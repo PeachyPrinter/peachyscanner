@@ -13,6 +13,9 @@ class Mapper(object):
 
 	def __init__(self,colour,threshold):
 		self.b_match,self.g_match, self.r_match = colour
+		self.set_threshold(threshold)
+
+	def set_threshold(self, threshold):
 		self.b_threshold, self.g_threshold, self.r_threshold = threshold
 
 	def _get_first_match(self, ypos, width, img):

@@ -5,10 +5,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
 
 from peachyscanner import Mapper
 
-class PeachyScannerTest(unittest.TestCase):
-    def test_peachy(self):
-        self.assertEquals(1,1)
-
 class MapperTest(unittest.TestCase):
     def test_given_an_image_point_map_returned(self):
         img = cv2.imread('TestData/SimpleTestImage1.png',1)
@@ -64,6 +60,18 @@ class MapperTest(unittest.TestCase):
         actual = mapper.get_points(img)
         self.assertEquals(expected,actual)
 
+    def test_a_threshold_can_be_changed(self):
+        img = cv2.imread('TestData/GreenThresholdTest.png',1)
+        initial_threshold = [0,20,0]
+        new_threshold = [0,21,0]
+        expected = [0,0,0,0,0] 
+        colour = [128,128,128]
+        mapper = Mapper(colour, initial_threshold)
+        mapper.set_threshold(new_threshold)
+        actual = mapper.get_points(img)
+        self.assertEquals(expected,actual)
+
+
     def test_given_a_threshold_items_in_threshold_work_for_blue(self):
         img = cv2.imread('TestData/BlueThresholdTest.png',1)
         threshold = [20,0,0]
@@ -72,7 +80,5 @@ class MapperTest(unittest.TestCase):
         mapper = Mapper(colour, threshold)
         actual = mapper.get_points(img)
         self.assertEquals(expected,actual)
-
-
 
 unittest.main()
