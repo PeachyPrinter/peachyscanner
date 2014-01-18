@@ -11,12 +11,15 @@ class Mapper(object):
         if (self.debug):
             print(val)
 
-    def __init__(self,colour,threshold):
-        self.b_match,self.g_match, self.r_match = colour
+    def __init__(self,bgr_colour,threshold):
+        self.b_match,self.g_match, self.r_match = bgr_colour
         self.set_threshold(threshold)
 
     def set_threshold(self, threshold):
         self.threshold = threshold
+
+    def set_colour(self, bgr_colour):
+        self.b_match,self.g_match, self.r_match = bgr_colour
 
     def _get_lower(self, value):
         lower = value - self.threshold
