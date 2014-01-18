@@ -57,13 +57,11 @@ def getUpper(value, threshold):
     return upper
 
 def show_points(img):
-    global red
     b,g,r = cv2.split(img)
-    bc,gc,rc = b.copy(),g.copy(),r.copy()
     global threshold
-    cv2.inRange(b,getLower(blue,threshold), getUpper(blue,threshold),bc)
-    cv2.inRange(g,getLower(green,threshold), getUpper(green,threshold),gc)
-    cv2.inRange(r,getLower(red,threshold), getUpper(red,threshold),rc)
+    bc = cv2.inRange(b,getLower(blue,threshold), getUpper(blue,threshold))
+    gc = cv2.inRange(g,getLower(green,threshold), getUpper(green,threshold))
+    rc = cv2.inRange(r,getLower(red,threshold), getUpper(red,threshold))
     cv2.bitwise_and(bc,gc,bc)
     cv2.bitwise_and(bc,rc,rc)
     return rc

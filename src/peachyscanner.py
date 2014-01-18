@@ -1,48 +1,58 @@
 import cv2
 
 class PeachyScanner(object):
-	def run(self):
-		print("Starting Up")
+    def run(self):
+        print("Starting Up")
 
 
 class Mapper(object):
-	debug = False
-	def info(self,val):
-		if (self.debug):
-			print(val)
+    debug = False
+    def info(self,val):
+        if (self.debug):
+            print(val)
 
-	def __init__(self,colour,threshold):
-		self.b_match,self.g_match, self.r_match = colour
-		self.set_threshold(threshold)
+    def __init__(self,colour,threshold):
+        self.b_match,self.g_match, self.r_match = colour
+        self.set_threshold(threshold)
 
-	def set_threshold(self, threshold):
-		self.b_threshold, self.g_threshold, self.r_threshold = threshold
+    def set_threshold(self, threshold):
+        self.threshold = threshold
 
-	def _get_first_match(self, ypos, width, img):
-		for xpos in range(0,width):
-			b_px = img.item(ypos,xpos,0)
-			g_px = img.item(ypos,xpos,1)
-			r_px = img.item(ypos,xpos,2)
-			self.info('R: %d G: %d B: %d' % (r_px, g_px, b_px))
-			if (
-				abs(self.r_match - r_px) <= self.r_threshold and
-				abs(self.g_match - g_px) <= self.g_threshold and
-				abs(self.b_match - b_px) <= self.b_threshold
-				):
-					return xpos
-		return -1
+    def _get_lower(self, value):
+        lower = value - self.threshold
+        if lower < 0:
+            lower = 0
+        return lower
 
-	def get_points(self,img):
-		height = img.shape[0]
-		width = img.shape[1]
+    def _get_upper(self, value):
+        upper = value + self.threshold
+        if upper > 255:
+            upper = 255
+        return upper
 
-		self.info("Image Height: %d" % height)
-		self.info("Image Width: %d" % width)
-		self.info('MATCH R: %d G: %d B: %d' % (self.r_match,self.g_match, self.b_match))
-		self.info('Threshold R: %d G: %d B: %d' % (self.r_threshold, self.g_threshold, self.b_threshold))
+    def get_threshold_array(self,img):
+        b,g,r = cv2.split(img)
+        bc = cv2.inRange(b,self._get_lower(self.b_match), self._get_upper(self.b_match))
+        gc = cv2.inRange(g,self._get_lower(self.g_match), self._get_upper(self.g_match))
+        rc = cv2.inRange(r,self._get_lower(self.r_match), self._get_upper(self.r_match))
+        bg = cv2.bitwise_and(bc,gc)
+        bgr = cv2.bitwise_and(bg,rc)
+        return bgr
 
-		
-		return [ self._get_first_match(ypos, width, img) for ypos in range(0,height) ] 
+    def _get_first_point(self, array):
+        for index in range(len(array)):
+            if array[index] == 255:
+                return index
+        return -1
+
+    def _get_first_points(self, img):
+        array = self.get_threshold_array(img)
+        return [ self._get_first_point(array[row]) for row in range(img.shape[0]) ]
+        
+
+    def get_points(self,img):
+        self.info('MATCH R: %d G: %d B: %d' % (self.r_match,self.g_match, self.b_match))
+        return self._get_first_points(img)
 
 if __name__ == "__main__":
-	PeachyScanner().run()
+    PeachyScanner().run()
