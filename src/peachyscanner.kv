@@ -1,0 +1,60 @@
+GridLayout:
+    cols: 1
+    Label:
+        size_hint_y: None
+        height: app.label_height
+        text: "Peachy Scanner"
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: app.button_height
+        Button:
+            size_hint_y: None
+            height: app.button_height
+            text: "Focus +"
+            on_release: app.focus_in()
+        Button:
+            size_hint_y: None
+            height: app.button_height
+            text: "Focus -"
+            on_release: app.focus_out()
+    Button:
+        size_hint_y: None
+        height: app.button_height
+        id: find_centre
+        text: "Select Center"
+        disabled: True
+    Button:
+        size_hint_y: None
+        height: app.button_height
+        id: find_encoder
+        text: "Select Encoder Point"
+        disabled: True
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            size_hint_y: None
+            height: app.label_height
+            text: "Color Dark"
+        ColorPicker:
+            id: dark_color
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            size_hint_y: None
+            height: app.label_height
+            text: "Color Light"
+        ColorPicker:
+            id: light_color
+    Button:
+        size_hint_y: None
+        height: app.button_height
+        id: start_scanning
+        text: "Start Scanning"
+        disabled: True
+    Label:
+    Button:
+        size_hint_y: None
+        height: app.button_height
+        text: "Quit"
+        on_release: app.shutdown()
