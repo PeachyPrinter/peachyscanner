@@ -1,60 +1,117 @@
+<MyScreenManager>:
+
 GridLayout:
     cols: 1
-    Label:
-        size_hint_y: None
-        height: app.label_height
-        text: "Peachy Scanner"
     BoxLayout:
-        orientation: 'horizontal'
         size_hint_y: None
         height: app.button_height
         Button:
             size_hint_y: None
             height: app.button_height
-            text: "Focus +"
-            on_release: app.focus_in()
+            text: "CAM"
+            on_release: manager.current = 'camera_control_ui'
         Button:
             size_hint_y: None
             height: app.button_height
-            text: "Focus -"
-            on_release: app.focus_out()
-    Button:
-        size_hint_y: None
-        height: app.button_height
-        id: find_centre
-        text: "Select Center"
-        disabled: True
-    Button:
-        size_hint_y: None
-        height: app.button_height
-        id: find_encoder
-        text: "Select Encoder Point"
-        disabled: True
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
+            text: "POS"
+            on_release: manager.current = 'posisition_control_ui'
+        Button:
             size_hint_y: None
-            height: app.label_height
-            text: "Color Dark"
-        ColorPicker:
-            id: dark_color
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            size_hint_y: None
-            height: app.label_height
-            text: "Color Light"
-        ColorPicker:
-            id: light_color
-    Button:
-        size_hint_y: None
-        height: app.button_height
-        id: start_scanning
-        text: "Start Scanning"
-        disabled: True
-    Label:
+            height: app.button_height
+            text: "COL"
+            on_release: manager.current = 'color_control_ui'
+    MyScreenManager:
+        id: manager
     Button:
         size_hint_y: None
         height: app.button_height
         text: "Quit"
         on_release: app.shutdown()
+
+<CameraControl>:
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: app.button_height
+    Label:
+        size_hint_y: None
+        height: app.button_height
+        text: root.text
+        size_hint_x: None
+        width: self.texture_size[0] + dp(10)
+    Slider:
+        size_hint_y: None
+        height: app.button_height
+        min: root.min_value
+        max: root.max_value
+        value: root.default_value
+        on_value: root.value = self.value
+
+<CameraControls>:
+    name: 'camera_control_ui'
+    capture: app.capture
+    GridLayout:
+        cols: 1
+        Label:
+            text: "Camera Control"
+            size_hint_y: None
+            height: app.button_height
+        CameraControl:
+            text: "Focus"
+            min_value: 0
+            max_value: 255
+            default_value: 120
+            value: root.focus
+        CameraControl:
+            text: "Brightness"
+            min_value: 0
+            max_value: 255
+            default_value: 120
+            value: root.brightness
+        CameraControl:
+            text: "Contrast"
+            min_value: 0
+            max_value: 255
+            default_value: 120
+            value: root.contrast
+        BoxLayout:
+            
+
+
+
+<PositionControl>:
+    name: 'posisition_control_ui'
+    GridLayout:
+        cols: 1
+        Button:
+            size_hint_y: None
+            height: app.button_height
+            id: find_centre
+            text: "Select Center"
+            disabled: True
+        Button:
+            size_hint_y: None
+            height: app.button_height
+            id: find_encoder
+            text: "Select Encoder Point"
+            disabled: True
+
+<ColorControl>:
+    name: 'color_control_ui'
+    GridLayout:
+        cols: 1
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                size_hint_y: None
+                height: app.label_height
+                text: "Color Dark"
+            ColorPicker:
+                id: dark_color
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                size_hint_y: None
+                height: app.label_height
+                text: "Color Light"
+            ColorPicker:
+                id: light_color

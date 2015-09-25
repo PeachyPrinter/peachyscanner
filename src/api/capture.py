@@ -64,13 +64,11 @@ class Capture(threading.Thread):
             self.upper_range = self.frame[y, x]
             logger.info("{},{}".format(self.lower_range, self.upper_range))
 
-    def focus_in(self):
-        self.focus += 10
-        os.system('''uvcdynctrl  --set='Focus (absolute)' {}'''.format(self.focus))
-        logger.info('FOCUS: {}'.format(self.focus))
+    def get_focus(self):
+        return self.focus
 
-    def focus_out(self):
-        self.focus -= 10
+    def set_focus(self, amount):
+        self.focus = amount
         os.system('''uvcdynctrl  --set='Focus (absolute)' {}'''.format(self.focus))
         logger.info('FOCUS: {}'.format(self.focus))
 
