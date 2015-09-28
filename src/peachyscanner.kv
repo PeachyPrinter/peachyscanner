@@ -33,17 +33,18 @@ GridLayout:
     size_hint_y: None
     height: app.button_height
     Label:
+        halign: 'left'
         size_hint_y: None
         height: app.button_height
         text: root.text
         size_hint_x: None
-        width: self.texture_size[0] + dp(10)
+        width: '90dp'
     Slider:
         size_hint_y: None
         height: app.button_height
         min: root.min_value
         max: root.max_value
-        value: root.default_value
+        value: root.value
         on_value: root.value = self.value
 
 <CameraControls>:
@@ -56,23 +57,35 @@ GridLayout:
             size_hint_y: None
             height: app.button_height
         CameraControl:
+            id: focus
             text: "Focus"
             min_value: 0
             max_value: 255
-            default_value: 120
-            value: root.focus
+            value: 120
         CameraControl:
+            id: brightness
             text: "Brightness"
             min_value: 0
             max_value: 255
-            default_value: 120
-            value: root.brightness
+            value: 120
         CameraControl:
+            id: contrast
             text: "Contrast"
             min_value: 0
             max_value: 255
-            default_value: 120
-            value: root.contrast
+            value: 120
+        CameraControl:
+            id: white_balance
+            text: "White Bal"
+            min_value: 0
+            max_value: 20000
+            value: 120
+        CameraControl:
+            id: sharpness
+            text: "Sharpness"
+            min_value: 0
+            max_value: 255
+            value: 120
         BoxLayout:
             
 

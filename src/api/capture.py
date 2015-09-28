@@ -4,17 +4,35 @@ import cv
 import threading
 import os
 import logging
+import subprocess
 
 logger = logging.getLogger('peachy')
 
 
+
 class Capture(threading.Thread):
+
+    def run_command(self, command):
+        proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
+        (out, error) = proc.communicate()
+        if error:
+            raise Exception(error)
+        else:
+            return out
+
     def __init__(self, callback):
         threading.Thread.__init__(self)
         logger.info("Creating Window")
         self.is_running = True
         self.show = 'r'
-        self.focus = 120
+
+        #Camera Settings
+        self.focus = 0
+        self.brightness = 0
+        self.contrast = 0
+        self.white_balance = 0
+        self.sharpness = 0
+
         self.canny_low = 50
         self.canny_high = 100
         cv.NamedWindow('frame', flags=cv.CV_WINDOW_NORMAL)
@@ -24,8 +42,21 @@ class Capture(threading.Thread):
         self.cap.read()
         self.cap.set(cv.CV_CAP_PROP_FRAME_HEIGHT, 1080.0)
         self.cap.set(cv.CV_CAP_PROP_FRAME_WIDTH, 1920.0)
-        os.system('''uvcdynctrl  --set='Focus, Auto' 0''')
-        os.system('''uvcdynctrl  --set='Focus (absolute)' {}'''.format(self.focus))
+        self.run_command('''uvcdynctrl  --set='Focus, Auto' 0''')
+        # self.run_command('''uvcdynctrl  --set='Exposure, Auto' 0''')
+        self.run_command('''uvcdynctrl  --set='White Balance Temperature, Auto' 0''')
+        self.focus = int(self.run_command('''uvcdynctrl  --get='Focus (absolute)' '''))
+        self.brightness = int(self.run_command('''uvcdynctrl  --get='Brightness' '''))
+        self.contrast = int(self.run_command('''uvcdynctrl  --get='Contrast' '''))
+        self.white_balance = int(self.run_command('''uvcdynctrl  --get='White Balance Temperature' '''))
+        self.sharpness = int(self.run_command('''uvcdynctrl  --get='Sharpness' '''))
+
+        logger.info("Initial Focus: {}".format(self.focus))
+        logger.info("Initial Brightness: {}".format(self.brightness))
+        logger.info("Initial Contrast: {}".format(self.contrast))
+        logger.info("Initial White Balance: {}".format(self.white_balance))
+        logger.info("Initial Sharpness: {}".format(self.sharpness))
+
         self.video_properties = {
             "CV_CAP_PROP_POS_MSEC": cv.CV_CAP_PROP_POS_MSEC,
             "CV_CAP_PROP_POS_FRAMES": cv.CV_CAP_PROP_POS_FRAMES,
@@ -64,13 +95,60 @@ class Capture(threading.Thread):
             self.upper_range = self.frame[y, x]
             logger.info("{},{}".format(self.lower_range, self.upper_range))
 
+####################################################################
+
+    def get_focus(self):
+        logger.info('Getting Focus: {}'.format(self.focus))
+        return self.focus
+
+    def set_focus(self, amount):
+        self.focus = amount
+        self.run_command('''uvcdynctrl  --set='Focus (absolute)' {}'''.format(self.focus))
+        logger.info('FOCUS: {}'.format(self.focus))
+
     def get_focus(self):
         return self.focus
 
     def set_focus(self, amount):
         self.focus = amount
-        os.system('''uvcdynctrl  --set='Focus (absolute)' {}'''.format(self.focus))
+        self.run_command('''uvcdynctrl  --set='Focus (absolute)' {}'''.format(self.focus))
         logger.info('FOCUS: {}'.format(self.focus))
+
+    def get_brightness(self):
+        return self.brightness
+
+    def set_brightness(self, brightness):
+        self.brightness = brightness
+        self.run_command('''uvcdynctrl --set='Brightness' {}'''.format(self.brightness))
+        logger.info('Brightness: {}'.format(self.brightness))
+
+    def get_contrast(self):
+        return self.contrast
+
+    def set_contrast(self, contrast):
+        self.contrast = contrast
+        self.run_command('''uvcdynctrl --set='Contrast' {}'''.format(self.contrast))
+        logger.info('Contrast: {}'.format(self.contrast))
+
+    def get_white_balance(self):
+        return self.white_balance
+
+    def set_white_balance(self, white_balance):
+        self.white_balance = white_balance
+        self.run_command('''uvcdynctrl --set='White Balance Temperature' {}'''.format(self.white_balance))
+        logger.info('White_balance: {}'.format(self.white_balance))
+
+    def get_sharpness(self):
+        return self.sharpness
+
+    def set_sharpness(self, sharpness):
+        self.sharpness = sharpness
+        self.run_command('''uvcdynctrl --set='Sharpness' {}'''.format(self.sharpness))
+        logger.info('Sharpness: {}'.format(self.sharpness))
+
+
+##################################################################
+
 
     def show_data(self):
         for (key, value) in self.video_properties.items():

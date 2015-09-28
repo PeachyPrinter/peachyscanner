@@ -8,6 +8,7 @@ from kivy.metrics import dp
 from kivy.properties import NumericProperty, BoundedNumericProperty, ObjectProperty, StringProperty
 from kivy.logger import Logger
 from api.capture import Capture
+from kivy.app import App
 
 kivy.require('1.9.0')
 
@@ -28,25 +29,52 @@ class CameraControl(BoxLayout):
     text = StringProperty()
     min_value = NumericProperty()
     max_value = NumericProperty()
-    default_value = NumericProperty()
+    value = NumericProperty()
 
     def __init__(self, **kwargs):
         super(CameraControl, self).__init__(**kwargs)
-        Logger.info(str(dir(kwargs.keys())))
-        self.value = getattr(kwargs, 'value')
 
 
 class CameraControls(Screen):
-    focus = BoundedNumericProperty(120, min=0, max=255)
-    brightness = BoundedNumericProperty(120, min=0, max=255)
-    contrast = BoundedNumericProperty(120, min=0, max=255)
     capture = ObjectProperty()
 
-    def get_focus(self):
-        self.focus = self.capture.get_focus()
+    def __init__(self, **kwargs):
+        super(CameraControls, self).__init__(**kwargs)
+        self.get_capture_settings()
+        self.ids.focus.bind(value=self.on_focus)
+        self.ids.brightness.bind(value=self.on_brightness)
+        self.ids.contrast.bind(value=self.on_contrast)
+        self.ids.white_balance.bind(value=self.on_white_balance)
+        self.ids.sharpness.bind(value=self.on_sharpness)
+
+    def get_capture_settings(self):
+        Logger.info('on_capture')
+        self.ids.focus.value = self.capture.get_focus()
+        self.ids.brightness.value = self.capture.get_brightness()
+        self.ids.contrast.value = self.capture.get_contrast()
+        self.ids.white_balance.value = self.capture.get_white_balance()
+        self.ids.sharpness.value = self.capture.get_sharpness()
 
     def on_focus(self, instance, value):
+        Logger.info('focus: {}'.format(value))
         self.capture.set_focus(value)
+
+    def on_brightness(self, instance, value):
+        Logger.info('brightness: {}'.format(value))
+        self.capture.set_brightness(value)
+
+    def on_contrast(self, instance, value):
+        Logger.info('contrast: {}'.format(value))
+        self.capture.set_contrast(value)
+
+    def on_white_balance(self, instance, value):
+        Logger.info('white_balance: {}'.format(value))
+        self.capture.set_white_balance(value)
+
+    def on_sharpness(self, instance, value):
+        Logger.info('sharpness: {}'.format(value))
+        self.capture.set_sharpness(value)
+
 
 
 class MyScreenManager(ScreenManager):
