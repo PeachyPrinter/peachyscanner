@@ -32,6 +32,7 @@ GridLayout:
     orientation: 'horizontal'
     size_hint_y: None
     height: app.button_height
+    step: 1
     Label:
         halign: 'left'
         size_hint_y: None
@@ -44,6 +45,7 @@ GridLayout:
         height: app.button_height
         min: root.min_value
         max: root.max_value
+        step: root.step
         value: root.value
         on_value: root.value = self.value
 
@@ -79,6 +81,7 @@ GridLayout:
             text: "White Bal"
             min_value: 0
             max_value: 20000
+            step: 100
             value: 120
         CameraControl:
             id: sharpness

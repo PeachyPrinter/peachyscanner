@@ -1,11 +1,13 @@
 import logging
 import subprocess
+from threading import Lock
 
 logger = logging.getLogger('peachy')
 
 
 class CameraControl(object):
     def __init__(self):
+        self._lock = Lock()
         self._run_command('''uvcdynctrl  --set='Focus, Auto' 0''')
         self._run_command('''uvcdynctrl  --set='White Balance Temperature, Auto' 0''')
         self._focus = int(self._run_command('''uvcdynctrl  --get='Focus (absolute)' '''))
@@ -35,8 +37,10 @@ class CameraControl(object):
     @focus.setter
     def focus(self, amount):
         self._focus = amount
+        self._lock.acquire()
         self._run_command('''uvcdynctrl  --set='Focus (absolute)' {}'''.format(self._focus))
         logger.info('FOCUS: {}'.format(self._focus))
+        self._lock.release()
 
     @property
     def brightness(self):
@@ -45,8 +49,10 @@ class CameraControl(object):
     @brightness.setter
     def brightness(self, brightness):
         self._brightness = brightness
+        self._lock.acquire()
         self._run_command('''uvcdynctrl --set='Brightness' {}'''.format(self._brightness))
         logger.info('Brightness: {}'.format(self._brightness))
+        self._lock.release()
 
     @property
     def contrast(self):
@@ -55,8 +61,10 @@ class CameraControl(object):
     @contrast.setter
     def contrast(self, contrast):
         self._contrast = contrast
+        self._lock.acquire()
         self._run_command('''uvcdynctrl --set='Contrast' {}'''.format(self._contrast))
         logger.info('Contrast: {}'.format(self._contrast))
+        self._lock.release()
 
     @property
     def white_balance(self):
@@ -65,8 +73,10 @@ class CameraControl(object):
     @white_balance.setter
     def white_balance(self, white_balance):
         self._white_balance = white_balance
+        self._lock.acquire()
         self._run_command('''uvcdynctrl --set='White Balance Temperature' {}'''.format(self._white_balance))
         logger.info('White_balance: {}'.format(self._white_balance))
+        self._lock.release()
 
     @property
     def sharpness(self):
@@ -75,6 +85,8 @@ class CameraControl(object):
     @sharpness.setter
     def sharpness(self, sharpness):
         self._sharpness = sharpness
+        self._lock.acquire()
         self._run_command('''uvcdynctrl --set='Sharpness' {}'''.format(self._sharpness))
         logger.info('Sharpness: {}'.format(self._sharpness))
+        self._lock.release()
 
