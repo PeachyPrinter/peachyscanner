@@ -87,8 +87,6 @@ GridLayout:
             max_value: 255
             value: 120
         BoxLayout:
-            
-
 
 
 <PositionControl>:
@@ -100,13 +98,12 @@ GridLayout:
             height: app.button_height
             id: find_centre
             text: "Select Center"
-            disabled: True
+            on_release: root.select_centre()
         Button:
             size_hint_y: None
             height: app.button_height
             id: find_encoder
             text: "Select Encoder Point"
-            disabled: True
 
 <ColorControls>:
     name: 'color_control_ui'

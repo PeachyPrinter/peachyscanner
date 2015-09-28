@@ -18,11 +18,41 @@ class Callback(object):
 
 
 class PositionControl(Screen):
-    pass
+    def select_centre(self):
+        self._disable_all()
+        App.get_running_app().capture.get_centre(self._points_cb)
+
+    def _points_cb(self, pos):
+        self._enable_all()
+        Logger.info('Found centre: {}'.format(pos))
+
+    def _disable_all(self):
+        for child in self.children:
+            child.disabled = True
+
+    def _enable_all(self):
+        for child in self.children:
+            child.disabled = False
 
 
 class ColorControls(Screen):
-    pass
+    def __init__(self, **kwargs):
+        super(ColorControls, self).__init__(**kwargs)
+        self.visable = False
+        self.ids.dark_color.bind(color=self._color_changed)
+        self.ids.light_color.bind(color=self._color_changed)
+
+    def _color_changed(self, instance, value):
+        if self.visable:
+            App.get_running_app().capture.show_range(list(self.ids.dark_color.color)[:3], list(self.ids.light_color.color)[:3])
+
+    def on_enter(self):
+        self.visable = True
+        # App.get_running_app().capture.show_range(self.ids.dark_color[:3], self.ids.light_color[:3])
+
+    def on_leave(self):
+        App.get_running_app().capture.hide_range()
+        self.visable = False
 
 
 class CameraControl(BoxLayout):
