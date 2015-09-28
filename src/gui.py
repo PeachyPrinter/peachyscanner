@@ -48,33 +48,26 @@ class CameraControls(Screen):
         self.ids.sharpness.bind(value=self.on_sharpness)
 
     def get_capture_settings(self):
-        Logger.info('on_capture')
-        self.ids.focus.value = self.capture.get_focus()
-        self.ids.brightness.value = self.capture.get_brightness()
-        self.ids.contrast.value = self.capture.get_contrast()
-        self.ids.white_balance.value = self.capture.get_white_balance()
-        self.ids.sharpness.value = self.capture.get_sharpness()
+        self.ids.focus.value = self.capture.camera.focus
+        self.ids.brightness.value = self.capture.camera.brightness
+        self.ids.contrast.value = self.capture.camera.contrast
+        self.ids.white_balance.value = self.capture.camera.white_balance
+        self.ids.sharpness.value = self.capture.camera.sharpness
 
     def on_focus(self, instance, value):
-        Logger.info('focus: {}'.format(value))
-        self.capture.set_focus(value)
+        self.capture.camera.focus = value
 
     def on_brightness(self, instance, value):
-        Logger.info('brightness: {}'.format(value))
-        self.capture.set_brightness(value)
+        self.capture.camera.brightness = value
 
     def on_contrast(self, instance, value):
-        Logger.info('contrast: {}'.format(value))
-        self.capture.set_contrast(value)
+        self.capture.camera.contrast = value
 
     def on_white_balance(self, instance, value):
-        Logger.info('white_balance: {}'.format(value))
-        self.capture.set_white_balance(value)
+        self.capture.camera.white_balance = value
 
     def on_sharpness(self, instance, value):
-        Logger.info('sharpness: {}'.format(value))
-        self.capture.set_sharpness(value)
-
+        self.capture.camera.sharpness = value
 
 
 class MyScreenManager(ScreenManager):
