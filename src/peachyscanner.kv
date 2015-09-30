@@ -107,11 +107,22 @@ GridLayout:
             height: app.button_height
             id: find_encoder
             text: "Select Encoder Point"
+        Button:
+            size_hint_y: None
+            height: app.button_height
+            id: find_roi
+            text: "Select Region of Interest"
+            on_release: root.select_roi()
 
 <ColorControls>:
     name: 'color_control_ui'
     GridLayout:
         cols: 1
+        ToggleButton:
+            size_hint_y: None
+            height: app.button_height
+            text: "Show Mask"
+            on_release: root.toggle_mask(self.state)
         BoxLayout:
             orientation: 'vertical'
             Label:

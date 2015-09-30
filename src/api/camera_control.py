@@ -4,7 +4,6 @@ from threading import Lock
 
 logger = logging.getLogger('peachy')
 
-
 class CameraControl(object):
     def __init__(self):
         self._lock = Lock()

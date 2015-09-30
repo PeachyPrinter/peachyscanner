@@ -26,6 +26,14 @@ class PositionControl(Screen):
         self._enable_all()
         Logger.info('Found centre: {}'.format(pos))
 
+    def select_roi(self):
+        self._disable_all()
+        App.get_running_app().capture.select_roi(self._roi_cb)
+
+    def _roi_cb(self, roi):
+        self._enable_all()
+        Logger.info('Found ROI: {}'.format(roi))
+
     def _disable_all(self):
         for child in self.children:
             child.disabled = True
@@ -45,6 +53,15 @@ class ColorControls(Screen):
     def _color_changed(self, instance, value):
         if self.visable:
             App.get_running_app().capture.show_range(list(self.ids.dark_color.color)[:3], list(self.ids.light_color.color)[:3])
+
+    def toggle_mask(self, state):
+        Logger.info("state: {}".format(state))
+        if state == 'down':
+            show = True
+        else:
+            show = False
+        Logger.info("state: {}".format(state))
+        App.get_running_app().capture.toggle_mask(show)
 
     def on_enter(self):
         self.visable = True
@@ -123,6 +140,8 @@ class PeachyScannerApp(App):
         Window.size = (350, 900)
         Window.minimum_width = 450
         Window.minimum_height = 900
+        Window.x = 0
+        Window.y = 0
         super(PeachyScannerApp, self).__init__(**kwargs)
         Config.set("input", "mouse", "mouse,disable_multitouch")
         Config.set("kivy", "exit_on_escape", 0)
@@ -136,6 +155,7 @@ class PeachyScannerApp(App):
 
     def exit_app(self, *args):
         self.shutdown()
+
 
     def shutdown(self, *args):
         if self.capture:
