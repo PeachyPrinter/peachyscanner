@@ -26,6 +26,14 @@ class PositionControl(Screen):
         self._enable_all()
         Logger.info('Found centre: {}'.format(pos))
 
+    def select_encoder(self):
+        self._disable_all()
+        App.get_running_app().capture.select_encoder(self._encoder_cb)
+
+    def _encoder_cb(self, encoder_pos):
+        self._enable_all()
+        Logger.info('Found Encoder: {}'.format(encoder_pos))
+
     def select_roi(self):
         self._disable_all()
         App.get_running_app().capture.select_roi(self._roi_cb)
