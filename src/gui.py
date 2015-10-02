@@ -18,6 +18,7 @@ class Callback(object):
 
 
 class PositionControl(Screen):
+
     def select_centre(self):
         self._disable_all()
         App.get_running_app().capture.get_centre(self._points_cb)
@@ -40,7 +41,15 @@ class PositionControl(Screen):
 
     def _roi_cb(self, roi):
         self._enable_all()
-        Logger.info('Found ROI: {}'.format(roi))
+        Logger.info('Found ROI (x,y,w,h: {}'.format(roi))
+
+    def encoder_threshold(self, value):
+        App.get_running_app().capture.encoder_threshold = value
+        Logger.info('Encoder Set at : {}'.format(value))
+
+    def encoder_null_zone(self, value):
+        App.get_running_app().capture.encoder_null_zone = value
+        Logger.info('Encoder Null Zone Set at : {}'.format(value))
 
     def _disable_all(self):
         for child in self.children:
@@ -57,10 +66,10 @@ class ColorControls(Screen):
         self.visable = False
         self.ids.dark_color.bind(color=self._color_changed)
         self.ids.light_color.bind(color=self._color_changed)
+        App.get_running_app().capture.show_range(list(self.ids.dark_color.color)[:3], list(self.ids.light_color.color)[:3])
 
     def _color_changed(self, instance, value):
-        if self.visable:
-            App.get_running_app().capture.show_range(list(self.ids.dark_color.color)[:3], list(self.ids.light_color.color)[:3])
+        App.get_running_app().capture.show_range(list(self.ids.dark_color.color)[:3], list(self.ids.light_color.color)[:3])
 
     def toggle_mask(self, state):
         Logger.info("state: {}".format(state))
@@ -70,14 +79,6 @@ class ColorControls(Screen):
             show = False
         Logger.info("state: {}".format(state))
         App.get_running_app().capture.toggle_mask(show)
-
-    def on_enter(self):
-        self.visable = True
-        # App.get_running_app().capture.show_range(self.ids.dark_color[:3], self.ids.light_color[:3])
-
-    def on_leave(self):
-        App.get_running_app().capture.hide_range()
-        self.visable = False
 
 
 class CameraControl(BoxLayout):
