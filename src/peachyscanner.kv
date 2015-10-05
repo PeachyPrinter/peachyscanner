@@ -45,51 +45,6 @@ GridLayout:
             text: "Start Capture"
             on_release: root.start_capture()
 
-<PositionControl>:
-    name: 'posisition_control_ui'
-    GridLayout:
-        cols: 1
-        Button:
-            size_hint_y: None
-            height: app.button_height
-            id: find_centre
-            text: "Select Center"
-            on_release: root.select_centre()
-        Button:
-            size_hint_y: None
-            height: app.button_height
-            id: find_encoder
-            text: "Select Encoder Point"
-            on_release: root.select_encoder()
-        Label:
-            size_hint_y: None
-            height: app.label_height
-            text: "Encoder Threshold"
-        Slider:
-            size_hint_y: None
-            min: 0
-            max: 255 * 6
-            value: 150
-            height: app.button_height
-            on_value: root.encoder_threshold(self.value)
-        Label:
-            size_hint_y: None
-            height: app.label_height
-            text: "Encoder Null Zone"
-        Slider:
-            size_hint_y: None
-            min: 1
-            max: 256
-            value: 50
-            height: app.button_height
-            on_value: root.encoder_null_zone(self.value)
-        Button:
-            size_hint_y: None
-            height: app.button_height
-            id: find_roi
-            text: "Select Region of Interest"
-            on_release: root.select_roi()
-
 <ColorControls>:
     name: 'color_control_ui'
     GridLayout:

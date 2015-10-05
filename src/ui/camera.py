@@ -33,7 +33,7 @@ class CameraControls(BoxLayout):
     def __init__(self, **kwargs):
         super(CameraControls, self).__init__(**kwargs)
         Config.adddefaultsection('camera')
-        
+
         Clock.schedule_once(self._post_init)
 
     def _post_init(self, instance):
