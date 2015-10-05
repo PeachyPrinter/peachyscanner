@@ -100,9 +100,7 @@ class PeachyScannerApp(App):
     def exit_app(self, *args):
         self.shutdown()
 
-
     def shutdown(self, *args):
         if self.capture:
             self.capture.shutdown()
         exit()
-

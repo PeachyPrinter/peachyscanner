@@ -19,13 +19,6 @@ class CameraControl(BoxLayout):
     max_value = NumericProperty()
     value = NumericProperty()
 
-    def __init__(self, **kwargs):
-        Logger.info("init: {}".format(self.value))
-        super(CameraControl, self).__init__(**kwargs)
-
-    def on_value(self, instance, value):
-        Logger.info("value: {}".format(value))
-
 
 class CameraControls(BoxLayout):
     capture = ObjectProperty()

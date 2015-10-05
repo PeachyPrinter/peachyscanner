@@ -7,6 +7,8 @@ from kivy.lang import Builder
 from kivy.clock import Clock
 from kivy.properties import NumericProperty, ObjectProperty, StringProperty
 
+import json
+
 
 kivy.require('1.9.0')
 Builder.load_file('ui/posisition.kv')
@@ -24,15 +26,25 @@ class PositionControl(Screen):
         self._load_saved_settings()
 
     def _load_saved_settings(self):
-        pass
+        center = Config.getdefault('posisition', 'center', None)
+        if center:
+            Logger.info("Center Loaded - {}".format(center))
+            self.capture.center = json.loads(center)
 
-    def select_centre(self):
+        roi = Config.getdefault('posisition', 'roi', None)
+        if roi:
+            Logger.info("ROI Loaded - {}".format(roi))
+            self.capture.roi = json.loads(roi)
+
+    def select_center(self):
         self._disable_all()
-        self.capture.get_centre(self._points_cb)
+        self.capture.get_center(self._center_call_back)
 
-    def _points_cb(self, pos):
+    def _center_call_back(self, center):
         self._enable_all()
-        Logger.info('Found centre: {}'.format(pos))
+        Logger.info('Found Center: {}'.format(center))
+        Config.set('posisition', 'center', json.dumps(center))
+        Config.write()
 
     def select_encoder(self):
         self._disable_all()
@@ -44,11 +56,13 @@ class PositionControl(Screen):
 
     def select_roi(self):
         self._disable_all()
-        self.capture.select_roi(self._roi_cb)
+        self.capture.select_roi(self._roi_call_back)
 
-    def _roi_cb(self, roi):
+    def _roi_call_back(self, roi):
         self._enable_all()
         Logger.info('Found ROI (x,y,w,h: {}'.format(roi))
+        Config.set('posisition', 'roi', json.dumps(roi))
+        Config.write()
 
     def encoder_threshold(self, value):
         self.capture.encoder_threshold = value

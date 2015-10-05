@@ -10,17 +10,78 @@ from camera_control import CameraControl
 logger = logging.getLogger('peachy')
 
 
-class Capture(threading.Thread):
+class CenterMixIn(object):
+    def __init__(self):
+        self._center = None
+        self._center_callback = None
+
+    @property
+    def center(self):
+        return self._center
+
+    @center.setter
+    def center(self, center):
+        assert(len(center) == 2)
+        self._center = center
+
+    def get_center(self, call_back):
+        with self._setting_lock:
+            self._show_crosshair = True
+            self._center_callback = call_back
+            self._left_click_call_backs.append(self._set_center)
+
+    def _set_center(self, x, y):
+        logger.info("Center set to {}, {}".format(x, y))
+        self._show_crosshair = False
+        self._center = [x, y]
+        if self._center_callback:
+            self._center_callback([x, y])
+            self._center_callback = None
+
+
+class ROIMixIn(object):
+    def __init__(self):
+        self._roi = None
+        self._roi_callback = None
+
+    @property
+    def roi(self):
+        return self._roi
+
+    @roi.setter
+    def roi(self, roi):
+        self._roi = roi
+
+    def select_roi(self, callback):
+        with self._setting_lock:
+            self._roi = None
+            self._roi_callback = callback
+            self._get_drag = True
+
+    def _roi_selected(self, start, stop):
+        self._get_drag = False
+        self._drag_start = None
+        x = min(start[0], stop[0])
+        y = min(start[1], stop[1])
+        w = abs(start[0] - stop[0])
+        h = abs(start[1] - stop[1])
+        self._roi = (x, y, w, h)
+        if self._roi_callback:
+            self._roi_callback(self._roi)
+
+
+class Capture(threading.Thread, CenterMixIn, ROIMixIn):
     def __init__(self, callback):
         threading.Thread.__init__(self)
+        CenterMixIn.__init__(self)
+        ROIMixIn.__init__(self)
+
+
         self._setting_lock = RLock()
-        logger.info("Creating Window")
         self.is_running = True
 
         self._mouse_pos = [0, 0]
         self._drag_start = None
-        self._centre = None
-        self._roi = None
         self._encoder_point = None
         self._encoder_threshold = 150
         self._encoder_null_zone = 50
@@ -42,8 +103,7 @@ class Capture(threading.Thread):
         self._off_count = 0
 
         self._left_click_call_backs = []
-        self._centre_callback = None
-        self._roi_callback = None
+
         self._encoder_callback = None
         self._capturing_callback = None
 
@@ -71,22 +131,6 @@ class Capture(threading.Thread):
         if event == cv2.EVENT_RBUTTONDOWN:
             pass
 
-    def select_roi(self, callback):
-        with self._setting_lock:
-            self._roi = None
-            self._roi_callback = callback
-            self._get_drag = True
-
-    def _roi_selected(self, start, stop):
-        self._get_drag = False
-        self._drag_start = None
-        x = min(start[0], stop[0])
-        y = min(start[1], stop[1])
-        w = abs(start[0] - stop[0])
-        h = abs(start[1] - stop[1])
-        self._roi = (x, y, w, h)
-        if self._roi_callback:
-            self._roi_callback(self._roi)
 
     def select_encoder(self, callback):
         with self._setting_lock:
@@ -107,19 +151,6 @@ class Capture(threading.Thread):
         with self._setting_lock:
             self._show_mask = onoff
 
-    def get_centre(self, call_back):
-        with self._setting_lock:
-            self._show_crosshair = True
-            self._centre_callback = call_back
-            self._left_click_call_backs.append(self._set_centre)
-
-    def _set_centre(self, x, y):
-        logger.info("Center set to {}, {}".format(x, y))
-        self._show_crosshair = False
-        self._centre = [x, y]
-        if self._centre_callback:
-            self._centre_callback([x, y])
-            self._centre_callback = None
 
     def start_capture(self, callback):
         logger.info("Capture Requested")
@@ -231,7 +262,7 @@ class Capture(threading.Thread):
                     self._capturing_callback(self._capture_file)
                 return
         if self._last_degrees is not self._degrees:
-            roi = frame[self._roi[1]:self._roi[1] + self._roi[3], self._centre[0]]
+            roi = frame[self._roi[1]:self._roi[1] + self._roi[3], self._center[0]]
             turns = int(self._degrees / 1.8)
             self._capture[self._frames_aquired] = roi
             logger.info("Aquired Frame: {} at {}".format(self._frames_aquired, turns))
@@ -276,8 +307,8 @@ class Capture(threading.Thread):
                     gray[self._roi[1]:self._roi[1] + self._roi[3], self._roi[0]:self._roi[0] + self._roi[2]] = roi
                     frame = gray
 
-                if self._centre:
-                    self._draw_cross_hair(frame, self._centre, (255, 255, 255), 1)
+                if self._center:
+                    self._draw_cross_hair(frame, self._center, (255, 255, 255), 1)
 
                 if self._show_crosshair:
                     self._draw_cross_hair(frame, self._mouse_pos)
