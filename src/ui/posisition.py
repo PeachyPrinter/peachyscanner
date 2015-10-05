@@ -36,6 +36,22 @@ class PositionControl(Screen):
             Logger.info("ROI Loaded - {}".format(roi))
             self.capture.roi = json.loads(roi)
 
+        roi = Config.getdefault('posisition', 'roi', None)
+        if roi:
+            Logger.info("ROI Loaded - {}".format(roi))
+            self.capture.roi = json.loads(roi)
+
+        encoder_threshold = float(Config.getdefault('posisition', 'encoder_threshold', 200))
+        self.capture.encoder_threshold = encoder_threshold
+        
+        encoder_null_zone = float(Config.getdefault('posisition', 'encoder_null_zone', 50))
+        self.capture.encoder_null_zone = encoder_null_zone
+        
+        encoder_point = Config.getdefault('posisition', 'encoder_point', None)
+        if encoder_point:
+            Logger.info("Encoder Point Loaded - {}".format(encoder_point))
+            self.capture.encoder_point = json.loads(encoder_point)
+
     def select_center(self):
         self._disable_all()
         self.capture.get_center(self._center_call_back)
@@ -48,11 +64,12 @@ class PositionControl(Screen):
 
     def select_encoder(self):
         self._disable_all()
-        self.capture.select_encoder(self._encoder_cb)
+        self.capture.select_encoder(self._encoder_call_back)
 
-    def _encoder_cb(self, encoder_pos):
+    def _encoder_call_back(self, encoder_pos):
         self._enable_all()
         Logger.info('Found Encoder: {}'.format(encoder_pos))
+        Config.set('posisition', 'encoder_point', json.dumps(encoder_pos))
 
     def select_roi(self):
         self._disable_all()
@@ -62,15 +79,19 @@ class PositionControl(Screen):
         self._enable_all()
         Logger.info('Found ROI (x,y,w,h: {}'.format(roi))
         Config.set('posisition', 'roi', json.dumps(roi))
-        Config.write()
 
     def encoder_threshold(self, value):
         self.capture.encoder_threshold = value
-        Logger.info('Encoder Set at : {}'.format(value))
+        Logger.info('Encoder Threshold Set at : {}'.format(value))
+        Config.set('posisition', 'encoder_threshold', value)
 
     def encoder_null_zone(self, value):
-        App.get_running_app().capture.encoder_null_zone = value
+        self.capture.encoder_null_zone = value
         Logger.info('Encoder Null Zone Set at : {}'.format(value))
+        Config.set('posisition', 'encoder_null_zone', value)
+
+    def save_settings(self):
+        Config.write()
 
     def _disable_all(self):
         for child in self.children:
