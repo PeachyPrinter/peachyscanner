@@ -20,6 +20,11 @@ GridLayout:
             height: app.button_height
             text: "COL"
             on_release: manager.current = 'color_control_ui'
+        Button:
+            size_hint_y: None
+            height: app.button_height
+            text: "GET"
+            on_release: manager.current = 'capture_control_ui'
     MyScreenManager:
         id: manager
     Button:
@@ -91,6 +96,16 @@ GridLayout:
             value: 120
         BoxLayout:
 
+<CaptureControl>:
+    name: 'capture_control_ui'
+    GridLayout:
+        cols: 1
+        Button:
+            size_hint_y: None
+            height: app.button_height
+            id: find_centre
+            text: "Start Capture"
+            on_release: root.start_capture()
 
 <PositionControl>:
     name: 'posisition_control_ui'

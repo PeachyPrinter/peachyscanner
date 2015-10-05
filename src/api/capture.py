@@ -38,15 +38,24 @@ class Capture(threading.Thread):
 
         self._lower_range = None
         self._upper_range = None
+        self._on_count = 0
+        self._off_count = 0
 
         self._left_click_call_backs = []
         self._centre_callback = None
         self._roi_callback = None
         self._encoder_callback = None
+        self._capturing_callback = None
 
         self._get_drag = False
         self._dragging = False
         self._level = []
+
+        self._capture = None
+        self._capturing = False
+        self._capture_file = 'ImageMesh'
+        self._frames_aquired = 0
+        self._last_degrees = 0
 
     def _clicky(self, event, x, y, flags, param):
         self._mouse_pos = (x, y)
@@ -59,7 +68,6 @@ class Capture(threading.Thread):
             self._roi_selected(self._drag_start, self._mouse_pos)
         if event == cv2.EVENT_LBUTTONUP:
             self._dragging = False
-
         if event == cv2.EVENT_RBUTTONDOWN:
             pass
 
@@ -112,6 +120,12 @@ class Capture(threading.Thread):
         if self._centre_callback:
             self._centre_callback([x, y])
             self._centre_callback = None
+
+    def start_capture(self, callback):
+        logger.info("Capture Requested")
+        with self._setting_lock:
+            self._capturing_callback = callback
+            self._capturing = True
 
     @property
     def encoder_threshold(self):
@@ -168,23 +182,61 @@ class Capture(threading.Thread):
         self._draw_levels(frame, self._level)
 
         if self._level[-1] >= self._encoder_threshold + self._encoder_null_zone:
-            self.on_count += 1
-            if self.on_count >= 2:
+            self._off_count = 0
+            self._on_count += 1
+            if self._on_count >= 2:
                 enc_color = (0, 200, 0)
             else:
                 enc_color = (200, 200, 0)
-            if self.on_count == 2:
-                self._degrees += 3.6
+            if self._on_count == 2:
+                self._degrees += 1.8
                 if self._degrees >= 360.0:
                     self._degrees -= 360.0
         elif self._level[-1] <= self._encoder_threshold - self._encoder_null_zone:
-            self.on_count = 0
-            enc_color = (0, 0, 200)
+            self._on_count = 0
+            self._off_count += 1
+            if self._off_count >= 2:
+                enc_color = (0, 0, 200)
+            else:
+                enc_color = (200, 200, 0)
+            if self._off_count == 2:
+                self._degrees += 1.8
+                if self._degrees >= 360.0:
+                    self._degrees -= 360.0
         else:
             enc_color = (200, 200, 0)
-            self.on_count = 0
+            self._on_count = 0
+            self._off_count = 0
 
         cv2.circle(frame, self._encoder_point, 10, enc_color, 5)
+
+    def _start_capture(self, frame):
+        if self._capture is None:
+            logger.info("Capture Init")
+            self._degrees = 0.0
+            self._frames_aquired = 0
+            self._last_degrees = -90.0
+            logger.info("Starting at {}".format(self._degrees))
+            self._capture = np.empty((200, self._roi[3], 3))
+            logger.info("output array: {}".format(self._capture.shape))
+        else:
+            if self._frames_aquired >= 200:
+                logger.info("Capture Compelete")
+                self._capture_start = None
+                cv2.imwrite(self._capture_file+"-"+str(time.time())+".jpg", self._capture)
+                self._capture = None
+                self._capturing = False
+                self._last_degrees = False
+                if self._capturing_callback:
+                    self._capturing_callback(self._capture_file)
+                return
+        if self._last_degrees is not self._degrees:
+            roi = frame[self._roi[1]:self._roi[1] + self._roi[3], self._centre[0]]
+            turns = int(self._degrees / 1.8)
+            self._capture[self._frames_aquired] = roi
+            logger.info("Aquired Frame: {} at {}".format(self._frames_aquired, turns))
+            self._frames_aquired += 1
+        self._last_degrees = self._degrees
 
     def run(self):
         cv2.namedWindow('frame', cv2.WINDOW_NORMAL)
@@ -192,8 +244,7 @@ class Capture(threading.Thread):
         cv2.resizeWindow('frame', 960, 540)
         fps = []
         start = time.time()
-        self.on_count = 0
-        self.off_count = 0
+
         while(self.is_running):
             with self._setting_lock:
                 fps.append(1.0 / (time.time() - start))
@@ -201,6 +252,9 @@ class Capture(threading.Thread):
                 start = time.time()
                 ret, original = self._cap.read()
                 frame = original
+
+                if self._capturing:
+                    self._start_capture(original)
 
                 if (self._lower_range is not None) and (self._upper_range is not None):
                     mask = cv2.inRange(original, self._lower_range, self._upper_range)

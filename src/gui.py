@@ -17,6 +17,24 @@ class Callback(object):
     pass
 
 
+class CaptureControl(Screen):
+
+    def start_capture(self):
+        self._disable_all()
+        App.get_running_app().capture.start_capture(self._capture_callback)
+
+    def _capture_callback(self, file_name):
+        self._enable_all()
+
+    def _enable_all(self):
+        for child in self.children:
+            child.disabled = False
+
+    def _disable_all(self):
+        for child in self.children:
+            child.disabled = True
+
+
 class PositionControl(Screen):
 
     def select_centre(self):
@@ -132,9 +150,11 @@ class MyScreenManager(ScreenManager):
         self.camera_control_ui = CameraControls()
         self.posisition_control_ui = PositionControl()
         self.color_control_ui = ColorControls()
+        self.capture_control_ui = CaptureControl()
         self.add_widget(self.camera_control_ui)
         self.add_widget(self.posisition_control_ui)
         self.add_widget(self.color_control_ui)
+        self.add_widget(self.capture_control_ui)
         self.current = 'camera_control_ui'
 
 
