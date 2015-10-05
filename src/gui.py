@@ -1,14 +1,15 @@
 import kivy
 from kivy.app import App
-from kivy.config import Config
+from kivy.config import Config, ConfigParser
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.uix.boxlayout import BoxLayout
 from kivy.core.window import Window
 from kivy.metrics import dp
-from kivy.properties import NumericProperty, BoundedNumericProperty, ObjectProperty, StringProperty
+from kivy.properties import NumericProperty, ObjectProperty
 from kivy.logger import Logger
 from api.capture import Capture
-from kivy.app import App
+
+
+from ui.camera import CameraControlWrapper
 
 kivy.require('1.9.0')
 
@@ -99,55 +100,10 @@ class ColorControls(Screen):
         App.get_running_app().capture.toggle_mask(show)
 
 
-class CameraControl(BoxLayout):
-    text = StringProperty()
-    min_value = NumericProperty()
-    max_value = NumericProperty()
-    value = NumericProperty()
-
-    def __init__(self, **kwargs):
-        super(CameraControl, self).__init__(**kwargs)
-
-
-class CameraControls(Screen):
-    capture = ObjectProperty()
-
-    def __init__(self, **kwargs):
-        super(CameraControls, self).__init__(**kwargs)
-        self.get_capture_settings()
-        self.ids.focus.bind(value=self.on_focus)
-        self.ids.brightness.bind(value=self.on_brightness)
-        self.ids.contrast.bind(value=self.on_contrast)
-        self.ids.white_balance.bind(value=self.on_white_balance)
-        self.ids.sharpness.bind(value=self.on_sharpness)
-
-    def get_capture_settings(self):
-        self.ids.focus.value = self.capture.camera.focus
-        self.ids.brightness.value = self.capture.camera.brightness
-        self.ids.contrast.value = self.capture.camera.contrast
-        self.ids.white_balance.value = self.capture.camera.white_balance
-        self.ids.sharpness.value = self.capture.camera.sharpness
-
-    def on_focus(self, instance, value):
-        self.capture.camera.focus = value
-
-    def on_brightness(self, instance, value):
-        self.capture.camera.brightness = value
-
-    def on_contrast(self, instance, value):
-        self.capture.camera.contrast = value
-
-    def on_white_balance(self, instance, value):
-        self.capture.camera.white_balance = value
-
-    def on_sharpness(self, instance, value):
-        self.capture.camera.sharpness = value
-
-
 class MyScreenManager(ScreenManager):
     def __init__(self, **kwargs):
         super(MyScreenManager, self).__init__(**kwargs)
-        self.camera_control_ui = CameraControls()
+        self.camera_control_ui = CameraControlWrapper()
         self.posisition_control_ui = PositionControl()
         self.color_control_ui = ColorControls()
         self.capture_control_ui = CaptureControl()
@@ -163,6 +119,7 @@ class PeachyScannerApp(App):
     label_height = NumericProperty(dp(30))
     input_height = NumericProperty(dp(30))
     refresh_rate = NumericProperty(1.0 / 30.0)
+    Config = ConfigParser(name='PeachyScanner')
     capture = ObjectProperty()
 
     def __init__(self, **kwargs):

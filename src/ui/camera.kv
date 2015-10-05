@@ -1,0 +1,67 @@
+<CameraControl>:
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: app.button_height
+    step: 1
+    Label:
+        halign: 'left'
+        size_hint_y: None
+        height: app.button_height
+        text: root.text
+        size_hint_x: None
+        width: '90dp'
+    Slider:
+        size_hint_y: None
+        height: app.button_height
+        min: root.min_value
+        max: root.max_value
+        step: root.step
+        value: root.value
+        on_value: root.value = self.value
+
+<CameraControls>:
+    capture: app.capture
+    focus: focus
+    brightness: brightness
+    contrast: contrast
+    white_balance: white_balance
+    sharpness: sharpness
+    GridLayout:
+        cols: 1
+        Label:
+            text: "Camera Control"
+            size_hint_y: None
+            height: app.button_height
+        CameraControl:
+            id: focus
+            text: "Focus"
+            min_value: 0
+            max_value: 255
+        CameraControl:
+            id: brightness
+            text: "Brightness"
+            min_value: 0
+            max_value: 255
+        CameraControl:
+            id: contrast
+            text: "Contrast"
+            min_value: 0
+            max_value: 255
+        CameraControl:
+            id: white_balance
+            text: "White Bal"
+            min_value: 0
+            max_value: 20000
+            step: 100
+        CameraControl:
+            id: sharpness
+            text: "Sharpness"
+            min_value: 0
+            max_value: 255
+        BoxLayout:
+
+<CameraControlWrapper>:
+    name: 'camera_control_ui'
+    camera_controls: camera_controls
+    CameraControls:
+        id: camera_controls
