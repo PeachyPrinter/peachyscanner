@@ -70,93 +70,12 @@ class ROIMixIn(object):
             self._roi_callback(self._roi)
 
 
-class Capture(threading.Thread, CenterMixIn, ROIMixIn):
-    def __init__(self, callback):
-        threading.Thread.__init__(self)
-        CenterMixIn.__init__(self)
-        ROIMixIn.__init__(self)
-
-
-        self._setting_lock = RLock()
-        self.is_running = True
-
-        self._mouse_pos = [0, 0]
-        self._drag_start = None
+class EncoderMixIn(object):
+    def __init__(self):
         self._encoder_point = None
         self._encoder_threshold = 150
         self._encoder_null_zone = 50
-        self._degrees = 0
-
-        self._show_crosshair = False
-        self._show_mask = False
-        # self._cap = None
-        self._cap = cv2.VideoCapture(0)
-        self._frame = self._cap.read()
-        self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-        self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        self._frame = self._cap.read()
-        self.camera = CameraControl()
-
-        self._lower_range = None
-        self._upper_range = None
-        self._on_count = 0
-        self._off_count = 0
-
-        self._left_click_call_backs = []
-
         self._encoder_callback = None
-        self._capturing_callback = None
-
-        self._get_drag = False
-        self._dragging = False
-        self._level = []
-
-        self._capture = None
-        self._capturing = False
-        self._capture_file = 'ImageMesh'
-        self._frames_aquired = 0
-        self._last_degrees = 0
-
-    def _clicky(self, event, x, y, flags, param):
-        self._mouse_pos = (x, y)
-        if event == cv2.EVENT_LBUTTONDOWN:
-            self._dragging = True
-            self._drag_start = self._mouse_pos
-            while len(self._left_click_call_backs) > 0:
-                self._left_click_call_backs.pop()(self._mouse_pos[0], self._mouse_pos[1])
-        if event == cv2.EVENT_LBUTTONUP and self._get_drag:
-            self._roi_selected(self._drag_start, self._mouse_pos)
-        if event == cv2.EVENT_LBUTTONUP:
-            self._dragging = False
-        if event == cv2.EVENT_RBUTTONDOWN:
-            pass
-
-
-    def select_encoder(self, callback):
-        with self._setting_lock:
-            self._encoder_callback = callback
-            self._left_click_call_backs.append(self._encoder_selected)
-
-    def _encoder_selected(self, x, y):
-        self._encoder_point = (x, y)
-        self._degrees = 0
-        if self._encoder_callback:
-            self._encoder_callback((x, y))
-
-    def show_range(self, low_RGB, high_RGB):
-            self._lower_range = np.array([min(low_RGB[2], high_RGB[2]) * 255, min(low_RGB[1], high_RGB[1]) * 255, min(low_RGB[0], high_RGB[0]) * 255])
-            self._upper_range = np.array([max(low_RGB[2], high_RGB[2]) * 255, max(low_RGB[1], high_RGB[1]) * 255, max(low_RGB[0], high_RGB[0]) * 255])
-
-    def toggle_mask(self, onoff):
-        with self._setting_lock:
-            self._show_mask = onoff
-
-
-    def start_capture(self, callback):
-        logger.info("Capture Requested")
-        with self._setting_lock:
-            self._capturing_callback = callback
-            self._capturing = True
 
     @property
     def encoder_threshold(self):
@@ -174,18 +93,28 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn):
     def encoder_null_zone(self, value):
         self._encoder_null_zone = value
 
-    def shutdown(self):
-        self.is_running = False
+    @property
+    def encoder_point(self):
+        return self._encoder_point
 
-    def _draw_cross_hair(self, frame, pos, color=(0, 255, 0), width=2):
-        cv2.line(frame, (0, pos[1]), (frame.shape[1], pos[1]), color, width)
-        cv2.line(frame, (pos[0], 0), (pos[0], frame.shape[0]), color, width)
+    @encoder_point.setter
+    def encoder_point(self, value):
+        self._encoder_point = value
 
-    def _draw_bounding_box(self, frame, tl, lr, color=(0, 0, 255), thickness=2):
-        cv2.line(frame, (tl[0], tl[1]), (lr[0], tl[1]), color, thickness)
-        cv2.line(frame, (lr[0], tl[1]), (lr[0], lr[1]), color, thickness)
-        cv2.line(frame, (lr[0], lr[1]), (tl[0], lr[1]), color, thickness)
-        cv2.line(frame, (tl[0], lr[1]), (tl[0], tl[1]), color, thickness)
+    def select_encoder(self, callback):
+        with self._setting_lock:
+            self._encoder_callback = callback
+            self._left_click_call_backs.append(self._encoder_selected)
+
+    def _encoder_selected(self, x, y):
+        self._encoder_point = (x, y)
+        self._degrees = 0
+        if self._encoder_callback:
+            self._encoder_callback((x, y))
+
+    def show_range(self, low_RGB, high_RGB):
+            self._lower_range = np.array([min(low_RGB[2], high_RGB[2]) * 255, min(low_RGB[1], high_RGB[1]) * 255, min(low_RGB[0], high_RGB[0]) * 255])
+            self._upper_range = np.array([max(low_RGB[2], high_RGB[2]) * 255, max(low_RGB[1], high_RGB[1]) * 255, max(low_RGB[0], high_RGB[0]) * 255])
 
     def _draw_levels(self, frame, levels):
         for idx in range(0, len(levels)):
@@ -240,6 +169,84 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn):
             self._off_count = 0
 
         cv2.circle(frame, self._encoder_point, 10, enc_color, 5)
+
+class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
+    def __init__(self, callback):
+        threading.Thread.__init__(self)
+        CenterMixIn.__init__(self)
+        ROIMixIn.__init__(self)
+        EncoderMixIn.__init__(self)
+
+        self._setting_lock = RLock()
+        self.is_running = True
+        self._mouse_pos = [0, 0]
+        self._drag_start = None
+        self._degrees = 0
+        self._show_crosshair = False
+        self._show_mask = False
+        # self._cap = None
+        self._cap = cv2.VideoCapture(0)
+        self._frame = self._cap.read()
+        self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+        self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        self._frame = self._cap.read()
+        self.camera = CameraControl()
+
+        self._lower_range = None
+        self._upper_range = None
+        self._on_count = 0
+        self._off_count = 0
+
+        self._left_click_call_backs = []
+
+        self._capturing_callback = None
+
+        self._get_drag = False
+        self._dragging = False
+        self._level = []
+
+        self._capture = None
+        self._capturing = False
+        self._capture_file = 'ImageMesh'
+        self._frames_aquired = 0
+        self._last_degrees = 0
+
+    def _clicky(self, event, x, y, flags, param):
+        self._mouse_pos = (x, y)
+        if event == cv2.EVENT_LBUTTONDOWN:
+            self._dragging = True
+            self._drag_start = self._mouse_pos
+            while len(self._left_click_call_backs) > 0:
+                self._left_click_call_backs.pop()(self._mouse_pos[0], self._mouse_pos[1])
+        if event == cv2.EVENT_LBUTTONUP and self._get_drag:
+            self._roi_selected(self._drag_start, self._mouse_pos)
+        if event == cv2.EVENT_LBUTTONUP:
+            self._dragging = False
+        if event == cv2.EVENT_RBUTTONDOWN:
+            pass
+
+    def toggle_mask(self, onoff):
+        with self._setting_lock:
+            self._show_mask = onoff
+
+    def start_capture(self, callback):
+        logger.info("Capture Requested")
+        with self._setting_lock:
+            self._capturing_callback = callback
+            self._capturing = True
+
+    def shutdown(self):
+        self.is_running = False
+
+    def _draw_cross_hair(self, frame, pos, color=(0, 255, 0), width=2):
+        cv2.line(frame, (0, pos[1]), (frame.shape[1], pos[1]), color, width)
+        cv2.line(frame, (pos[0], 0), (pos[0], frame.shape[0]), color, width)
+
+    def _draw_bounding_box(self, frame, tl, lr, color=(0, 0, 255), thickness=2):
+        cv2.line(frame, (tl[0], tl[1]), (lr[0], tl[1]), color, thickness)
+        cv2.line(frame, (lr[0], tl[1]), (lr[0], lr[1]), color, thickness)
+        cv2.line(frame, (lr[0], lr[1]), (tl[0], lr[1]), color, thickness)
+        cv2.line(frame, (tl[0], lr[1]), (tl[0], tl[1]), color, thickness)
 
     def _start_capture(self, frame):
         if self._capture is None:
