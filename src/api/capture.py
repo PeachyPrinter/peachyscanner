@@ -30,7 +30,7 @@ class CenterMixIn(object):
             self._center_callback = call_back
             self._left_click_call_backs.append(self._set_center)
 
-    def _set_center(self, x, y):
+    def _set_center(self, frame, x, y):
         logger.info("Center set to {}, {}".format(x, y))
         self._show_crosshair = False
         self._center = [x, y]
@@ -106,15 +106,19 @@ class EncoderMixIn(object):
             self._encoder_callback = callback
             self._left_click_call_backs.append(self._encoder_selected)
 
-    def _encoder_selected(self, x, y):
-        self._encoder_point = (x, y)
-        self._degrees = 0
-        if self._encoder_callback:
-            self._encoder_callback((x, y))
-
-    def show_range(self, low_RGB, high_RGB):
-            self._lower_range = np.array([min(low_RGB[2], high_RGB[2]) * 255, min(low_RGB[1], high_RGB[1]) * 255, min(low_RGB[0], high_RGB[0]) * 255])
-            self._upper_range = np.array([max(low_RGB[2], high_RGB[2]) * 255, max(low_RGB[1], high_RGB[1]) * 255, max(low_RGB[0], high_RGB[0]) * 255])
+    def _encoder_selected(self, frame, x, y):
+        logger.info("Encoder Point Selected - {},{}".format(x, y))
+        if frame.shape[0] > x and frame.shape[1] > y:
+            logger.info("Encoder Point Accepted")
+            self._encoder_point = (x, y)
+            self._degrees = 0
+            if self._encoder_callback:
+                self._encoder_callback((x, y))
+        else:
+            logger.info("Encoder Point Rejected")
+            self._encoder_point = None
+            if self._encoder_callback:
+                self._encoder_callback(None)
 
     def _draw_levels(self, frame, levels):
         for idx in range(0, len(levels)):
@@ -171,7 +175,7 @@ class EncoderMixIn(object):
         cv2.circle(frame, self._encoder_point, 10, enc_color, 5)
 
 class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
-    def __init__(self, callback):
+    def __init__(self):
         threading.Thread.__init__(self)
         CenterMixIn.__init__(self)
         ROIMixIn.__init__(self)
@@ -179,12 +183,14 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
 
         self._setting_lock = RLock()
         self.is_running = True
+        self.is_shutdown = False
         self._mouse_pos = [0, 0]
         self._drag_start = None
         self._degrees = 0
         self._show_crosshair = False
         self._show_mask = False
         # self._cap = None
+
         self._cap = cv2.VideoCapture(0)
         self._frame = self._cap.read()
         self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
@@ -217,13 +223,18 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
             self._dragging = True
             self._drag_start = self._mouse_pos
             while len(self._left_click_call_backs) > 0:
-                self._left_click_call_backs.pop()(self._mouse_pos[0], self._mouse_pos[1])
+                logger.info("Calling back click")
+                self._left_click_call_backs.pop()(self._frame, self._mouse_pos[0], self._mouse_pos[1])
         if event == cv2.EVENT_LBUTTONUP and self._get_drag:
             self._roi_selected(self._drag_start, self._mouse_pos)
         if event == cv2.EVENT_LBUTTONUP:
             self._dragging = False
         if event == cv2.EVENT_RBUTTONDOWN:
             pass
+
+    def show_range(self, low_RGB, high_RGB):
+        self._lower_range = np.array([int(min(low_RGB[2], high_RGB[2]) * 255), int(min(low_RGB[1], high_RGB[1]) * 255), int(min(low_RGB[0], high_RGB[0]) * 255)])
+        self._upper_range = np.array([int(max(low_RGB[2], high_RGB[2]) * 255), int(max(low_RGB[1], high_RGB[1]) * 255), int(max(low_RGB[0], high_RGB[0]) * 255)])
 
     def toggle_mask(self, onoff):
         with self._setting_lock:
@@ -237,6 +248,9 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
 
     def shutdown(self):
         self.is_running = False
+        while not self.is_shutdown:
+            time.sleep(0.1)
+        #TODO better this.
 
     def _draw_cross_hair(self, frame, pos, color=(0, 255, 0), width=2):
         cv2.line(frame, (0, pos[1]), (frame.shape[1], pos[1]), color, width)
@@ -277,9 +291,10 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
         self._last_degrees = self._degrees
 
     def run(self):
-        cv2.namedWindow('frame', cv2.WINDOW_NORMAL)
+        cv2.namedWindow('frame', cv2.WINDOW_AUTOSIZE)
+        cv2.resizeWindow('frame', 1280, 720)
+        cv2.moveWindow('frame', 500, 0)
         cv2.setMouseCallback('frame', self._clicky, 0)
-        cv2.resizeWindow('frame', 960, 540)
         fps = []
         start = time.time()
 
@@ -339,3 +354,4 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
         if self._cap:
             self._cap.release()
         cv2.destroyAllWindows()
+        self.is_shutdown = True

@@ -1,0 +1,34 @@
+
+<LaserDetection>:
+    name: 'color_control_ui'
+    capture: app.capture
+    dark_color: dark_color
+    light_color: light_color
+    GridLayout:
+        cols: 1
+        ToggleButton:
+            size_hint_y: None
+            height: app.button_height
+            text: "Show Mask"
+            on_release: root.toggle_mask(self.state)
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                size_hint_y: None
+                height: app.label_height
+                text: "Color Dark"
+            ColorPicker:
+                id: dark_color
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                size_hint_y: None
+                height: app.label_height
+                text: "Color Light"
+            ColorPicker:
+                id: light_color
+        Button:
+            size_hint_y: None
+            height: app.button_height
+            text: 'Save'
+            on_release: root.save()

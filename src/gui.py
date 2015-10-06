@@ -11,12 +11,9 @@ from api.capture import Capture
 
 from ui.camera import CameraControlWrapper
 from ui.posisition import PositionControl
+from ui.laserdetection import LaserDetection
 
 kivy.require('1.9.0')
-
-
-class Callback(object):
-    pass
 
 
 class CaptureControl(Screen):
@@ -37,25 +34,7 @@ class CaptureControl(Screen):
             child.disabled = True
 
 
-class ColorControls(Screen):
-    def __init__(self, **kwargs):
-        super(ColorControls, self).__init__(**kwargs)
-        self.visable = False
-        self.ids.dark_color.bind(color=self._color_changed)
-        self.ids.light_color.bind(color=self._color_changed)
-        App.get_running_app().capture.show_range(list(self.ids.dark_color.color)[:3], list(self.ids.light_color.color)[:3])
 
-    def _color_changed(self, instance, value):
-        App.get_running_app().capture.show_range(list(self.ids.dark_color.color)[:3], list(self.ids.light_color.color)[:3])
-
-    def toggle_mask(self, state):
-        Logger.info("state: {}".format(state))
-        if state == 'down':
-            show = True
-        else:
-            show = False
-        Logger.info("state: {}".format(state))
-        App.get_running_app().capture.toggle_mask(show)
 
 
 class MyScreenManager(ScreenManager):
@@ -63,11 +42,11 @@ class MyScreenManager(ScreenManager):
         super(MyScreenManager, self).__init__(**kwargs)
         self.camera_control_ui = CameraControlWrapper()
         self.posisition_control_ui = PositionControl()
-        self.color_control_ui = ColorControls()
+        self.laser_detection_ui = LaserDetection()
         self.capture_control_ui = CaptureControl()
         self.add_widget(self.camera_control_ui)
         self.add_widget(self.posisition_control_ui)
-        self.add_widget(self.color_control_ui)
+        self.add_widget(self.laser_detection_ui)
         self.add_widget(self.capture_control_ui)
         self.current = 'camera_control_ui'
 
@@ -80,22 +59,17 @@ class PeachyScannerApp(App):
     Config = ConfigParser(name='PeachyScanner')
     capture = ObjectProperty()
 
-    def __init__(self, **kwargs):
+    def __init__(self, capture, **kwargs):
         Window.size = (350, 900)
         Window.minimum_width = 450
         Window.minimum_height = 900
         Window.x = 0
         Window.y = 0
+        self.capture = capture
         super(PeachyScannerApp, self).__init__(**kwargs)
         Config.set("input", "mouse", "mouse,disable_multitouch")
         Config.set("kivy", "exit_on_escape", 0)
         Logger.info("Starting up")
-        self.callback = Callback()
-        self.start_camera()
-
-    def start_camera(self):
-        self.capture = Capture(self.callback)
-        self.capture.start()
 
     def exit_app(self, *args):
         self.shutdown()

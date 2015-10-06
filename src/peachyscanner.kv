@@ -44,29 +44,3 @@ GridLayout:
             id: find_centre
             text: "Start Capture"
             on_release: root.start_capture()
-
-<ColorControls>:
-    name: 'color_control_ui'
-    GridLayout:
-        cols: 1
-        ToggleButton:
-            size_hint_y: None
-            height: app.button_height
-            text: "Show Mask"
-            on_release: root.toggle_mask(self.state)
-        BoxLayout:
-            orientation: 'vertical'
-            Label:
-                size_hint_y: None
-                height: app.label_height
-                text: "Color Dark"
-            ColorPicker:
-                id: dark_color
-        BoxLayout:
-            orientation: 'vertical'
-            Label:
-                size_hint_y: None
-                height: app.label_height
-                text: "Color Light"
-            ColorPicker:
-                id: light_color

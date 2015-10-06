@@ -5,6 +5,8 @@ import sys
 import time
 import argparse
 
+from api.capture import Capture
+
 def setup_logging(args):
 
     peachy_logger = logging.getLogger('peachy')
@@ -53,5 +55,8 @@ if __name__ == "__main__":
         sys.argv.append("-m")
         sys.argv.append(args.mod)
 
+    capture = Capture()
+    capture.start()
     from gui import PeachyScannerApp
-    PeachyScannerApp().run()
+    PeachyScannerApp(capture).run()
+    capture.shutdown()
