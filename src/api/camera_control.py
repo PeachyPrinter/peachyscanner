@@ -9,17 +9,14 @@ class CameraControl(object):
         self._lock = Lock()
         self._run_command('''uvcdynctrl  --set='Focus, Auto' 0''')
         self._run_command('''uvcdynctrl  --set='White Balance Temperature, Auto' 0''')
-        self._focus = int(self._run_command('''uvcdynctrl  --get='Focus (absolute)' '''))
-        self._brightness = int(self._run_command('''uvcdynctrl  --get='Brightness' '''))
-        self._contrast = int(self._run_command('''uvcdynctrl  --get='Contrast' '''))
-        self._white_balance = int(self._run_command('''uvcdynctrl  --get='White Balance Temperature' '''))
-        self._sharpness = int(self._run_command('''uvcdynctrl  --get='Sharpness' '''))
+        self._run_command('''uvcdynctrl  --set='Focus (absolute)' 0''')
+        self._run_command('''uvcdynctrl  --set='Focus (absolute)' 255''')
+        self._focus = 0
+        self._brightness = 0
+        self._contrast = 0
+        self._white_balance = 0
+        self._sharpness = 0
 
-        logger.info("Initial Focus: {}".format(self.focus))
-        logger.info("Initial Brightness: {}".format(self.brightness))
-        logger.info("Initial Contrast: {}".format(self.contrast))
-        logger.info("Initial White Balance: {}".format(self.white_balance))
-        logger.info("Initial Sharpness: {}".format(self.sharpness))
 
     def _run_command(self, command):
         proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)

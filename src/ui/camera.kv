@@ -59,6 +59,12 @@
             min_value: 0
             max_value: 255
         BoxLayout:
+        Button:
+            size_hint_y: None
+            height: app.button_height
+            text: 'Save'
+            on_release: root.save()
+
 
 <CameraControlWrapper>:
     name: 'camera_control_ui'

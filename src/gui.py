@@ -34,9 +34,6 @@ class CaptureControl(Screen):
             child.disabled = True
 
 
-
-
-
 class MyScreenManager(ScreenManager):
     def __init__(self, **kwargs):
         super(MyScreenManager, self).__init__(**kwargs)

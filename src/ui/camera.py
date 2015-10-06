@@ -90,5 +90,4 @@ class CameraControls(BoxLayout):
 
 
 class CameraControlWrapper(Screen):
-    def on_pre_leave(self):
-        self.camera_controls.save()
+    pass
