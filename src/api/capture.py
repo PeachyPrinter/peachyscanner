@@ -7,6 +7,9 @@ import time
 
 from camera_control import CameraControl
 
+from infrastructure.point_converter import PointConverter
+from infrastructure.writer import PLYWriter
+
 logger = logging.getLogger('peachy')
 
 
@@ -195,7 +198,8 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
         self._frame = self._cap.read()
         self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
         self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        self._frame = self._cap.read()
+        self._frame = self._cap.read()[1]
+        self._center = (self._frame.shape[1] / 2, 0)
         self.camera = CameraControl()
 
         self._lower_range = None
@@ -211,11 +215,15 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
         self._dragging = False
         self._level = []
 
-        self._capture = None
+        self._capture_image = None
         self._capturing = False
         self._capture_file = 'ImageMesh'
         self._frames_aquired = 0
         self._last_degrees = 0
+
+        self.point_converter = PointConverter()
+        self._points = None
+        self._ply_writer = PLYWriter()
 
     def _clicky(self, event, x, y, flags, param):
         self._mouse_pos = (x, y)
@@ -263,20 +271,23 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
         cv2.line(frame, (tl[0], lr[1]), (tl[0], tl[1]), color, thickness)
 
     def _start_capture(self, frame):
-        if self._capture is None:
+        if self._capture_image is None:
             logger.info("Capture Init")
             self._degrees = 0.0
             self._frames_aquired = 0
             self._last_degrees = -90.0
             logger.info("Starting at {}".format(self._degrees))
-            self._capture = np.empty((200, self._roi[3], 3))
-            logger.info("output array: {}".format(self._capture.shape))
+            self._capture_image = np.empty((200, self._roi[3], 3))
+            self._capture_points = np.empty((200, self._roi[3]))
+            logger.info("output array: {}".format(self._capture_image.shape))
         else:
             if self._frames_aquired >= 200:
                 logger.info("Capture Compelete")
                 self._capture_start = None
-                cv2.imwrite(self._capture_file+"-"+str(time.time())+".jpg", self._capture)
-                self._capture = None
+                file_header = self._capture_file+"-"+str(time.time())
+                cv2.imwrite(file_header+".jpg", self._capture_image)
+                self._ply_writer.write_polar_points(file_header + ".ply", self._capture_points)
+                self._capture_image = None
                 self._capturing = False
                 self._last_degrees = False
                 if self._capturing_callback:
@@ -285,7 +296,8 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
         if self._last_degrees is not self._degrees:
             roi = frame[self._roi[1]:self._roi[1] + self._roi[3], self._center[0]]
             turns = int(self._degrees / 1.8)
-            self._capture[self._frames_aquired] = roi
+            self._capture_image[self._frames_aquired] = roi
+            self._capture_points[self._frames_aquired] = self._points
             logger.info("Aquired Frame: {} at {}".format(self._frames_aquired, turns))
             self._frames_aquired += 1
         self._last_degrees = self._degrees
@@ -294,6 +306,7 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
         cv2.namedWindow('frame', cv2.WINDOW_AUTOSIZE)
         cv2.resizeWindow('frame', 1280, 720)
         cv2.moveWindow('frame', 500, 0)
+
         cv2.setMouseCallback('frame', self._clicky, 0)
         fps = []
         start = time.time()
@@ -309,16 +322,19 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
                 if self._capturing:
                     self._start_capture(original)
 
-                if (self._lower_range is not None) and (self._upper_range is not None):
-                    mask = cv2.inRange(original, self._lower_range, self._upper_range)
-                    b, g, r = cv2.split(original)
+                if (self._lower_range is not None) and (self._upper_range is not None) and self._roi:
+                    roi = original[self._roi[1]:self._roi[1] + self._roi[3], self._roi[0]:self._roi[0] + self._roi[2]]
+                    mask = cv2.inRange(roi, self._lower_range, self._upper_range)
+                    mask_center = self.center[0] - self.roi[0]
+                    self._points = self.point_converter.get_points(mask, mask_center)
+                    b, g, r = cv2.split(roi)
                     b = cv2.subtract(b, mask)
                     g = cv2.add(g, mask)
                     r = cv2.subtract(r, mask)
                     if self._show_mask:
-                        frame = cv2.merge((mask, mask, mask))
+                        frame[self._roi[1]:self._roi[1] + self._roi[3], self._roi[0]:self._roi[0] + self._roi[2]] = cv2.merge((mask, mask, mask))
                     else:
-                        frame = cv2.merge((b, g, r))
+                        frame[self._roi[1]:self._roi[1] + self._roi[3], self._roi[0]:self._roi[0] + self._roi[2]] = cv2.merge((b, g, r))
 
                 if self._get_drag and self._dragging:
                     self._draw_bounding_box(frame, self._drag_start, self._mouse_pos)
