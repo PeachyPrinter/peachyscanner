@@ -8,6 +8,13 @@ class Writer(object):
     def write_points(self, array):
         pass
 
+class FileWriterWrapper(object):
+    def __init__(self, writer):
+        self._writer = writer
+
+    def write_polar_points(self, file_name, polar_array):
+        with open(file_name, 'w') as output:
+            self._writer.write_polar_points(output, polar_array)
 
 class PLYWriter(Writer):
 
@@ -35,6 +42,6 @@ class PLYWriter(Writer):
         for idx_phi in range(0, sections):
             z_data = polar_array[idx_phi]
             for z in range(0, z_data.shape[0]):
-                if z_data[z] != -1:
+                if z_data[z] >= 0:
                     (x, y) = self.pol2cart(z_data[z], degrees_per * idx_phi)
                     outfile.write('{} {} {}\n'.format(x, y, z))

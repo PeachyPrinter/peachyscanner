@@ -8,7 +8,7 @@ import time
 from camera_control import CameraControl
 
 from infrastructure.point_converter import PointConverter
-from infrastructure.writer import PLYWriter
+from infrastructure.writer import PLYWriter, FileWriterWrapper
 
 logger = logging.getLogger('peachy')
 
@@ -223,7 +223,8 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
 
         self.point_converter = PointConverter()
         self._points = None
-        self._ply_writer = PLYWriter()
+        self._inv_points = None
+        self._writer = FileWriterWrapper(PLYWriter())
 
     def _clicky(self, event, x, y, flags, param):
         self._mouse_pos = (x, y)
@@ -277,17 +278,18 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
             self._frames_aquired = 0
             self._last_degrees = -90.0
             logger.info("Starting at {}".format(self._degrees))
-            self._capture_image = np.empty((200, self._roi[3], 3))
-            self._capture_points = np.empty((200, self._roi[3]))
+            self._capture_image = np.zeros((200, self._roi[3], 3))
+            self._capture_points = np.ones((200, self._roi[3])) * -1
             logger.info("output array: {}".format(self._capture_image.shape))
         else:
             if self._frames_aquired >= 200:
                 logger.info("Capture Compelete")
                 self._capture_start = None
                 file_header = self._capture_file+"."+str(time.time())
+
                 cv2.imwrite(file_header+".jpg", self._capture_image)
-                with open(file_header + ".ply", 'w') as outfile:
-                    self._ply_writer.write_polar_points(outfile, self._capture_points)
+                self._writer.write_polar_points(file_header + ".ply", self._capture_points)
+
                 self._capture_image = None
                 self._capturing = False
                 self._last_degrees = False
@@ -298,7 +300,13 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
             roi = frame[self._roi[1]:self._roi[1] + self._roi[3], self._center[0]]
             turns = int(self._degrees / 1.8)
             self._capture_image[self._frames_aquired] = roi
-            self._capture_points[self._frames_aquired] = self._points
+
+            conditions = [self._capture_points[self._frames_aquired] > 0, self._capture_points[self._frames_aquired] <= 0]
+            self._capture_points[self._frames_aquired] = np.select(conditions, [self._capture_points[self._frames_aquired], self._points])
+            
+            inv_idx = (self._frames_aquired + 133) % 200
+            conditions = [self._capture_points[inv_idx] > 0, self._capture_points[inv_idx] <= 0]
+            self._capture_points[inv_idx] = np.select(conditions, [self._capture_points[inv_idx], self._inv_points])
             logger.info("Aquired Frame: {} at {}".format(self._frames_aquired, turns))
             self._frames_aquired += 1
         self._last_degrees = self._degrees
@@ -328,6 +336,7 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
                     mask = cv2.inRange(roi, self._lower_range, self._upper_range)
                     mask_center = self.center[0] - self.roi[0]
                     self._points = self.point_converter.get_points(mask, mask_center)
+                    self._inv_points = self.point_converter.get_points(mask, mask_center, True)
                     b, g, r = cv2.split(roi)
                     b = cv2.subtract(b, mask)
                     g = cv2.add(g, mask)

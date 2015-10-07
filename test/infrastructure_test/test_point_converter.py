@@ -96,5 +96,16 @@ class PointConverterTest(unittest.TestCase):
 
         self.assertTrue((expected_result == result).all(), str(result))
 
+    def test_get_points_returns_points_when_flipped(self):
+        data = np.array([[0, 0, 0, 0, 0, 1, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 1, 0],
+                         [0, 0, 0, 0, 0, 0, 1, 0],
+                         [0, 0, 0, 0, 0, 1, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 1, 0]])
+        expected_result = np.array([1, 2, 2, 1, 2])
+
+        result = self.test_converter.get_points(data, 4, True),
+
+        self.assertTrue((expected_result == result).all(), str(result))
 if __name__ == '__main__':
     unittest.main()
