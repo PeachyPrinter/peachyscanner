@@ -284,9 +284,10 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
             if self._frames_aquired >= 200:
                 logger.info("Capture Compelete")
                 self._capture_start = None
-                file_header = self._capture_file+"-"+str(time.time())
+                file_header = self._capture_file+"."+str(time.time())
                 cv2.imwrite(file_header+".jpg", self._capture_image)
-                self._ply_writer.write_polar_points(file_header + ".ply", self._capture_points)
+                with open(file_header + ".ply", 'w') as outfile:
+                    self._ply_writer.write_polar_points(outfile, self._capture_points)
                 self._capture_image = None
                 self._capturing = False
                 self._last_degrees = False

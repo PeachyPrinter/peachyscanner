@@ -17,7 +17,7 @@ class PointConverterTest(unittest.TestCase):
         data = np.array([[0, 0, 1],
                          [0, 1, 0],
                          [1, 0, 0]])
-        expected_result = np.array([0, 1, 2])
+        expected_result = np.array([0, 1, -1])
 
         result = self.test_converter.get_points(data, 2)
 
@@ -27,7 +27,7 @@ class PointConverterTest(unittest.TestCase):
         data = np.array([[1, 0, 0],
                          [0, 1, 0],
                          [0, 0, 1]])
-        expected_result = np.array([2, 1, 0])
+        expected_result = np.array([-1, 1, 0])
 
         result = self.test_converter.get_points(data, 2)
 
@@ -37,7 +37,7 @@ class PointConverterTest(unittest.TestCase):
         data = np.array([[1, 1, 1],
                          [0, 1, 0],
                          [0, 0, 1]])
-        expected_result = np.array([2, 1, 0])
+        expected_result = np.array([-1, 1, 0])
 
         result = self.test_converter.get_points(data,2)
 
@@ -47,7 +47,7 @@ class PointConverterTest(unittest.TestCase):
         data = np.array([[0, 0, 0],
                          [0, 0, 0],
                          [0, 0, 0]])
-        expected_result = np.array([2, 2, 2])
+        expected_result = np.array([-1, -1, -1])
 
         result = self.test_converter.get_points(data, 2)
 
@@ -67,7 +67,7 @@ class PointConverterTest(unittest.TestCase):
         data = np.array([[0, 0, 1, 0, 0, 0, 0],
                          [0, 0, 0, 0, 0, 0, 0],
                          [0, 0, 0, 0, 1, 0, 0]])
-        expected_result = np.array([2, 4, 0])
+        expected_result = np.array([2, -1, 0])
 
         result = self.test_converter.get_points(data, 4)
 
@@ -78,6 +78,19 @@ class PointConverterTest(unittest.TestCase):
                          [0, 0, 0, 1, 0, 0, 0],
                          [0, 0, 1, 1, 1, 1, 1]])
         expected_result = np.array([2, 1, 2])
+
+        result = self.test_converter.get_points(data, 4)
+
+        self.assertTrue((expected_result == result).all(), str(result))
+
+
+    def test_get_points_returns_offset_points_when_centered_and_extras_unsorted(self):
+        data = np.array([[0, 1, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 1, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 1, 0, 0, 0, 0],
+                         [0, 0, 0, 1, 0, 0, 0, 0],
+                         [0, 0, 1, 0, 0, 0, 0, 0]])
+        expected_result = np.array([3, 2, 1, 1, 2])
 
         result = self.test_converter.get_points(data, 4)
 

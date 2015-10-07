@@ -1,4 +1,7 @@
 import numpy as np
+import logging
+
+logger = logging.getLogger('peachy')
 
 
 class Writer(object):
@@ -18,21 +21,20 @@ class PLYWriter(Writer):
         y = rho * np.sin(phi)
         return(x, y)
 
-    def write_polar_points(self, polar_array, file_path):
-        with open(file_path, 'w') as output:
-            verticies = np.count_nonzero(polar_array)
-            output.write("""ply
-                            format ascii 1.0
-                            comment made by Peachy Scanner
-                            comment Date Should Go Here
-                            element vertex {}
-                            property float x
-                            property float y
-                            property float z
-                            end_header""".format(verticies))
-            degrees_per = polar_array.shape[0] / 360
-            for idx_phi in range(0, polar_array.shape[0]):
-                z_data = polar_array[idx_phi]
-                for z in range(0, z_data.shape[0]):
+    def write_polar_points(self, outfile, polar_array):
+        verticies = (polar_array >= 0).sum()
+        sections = polar_array.shape[0]
+        logger.info('Sections - {}'.format(sections))
+        degrees_per = (2.0 * np.pi) / sections
+        logger.info('Radians per point - {}'.format(degrees_per))
+
+        header = "ply\nformat ascii 1.0\ncomment made by Peachy Scanner\ncomment Date Should Go Here\nelement vertex {}\nproperty float x\nproperty float y\nproperty float z\nend_header\n".format(str(verticies))
+
+        outfile.write(header)
+
+        for idx_phi in range(0, sections):
+            z_data = polar_array[idx_phi]
+            for z in range(0, z_data.shape[0]):
+                if z_data[z] != -1:
                     (x, y) = self.pol2cart(z_data[z], degrees_per * idx_phi)
-                    output.write('{} {} {}'.format(x, y, z))
+                    outfile.write('{} {} {}\n'.format(x, y, z))
