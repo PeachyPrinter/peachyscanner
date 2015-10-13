@@ -79,6 +79,7 @@ class EncoderMixIn(object):
         self._encoder_threshold = 150
         self._encoder_null_zone = 50
         self._encoder_callback = None
+        self.ENCODER_POINTS = 200
 
     @property
     def encoder_threshold(self):
@@ -178,7 +179,7 @@ class EncoderMixIn(object):
         cv2.circle(frame, self._encoder_point, 10, enc_color, 5)
 
 class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
-    def __init__(self):
+    def __init__(self, status):
         threading.Thread.__init__(self)
         CenterMixIn.__init__(self)
         ROIMixIn.__init__(self)
@@ -277,11 +278,11 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
             self._frames_aquired = 0
             self._last_degrees = -90.0
             logger.info("Starting at {}".format(self._degrees))
-            self._capture_image = np.empty((200, self._roi[3], 3))
-            self._capture_points = np.empty((200, self._roi[3]))
+            self._capture_image = np.empty((self.ENCODER_POINTS, self._roi[3], 3))
+            self._capture_points = np.empty((self.ENCODER_POINTS, self._roi[3]))
             logger.info("output array: {}".format(self._capture_image.shape))
         else:
-            if self._frames_aquired >= 200:
+            if self._frames_aquired >= self.ENCODER_POINTS:
                 logger.info("Capture Compelete")
                 self._capture_start = None
                 file_header = self._capture_file+"."+str(time.time())

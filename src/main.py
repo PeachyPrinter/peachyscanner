@@ -6,6 +6,7 @@ import time
 import argparse
 
 from api.capture import Capture
+from infrastructure.status import Status
 
 def setup_logging(args):
 
@@ -55,8 +56,9 @@ if __name__ == "__main__":
         sys.argv.append("-m")
         sys.argv.append(args.mod)
 
-    capture = Capture()
+    status = Status()
+    capture = Capture(status)
     capture.start()
     from gui import PeachyScannerApp
-    PeachyScannerApp(capture).run()
+    PeachyScannerApp(capture, status).run()
     capture.shutdown()

@@ -22,6 +22,7 @@ class CaptureControl(Screen):
         self._disable_all()
         App.get_running_app().capture.start_capture(self._capture_callback)
 
+
     def _capture_callback(self, file_name):
         self._enable_all()
 
@@ -32,6 +33,9 @@ class CaptureControl(Screen):
     def _disable_all(self):
         for child in self.children:
             child.disabled = True
+
+    def update_progress(status):
+        pass
 
 
 class MyScreenManager(ScreenManager):
@@ -56,13 +60,14 @@ class PeachyScannerApp(App):
     Config = ConfigParser(name='PeachyScanner')
     capture = ObjectProperty()
 
-    def __init__(self, capture, **kwargs):
+    def __init__(self, capture, status, **kwargs):
         Window.size = (350, 900)
         Window.minimum_width = 450
         Window.minimum_height = 900
         Window.x = 0
         Window.y = 0
         self.capture = capture
+        self.status = status
         super(PeachyScannerApp, self).__init__(**kwargs)
         Config.set("input", "mouse", "mouse,disable_multitouch")
         Config.set("kivy", "exit_on_escape", 0)
