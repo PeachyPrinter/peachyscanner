@@ -1,0 +1,20 @@
+<CaptureControl>:
+    name: 'capture_control_ui'
+    progress: progress
+    render: render
+    GridLayout:
+        cols: 1
+        Button:
+            size_hint_y: None
+            height: app.button_height
+            id: find_centre
+            text: "Start Capture"
+            on_release: root.start_capture()
+        ProgressBar:
+            id: progress
+            size_hint_y: None
+            height: app.button_height
+            max: 1.0
+            value: 0.0
+        ObjectRenderer:
+            id:render

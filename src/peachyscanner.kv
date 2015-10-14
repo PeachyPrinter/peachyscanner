@@ -33,16 +33,3 @@ GridLayout:
         text: "Quit"
         on_release: app.shutdown()
 
-
-<CaptureControl>:
-    name: 'capture_control_ui'
-    GridLayout:
-        cols: 1
-        Button:
-            size_hint_y: None
-            height: app.button_height
-            id: find_centre
-            text: "Start Capture"
-            on_release: root.start_capture()
-        ProgressBar:
-            max: 1.0

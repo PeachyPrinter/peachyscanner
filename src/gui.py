@@ -1,42 +1,21 @@
+import os
+
 import kivy
 from kivy.app import App
 from kivy.config import Config, ConfigParser
-from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.screenmanager import ScreenManager
 from kivy.core.window import Window
 from kivy.metrics import dp
 from kivy.properties import NumericProperty, ObjectProperty
+from kivy.resources import resource_add_path
 from kivy.logger import Logger
-from api.capture import Capture
-
 
 from ui.camera import CameraControlWrapper
 from ui.posisition import PositionControl
 from ui.laserdetection import LaserDetection
+from ui.capture_control import CaptureControl
 
 kivy.require('1.9.0')
-
-
-class CaptureControl(Screen):
-
-    def start_capture(self):
-        self._disable_all()
-        App.get_running_app().capture.start_capture(self._capture_callback)
-
-
-    def _capture_callback(self, file_name):
-        self._enable_all()
-
-    def _enable_all(self):
-        for child in self.children:
-            child.disabled = False
-
-    def _disable_all(self):
-        for child in self.children:
-            child.disabled = True
-
-    def update_progress(status):
-        pass
-
 
 class MyScreenManager(ScreenManager):
     def __init__(self, **kwargs):
@@ -66,6 +45,9 @@ class PeachyScannerApp(App):
         Window.minimum_height = 900
         Window.x = 0
         Window.y = 0
+        resource_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resources')
+        resource_add_path(resource_path)
+        resource_add_path(os.path.join(resource_path, 'shaders'))
         self.capture = capture
         self.status = status
         super(PeachyScannerApp, self).__init__(**kwargs)

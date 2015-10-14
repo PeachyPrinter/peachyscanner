@@ -184,6 +184,7 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
         CenterMixIn.__init__(self)
         ROIMixIn.__init__(self)
         EncoderMixIn.__init__(self)
+        self._status = status
 
         self._setting_lock = RLock()
         self.is_running = True
@@ -274,16 +275,21 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
     def _start_capture(self, frame):
         if self._capture_image is None:
             logger.info("Capture Init")
+            self._status.operation = "Capturing Points"
+            self._status.progress = 0.0
             self._degrees = 0.0
             self._frames_aquired = 0
             self._last_degrees = -90.0
             logger.info("Starting at {}".format(self._degrees))
             self._capture_image = np.empty((self.ENCODER_POINTS, self._roi[3], 3))
-            self._capture_points = np.empty((self.ENCODER_POINTS, self._roi[3]))
+            self._capture_points = np.zeros((self.ENCODER_POINTS, self._roi[3]))
             logger.info("output array: {}".format(self._capture_image.shape))
+            self._status.points = self._capture_points
         else:
             if self._frames_aquired >= self.ENCODER_POINTS:
                 logger.info("Capture Compelete")
+                self._status.points = self._capture_points
+                self._status.operation = "Capture Complete"
                 self._capture_start = None
                 file_header = self._capture_file+"."+str(time.time())
                 cv2.imwrite(file_header+".jpg", self._capture_image)
@@ -301,6 +307,8 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
             self._capture_image[self._frames_aquired] = roi
             self._capture_points[self._frames_aquired] = self._points
             logger.info("Aquired Frame: {} at {}".format(self._frames_aquired, turns))
+            self._status.progress = self._frames_aquired / float(self.ENCODER_POINTS)
+            self._status.points = self._capture_points
             self._frames_aquired += 1
         self._last_degrees = self._degrees
 

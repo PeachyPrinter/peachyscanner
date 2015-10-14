@@ -5,6 +5,7 @@ class Status(object):
        self._operation = "Startup"
        self._progress = 1.0
        self._handlers = []
+       self._points = []
 
     @property
     def operation(self):
@@ -15,6 +16,16 @@ class Status(object):
         self._operation = value
         self._update()
         return self._operation
+
+    @property
+    def points(self):
+        return self._points
+
+    @points.setter
+    def points(self, value):
+        self._points = value
+        self._update()
+        return self._points
 
     @property
     def progress(self):
