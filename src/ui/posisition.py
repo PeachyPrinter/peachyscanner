@@ -26,10 +26,6 @@ class PositionControl(Screen):
         self._load_saved_settings()
 
     def _load_saved_settings(self):
-        # center = Config.getdefault('posisition', 'center', None)
-        # if center:
-        #     Logger.info("Center Loaded - {}".format(center))
-        #     self.capture.center = tuple(json.loads(center))
 
         roi = Config.getdefault('posisition', 'roi', None)
         if roi:
@@ -51,16 +47,6 @@ class PositionControl(Screen):
         if encoder_point:
             Logger.info("Encoder Point Loaded - {}".format(encoder_point))
             self.capture.encoder_point = tuple(json.loads(encoder_point))
-
-    # def select_center(self):
-    #     self._disable_all()
-    #     self.capture.get_center(self._center_call_back)
-
-    # def _center_call_back(self, center):
-    #     self._enable_all()
-    #     Logger.info('Found Center: {}'.format(center))
-    #     Config.set('posisition', 'center', json.dumps(center))
-    #     Config.write()
 
     def select_encoder(self):
         self._disable_all()

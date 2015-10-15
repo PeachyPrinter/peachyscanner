@@ -12,36 +12,6 @@ from infrastructure.writer import PLYWriter
 
 logger = logging.getLogger('peachy')
 
-
-class CenterMixIn(object):
-    def __init__(self):
-        self._center = None
-        self._center_callback = None
-
-    @property
-    def center(self):
-        return self._center
-
-    @center.setter
-    def center(self, center):
-        assert(len(center) == 2)
-        self._center = center
-
-    def get_center(self, call_back):
-        with self._setting_lock:
-            self._show_crosshair = True
-            self._center_callback = call_back
-            self._left_click_call_backs.append(self._set_center)
-
-    def _set_center(self, frame, x, y):
-        logger.info("Center set to {}, {}".format(x, y))
-        self._show_crosshair = False
-        self._center = [x, y]
-        if self._center_callback:
-            self._center_callback([x, y])
-            self._center_callback = None
-
-
 class ROIMixIn(object):
     def __init__(self):
         self._roi = None
@@ -178,10 +148,9 @@ class EncoderMixIn(object):
 
         cv2.circle(frame, self._encoder_point, 10, enc_color, 5)
 
-class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
+class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
     def __init__(self, status):
         threading.Thread.__init__(self)
-        CenterMixIn.__init__(self)
         ROIMixIn.__init__(self)
         EncoderMixIn.__init__(self)
         self._status = status
@@ -335,7 +304,7 @@ class Capture(threading.Thread, CenterMixIn, ROIMixIn, EncoderMixIn):
                 if (self._lower_range is not None) and (self._upper_range is not None) and self._roi:
                     roi = original[self._roi[1]:self._roi[1] + self._roi[3], self._roi[0]:self._roi[0] + self._roi[2]]
                     mask = cv2.inRange(roi, self._lower_range, self._upper_range)
-                    mask_center = self.center[0] - self.roi[0]
+                    mask_center = self._center[0] - self.roi[0]
                     self._points = self.point_converter.get_points(mask, mask_center)
                     b, g, r = cv2.split(roi)
                     b = cv2.subtract(b, mask)
