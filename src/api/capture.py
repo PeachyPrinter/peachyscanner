@@ -10,38 +10,34 @@ from camera_control import CameraControl
 from infrastructure.point_converter import PointConverter
 from infrastructure.writer import PLYWriter
 from infrastructure.encoder import Encoder
+from infrastructure.roi import ROI
 
 logger = logging.getLogger('peachy')
 
 class ROIMixIn(object):
     def __init__(self):
-        self._roi = None
+        self._roi = ROI()
         self._roi_callback = None
 
     @property
     def roi(self):
-        return self._roi
+        return [self._roi.x, self._roi.y, self._roi.w, self._roi.h]
 
     @roi.setter
-    def roi(self, roi):
-        self._roi = roi
+    def roi(self, value):
+        self._roi.set(*value)
 
     def select_roi(self, callback):
         with self._setting_lock:
-            self._roi = None
             self._roi_callback = callback
             self._get_drag = True
 
     def _roi_selected(self, start, stop):
         self._get_drag = False
         self._drag_start = None
-        x = min(start[0], stop[0])
-        y = min(start[1], stop[1])
-        w = abs(start[0] - stop[0])
-        h = abs(start[1] - stop[1])
-        self._roi = (x, y, w, h)
+        self._roi.set_from_points(start,stop)
         if self._roi_callback:
-            self._roi_callback(self._roi)
+            self._roi_callback(self.roi)
 
 
 class EncoderMixIn(object):
@@ -191,8 +187,8 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
             self._last_degrees = self.encoder.degrees - 90.0
             self._frames_aquired = 0
             logger.info("Starting at {}".format(self.encoder.degrees))
-            self._capture_image = np.empty((self.ENCODER_SECTIONS, self._roi[3], 3))
-            self._capture_points = np.zeros((self.ENCODER_SECTIONS, self._roi[3]))
+            self._capture_image = np.empty((self.ENCODER_SECTIONS, self._roi.h, 3))
+            self._capture_points = np.zeros((self.ENCODER_SECTIONS, self._roi.h))
             logger.info("output array: {}".format(self._capture_image.shape))
             self._status.points = self._capture_points
         else:
@@ -212,7 +208,7 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
                     self._capturing_callback(self._capture_file)
                 return
         if self._last_degrees != self.encoder.degrees:
-            roi = frame[self._roi[1]:self._roi[1] + self._roi[3], self._center[0]]
+            roi = frame[self._roi.y:self._roi.y + self._roi.h, self._center[0]]
             self._capture_image[self._frames_aquired] = roi
             self._capture_points[self._frames_aquired] = self._points
             logger.info("Aquired Frame: {}".format(self._frames_aquired))
@@ -243,28 +239,24 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
                 if self._capturing:
                     self._start_capture(original)
 
-                if (self._lower_range is not None) and (self._upper_range is not None) and self._roi:
-                    roi = original[self._roi[1]:self._roi[1] + self._roi[3], self._roi[0]:self._roi[0] + self._roi[2]]
+                if (self._lower_range is not None) and (self._upper_range is not None) and self._roi.y:
+                    roi = self._roi.get(original)
                     mask = cv2.inRange(roi, self._lower_range, self._upper_range)
-                    mask_center = self._center[0] - self.roi[0]
+                    mask_center = self._center[0] - self._roi.y
                     self._points = self.point_converter.get_points(mask, mask_center)
                     b, g, r = cv2.split(roi)
                     b = cv2.subtract(b, mask)
                     g = cv2.add(g, mask)
                     r = cv2.subtract(r, mask)
                     if self._show_mask:
-                        frame[self._roi[1]:self._roi[1] + self._roi[3], self._roi[0]:self._roi[0] + self._roi[2]] = cv2.merge((mask, mask, mask))
+                        self._roi.replace(frame, cv2.merge((mask, mask, mask)))
                     else:
-                        frame[self._roi[1]:self._roi[1] + self._roi[3], self._roi[0]:self._roi[0] + self._roi[2]] = cv2.merge((b, g, r))
+                        self._roi.replace(frame, cv2.merge((b, g, r)))
 
                 if self._get_drag and self._dragging:
                     self._draw_bounding_box(frame, self._drag_start, self._mouse_pos)
 
-                if self._roi:
-                    gray = frame / 4
-                    roi = frame[self._roi[1]:self._roi[1] + self._roi[3], self._roi[0]:self._roi[0] + self._roi[2]]
-                    gray[self._roi[1]:self._roi[1] + self._roi[3], self._roi[0]:self._roi[0] + self._roi[2]] = roi
-                    frame = gray
+                frame = self._roi.overlay(frame)
 
                 if self._center:
                     self._draw_cross_hair(frame, self._center, (255, 255, 255), 1)

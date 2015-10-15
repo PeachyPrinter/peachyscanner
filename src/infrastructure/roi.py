@@ -1,5 +1,9 @@
+import logging
+
+logger = logging.getLogger('peachy')
+
 class ROI(object):
-    def __init__(self, x=None, y=None, w=None, h=None):
+    def __init__(self, x=0, y=0, w=None, h=None):
         self.x = x
         self.y = y
         self.w = w
@@ -18,13 +22,20 @@ class ROI(object):
         self.h = abs(point1[1] - point2[1])
 
     def overlay(self, frame, amount=0.5):
-        gray = frame * amount
+        gray = frame / int(1 / amount)
         roi = self.get(frame)
-        gray[self.y:self.y + self.w, self.x:self.x + self.h] = roi
-        return gray
+        return self.replace(gray, roi)
+
+    def replace(self, full_frame, new_part):
+        if self._complete():
+            full_frame[self.y:self.y + self.h, self.x:self.x + self.w] = new_part
+        return full_frame
 
     def get(self, frame):
-        if self.x is not None and self.y is not None and self.w is not None and self.h is not None:
-            return frame[self.y:self.y + self.w, self.x:self.x + self.h]
+        if self._complete():
+            return frame[self.y:self.y + self.h, self.x:self.x + self.w]
         else:
             return frame
+
+    def _complete(self):
+        return not (self.x is None or self.y is None or self.w is None or self.h is None)
