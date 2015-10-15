@@ -97,6 +97,7 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
         ROIMixIn.__init__(self)
         EncoderMixIn.__init__(self)
         self._status = status
+        self._ply_writer = PLYWriter()
 
         self._setting_lock = RLock()
         self.is_running = True
@@ -110,7 +111,7 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
         self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
         self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         self._frame = self._cap.read()[1]
-        self._center = (self._frame.shape[1] / 2, 0)
+        self._center = self._frame.shape[1] / 2
         self.camera = CameraControl()
 
         self._lower_range = None
@@ -122,7 +123,6 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
 
         self._get_drag = False
         self._dragging = False
-        self._level = []
 
         self._capture_image = None
         self._capturing = False
@@ -132,7 +132,7 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
 
         self.point_converter = PointConverter()
         self._points = None
-        self._ply_writer = PLYWriter()
+        
 
     def _clicky(self, event, x, y, flags, param):
         self._mouse_pos = (x, y)
@@ -169,9 +169,9 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
             time.sleep(0.1)
         #TODO better this.
 
-    def _draw_cross_hair(self, frame, pos, color=(0, 255, 0), width=2):
-        cv2.line(frame, (0, pos[1]), (frame.shape[1], pos[1]), color, width)
-        cv2.line(frame, (pos[0], 0), (pos[0], frame.shape[0]), color, width)
+    def _draw_center_line(self, frame, color=(255, 255, 255), width=1):
+        cv2.line(frame, (self._center,0), (self._center,frame.shape[0]), color, width)
+        return frame
 
     def _draw_bounding_box(self, frame, tl, lr, color=(0, 0, 255), thickness=2):
         cv2.line(frame, (tl[0], tl[1]), (lr[0], tl[1]), color, thickness)
@@ -208,7 +208,7 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
                     self._capturing_callback(self._capture_file)
                 return
         if self._last_degrees != self.encoder.degrees:
-            roi = frame[self._roi.y:self._roi.y + self._roi.h, self._center[0]]
+            roi = frame[self._roi.y:self._roi.y + self._roi.h, self._center]
             self._capture_image[self._frames_aquired] = roi
             self._capture_points[self._frames_aquired] = self._points
             logger.info("Aquired Frame: {}".format(self._frames_aquired))
@@ -239,10 +239,10 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
                 if self._capturing:
                     self._start_capture(original)
 
-                if (self._lower_range is not None) and (self._upper_range is not None) and self._roi.y:
+                if (self._lower_range is not None) and (self._upper_range is not None) and self._roi.x:
                     roi = self._roi.get(original)
                     mask = cv2.inRange(roi, self._lower_range, self._upper_range)
-                    mask_center = self._center[0] - self._roi.y
+                    mask_center = self._center - self._roi.x
                     self._points = self.point_converter.get_points(mask, mask_center)
                     b, g, r = cv2.split(roi)
                     b = cv2.subtract(b, mask)
@@ -257,10 +257,7 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
                     self._draw_bounding_box(frame, self._drag_start, self._mouse_pos)
 
                 frame = self._roi.overlay(frame)
-
-                if self._center:
-                    self._draw_cross_hair(frame, self._center, (255, 255, 255), 1)
-
+                frame = self._draw_center_line(frame)
                 frame = self.encoder.overlay_encoder(frame)
                 frame = self.encoder.overlay_history(frame)
 
@@ -270,9 +267,6 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
                 cv2.putText(self._frame, "Deg: {}".format(self.encoder.degrees), (5, 40), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 255, 0), 2)
                 cv2.imshow('frame', self._frame)
 
-                # cv2.imshow('frame', frame)
-
-                # self.show_data()
                 key = chr(cv2.waitKey(1) & 0xFF)
                 if key == 'q':
                     break
