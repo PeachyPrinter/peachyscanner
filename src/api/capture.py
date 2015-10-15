@@ -216,8 +216,7 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
                 if self._capturing_callback:
                     self._capturing_callback(self._capture_file)
                 return
-        logger.info('{} == {}'.format(self._last_degrees, self.encoder.degrees))
-        if self._last_degrees is not self.encoder.degrees:
+        if self._last_degrees != self.encoder.degrees:
             roi = frame[self._roi[1]:self._roi[1] + self._roi[3], self._center[0]]
             self._capture_image[self._frames_aquired] = roi
             self._capture_points[self._frames_aquired] = self._points
