@@ -1,6 +1,8 @@
 <PositionControl>:
     name: 'posisition_control_ui'
     capture: app.capture
+    encoder_threshold_widget: encoder_threshold_widget
+    encoder_null_zone_widget: encoder_null_zone_widget
     GridLayout:
         cols: 1
         Button:
@@ -14,6 +16,7 @@
             height: app.label_height
             text: "Encoder Threshold"
         Slider:
+            id: encoder_threshold_widget
             size_hint_y: None
             min: 0
             max: 255 * 6
@@ -25,6 +28,7 @@
             height: app.label_height
             text: "Encoder Null Zone"
         Slider:
+            id: encoder_null_zone_widget
             size_hint_y: None
             min: 1
             max: 256

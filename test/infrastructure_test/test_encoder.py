@@ -175,8 +175,8 @@ class EncoderTest(unittest.TestCase):
         encoder = Encoder(point=[50, 50],threshold=300, null_zone=150)
         encoder.process(image)
         resulting_image = encoder.overlay_history(image)
-        self.assertTrue((resulting_image[150][9] == [255,255,255]).all())
-        self.assertTrue((resulting_image[50][9] == [255,255,255]).all())
+        self.assertTrue((resulting_image[255-150][9] == [255,255,255]).all())
+        self.assertTrue((resulting_image[255-50][9] == [255,255,255]).all())
 
     def test_overlays_threshold_history_shows_threshold_and_null_lines(self):
         blackimage = np.ones((255,255,3),dtype='uint8') * 10

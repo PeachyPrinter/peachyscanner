@@ -39,9 +39,12 @@ class PositionControl(Screen):
 
         encoder_threshold = float(Config.getdefault('posisition', 'encoder_threshold', 200))
         self.capture.encoder_threshold = encoder_threshold
+        self.encoder_threshold_widget.value = encoder_threshold
+
 
         encoder_null_zone = float(Config.getdefault('posisition', 'encoder_null_zone', 50))
         self.capture.encoder_null_zone = encoder_null_zone
+        self.encoder_null_zone_widget.value = encoder_null_zone
 
         encoder_point = Config.getdefault('posisition', 'encoder_point', None)
         if encoder_point:

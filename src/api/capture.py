@@ -92,7 +92,6 @@ class EncoderMixIn(object):
                 self._encoder_callback((x, y))
         else:
             logger.info("Encoder Point Rejected")
-            self._encoder_point = None
             if self._encoder_callback:
                 self._encoder_callback(None)
 
@@ -108,9 +107,7 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
         self.is_shutdown = False
         self._mouse_pos = [0, 0]
         self._drag_start = None
-        self._show_crosshair = False
         self._show_mask = False
-        # self._cap = None
 
         self._cap = cv2.VideoCapture(0)
         self._frame = self._cap.read()
@@ -122,8 +119,6 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
 
         self._lower_range = None
         self._upper_range = None
-        self._on_count = 0
-        self._off_count = 0
 
         self._left_click_call_backs = []
 
@@ -273,9 +268,6 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
 
                 if self._center:
                     self._draw_cross_hair(frame, self._center, (255, 255, 255), 1)
-
-                if self._show_crosshair:
-                    self._draw_cross_hair(frame, self._mouse_pos)
 
                 frame = self.encoder.overlay_encoder(frame)
                 frame = self.encoder.overlay_history(frame)

@@ -72,8 +72,8 @@ class Encoder(object):
             else:
                 color = self.ENCODER_COLOR_NULL_BGR
             image = cv2.line(image, (idx, image.shape[0]),(idx, image.shape[0] - height),color,1)
-        theshold_top = int(((self.threshold + self.null_zone) / (255.0 * 3.0)) * image.shape[0])
-        theshold_bottom = int(((self.threshold - self.null_zone) / (255.0 * 3.0)) * image.shape[0])
+        theshold_top = image.shape[0] - int(((self.threshold + self.null_zone) / (255.0 * 3.0)) * image.shape[0])
+        theshold_bottom = image.shape[0] - int(((self.threshold - self.null_zone) / (255.0 * 3.0)) * image.shape[0])
         image = cv2.line(image, (0, theshold_top),(self.history_length, theshold_top), self.THRESHOLD_MARKER_COLOR, 3)
         image = cv2.line(image, (0, theshold_bottom),(self.history_length, theshold_bottom), self.THRESHOLD_MARKER_COLOR, 3)
         return image
