@@ -1,5 +1,6 @@
 import numpy as np
 import logging
+import time
 
 logger = logging.getLogger('peachy')
 
@@ -15,17 +16,8 @@ class PLYWriter(Writer):
     def __init__(self):
         self.converter = GLConverter()
 
-    def cart2pol(self, x, y):
-        rho = np.sqrt(x**2 + y**2)
-        phi = np.arctan2(y, x)
-        return(rho, phi)
-
-    def pol2cart(self, rho, phi):
-        x = rho * np.cos(phi)
-        y = rho * np.sin(phi)
-        return(x, y)
-
     def write_polar_points(self, outfile, polar_array):
+        start = time.time()
         points = self.converter.convert(polar_array)
         verticies = points.shape[0] / 8
         
@@ -36,4 +28,6 @@ class PLYWriter(Writer):
         for (x,y,z,a,b,c,u,v) in np.hsplit(points, points.shape[0] // 8):
             outfile.write('{} {} {}\n'.format(x, y, z))
 
-        logger.info('File Written')
+        total = time.time() - start
+
+        logger.info('File Written in {:.2f} milliseconds'.format(total * 1000.0))

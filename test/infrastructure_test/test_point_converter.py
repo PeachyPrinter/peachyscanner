@@ -3,6 +3,7 @@ import sys
 import os
 import numpy as np
 import logging
+import time
 
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
@@ -174,6 +175,14 @@ class GLConverterTest(TestHelpers):
         test_array = np.array([[9, 8], [0, 6], [5, 4], [3, 2]])
         result = GLConverter().convert(test_array)
         self.assertEqual(8 * 7, len(result))
+
+    def test_convert_is_fast(self):
+        test_array = np.random.rand(720,10000)
+        start = time.time()
+        result = GLConverter().convert(test_array)
+        total = time.time() - start
+        self.assertTrue(total < 2.0)
+
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level='INFO')

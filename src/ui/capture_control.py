@@ -19,7 +19,6 @@ from infrastructure.point_converter import GLConverter
 Builder.load_file('ui/capture_control.kv')
 
 class CaptureControl(Screen):
-    
 
     def __init__(self, **kwargs):
         super(CaptureControl, self).__init__(**kwargs)
@@ -51,10 +50,7 @@ class CaptureControl(Screen):
     def update_model(self, *largs):
         if len(self.raw_points) > 0:
             scale = min(0.05, 1.0 / np.amax(self.raw_points))
-            start = time.time()
             points = self._converter.convert(self.raw_points, scale=scale)
-            total = time.time() - start
-            Logger.info("Rendered points in {}".format(total))
             self.render.update_mesh(points)
 
 
@@ -108,18 +104,6 @@ class ObjectRenderer(Widget):
         Rotate(90, 1, 0, 0)
         self.rot = Rotate(1, 0, 0, 1)
         UpdateNormalMatrix()
-        # self.othermesh = Mesh(
-        #     vertices=np.array([  -1, 0, 0, 0, 0 ,0, 0, 0,
-        #                 1, 0, 0, 0, 0 ,0, 0, 0,
-        #                 0, 0, 0, 0, 0 ,0, 0, 0,
-        #                 0, 1, 0, 0, 0 ,0, 0, 0,
-        #                 0, 0, -1, 0, 0 ,0, 0, 0,
-        #                 0, 0, 1, 0, 0 ,0, 0, 0,
-        #                 ]),
-        #     indices=np.array([0,1,2,3,4,5]),
-        #     fmt=self.mesh_data.vertex_format,
-        #     mode='lines',
-        # )
         self.mesh = Mesh(
                 vertices=self.mesh_data.vertices,
                 indices=self.mesh_data.indices,

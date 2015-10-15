@@ -1,5 +1,6 @@
 import numpy as np
 import logging
+import time
 
 logger = logging.getLogger('peachy')
 
@@ -33,9 +34,8 @@ class GLConverter(object):
         b = np.ones(polar_array.shape) * yi
         c = np.zeros(x.shape)
         u = np.ones(polar_array.shape) * np.reshape(np.arange(0,sections), (sections,-1))
-        v = z
-
-        xyz = np.dstack((x,y,z,a,b,c,u,v)).flatten()
-        xyz = np.array(np.hsplit(xyz, xyz.shape[0] // 8))
+        v = z.copy()
+        xyz = np.dstack((x,y,z,a,b,c,u,v))
+        xyz = xyz.reshape(xyz.size / 8,8)
         xyz = xyz[np.logical_not(np.logical_and(np.isclose(xyz[:,0], 0.0), np.isclose(xyz[:,1], 0.0), np.isclose(xyz[:,2], 0.0),))]
         return xyz.flatten()
