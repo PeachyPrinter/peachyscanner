@@ -14,33 +14,7 @@ from infrastructure.roi import ROI
 
 logger = logging.getLogger('peachy')
 
-class ROIMixIn(object):
-    def __init__(self):
-        self._roi = ROI()
-        self._roi_callback = None
-
-    @property
-    def roi(self):
-        return [self._roi.x, self._roi.y, self._roi.w, self._roi.h]
-
-    @roi.setter
-    def roi(self, value):
-        self._roi.set(*value)
-
-    def select_roi(self, callback):
-        with self._setting_lock:
-            self._roi_callback = callback
-            self._get_drag = True
-
-    def _roi_selected(self, start, stop):
-        self._get_drag = False
-        self._drag_start = None
-        self._roi.set_from_points(start,stop)
-        if self._roi_callback:
-            self._roi_callback(self.roi)
-
-
-class EncoderMixIn(object):
+class CaptureAPI(object):
     def __init__(self):
         self.ENCODER_SECTIONS = 200
         self.encoder = Encoder(
@@ -49,6 +23,18 @@ class EncoderMixIn(object):
                  threshold = 382,
                  null_zone = 382,
                  history_length = 30)
+        self._roi = ROI()
+
+        self._roi_callback = None
+        self._encoder_callback = None
+
+    @property
+    def roi(self):
+        return [self._roi.x, self._roi.y, self._roi.w, self._roi.h]
+
+    @roi.setter
+    def roi(self, value):
+        self._roi.set(*value)
 
     @property
     def encoder_threshold(self):
@@ -74,6 +60,7 @@ class EncoderMixIn(object):
     def encoder_point(self, value):
         self.encoder.point = value
 
+
     def select_encoder(self, callback):
         with self._setting_lock:
             self._encoder_callback = callback
@@ -91,11 +78,22 @@ class EncoderMixIn(object):
             if self._encoder_callback:
                 self._encoder_callback(None)
 
-class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
+    def select_roi(self, callback):
+        with self._setting_lock:
+            self._roi_callback = callback
+            self._get_drag = True
+
+    def _roi_selected(self, start, stop):
+        self._get_drag = False
+        self._drag_start = None
+        self._roi.set_from_points(start,stop)
+        if self._roi_callback:
+            self._roi_callback(self.roi)
+
+class Capture(threading.Thread, CaptureAPI):
     def __init__(self, status):
         threading.Thread.__init__(self)
-        ROIMixIn.__init__(self)
-        EncoderMixIn.__init__(self)
+        CaptureAPI.__init__(self)
         self._status = status
         self._ply_writer = PLYWriter()
 
@@ -149,10 +147,6 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
         if event == cv2.EVENT_RBUTTONDOWN:
             pass
 
-    def show_range(self, low_RGB, high_RGB):
-        self._lower_range = np.array([int(min(low_RGB[2], high_RGB[2]) * 255), int(min(low_RGB[1], high_RGB[1]) * 255), int(min(low_RGB[0], high_RGB[0]) * 255)])
-        self._upper_range = np.array([int(max(low_RGB[2], high_RGB[2]) * 255), int(max(low_RGB[1], high_RGB[1]) * 255), int(max(low_RGB[0], high_RGB[0]) * 255)])
-
     def toggle_mask(self, onoff):
         with self._setting_lock:
             self._show_mask = onoff
@@ -172,6 +166,10 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
     def _draw_center_line(self, frame, color=(255, 255, 255), width=1):
         cv2.line(frame, (self._center,0), (self._center,frame.shape[0]), color, width)
         return frame
+
+    def show_range(self, low_RGB, high_RGB):
+        self._lower_range = np.array([int(min(low_RGB[2], high_RGB[2]) * 255), int(min(low_RGB[1], high_RGB[1]) * 255), int(min(low_RGB[0], high_RGB[0]) * 255)])
+        self._upper_range = np.array([int(max(low_RGB[2], high_RGB[2]) * 255), int(max(low_RGB[1], high_RGB[1]) * 255), int(max(low_RGB[0], high_RGB[0]) * 255)])
 
     def _draw_bounding_box(self, frame, tl, lr, color=(0, 0, 255), thickness=2):
         cv2.line(frame, (tl[0], tl[1]), (lr[0], tl[1]), color, thickness)
