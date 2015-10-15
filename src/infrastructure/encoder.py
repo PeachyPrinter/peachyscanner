@@ -21,9 +21,10 @@ class Encoder(object):
             self._degrees_per_step = degrees_per_step
         self._changes = 0
         self._is_high = False
-        self._ENCODER_COLOR_LOW_BGR = (0,0,255)
-        self._ENCODER_COLOR_HIGH_BGR = (0,255,0)
-        self._ENCODER_COLOR_NULL_BGR = (0,255,255)
+        self._ENCODER_COLOR_LOW_BGR =  (0,   0,   255)
+        self._ENCODER_COLOR_HIGH_BGR = (0,   255, 0  )
+        self._ENCODER_COLOR_NULL_BGR = (0,   255, 255)
+        self._THRESHOLD_MARKER_COLOR = (255, 255, 255)
         self._encoder_color_bgr = self._ENCODER_COLOR_LOW_BGR
 
     @property
@@ -46,11 +47,28 @@ class Encoder(object):
         else:
             self._encoder_color_bgr = self._ENCODER_COLOR_NULL_BGR
 
-    def overlay(self, image):
+    def overlay_encoder(self, image):
         ep = self.encoder_point
         image = cv2.circle(image, ep, 3, self._encoder_color_bgr, 1)
         image = cv2.line(image, (ep[0] + 3, ep[1]),(ep[0] + 6, ep[1]), self._encoder_color_bgr, 1)
         image = cv2.line(image, (ep[0] - 3, ep[1]),(ep[0] - 6, ep[1]), self._encoder_color_bgr, 1)
         image = cv2.line(image, (ep[0], ep[1] + 3),(ep[0], ep[1] + 6), self._encoder_color_bgr, 1)
         image = cv2.line(image, (ep[0], ep[1] - 3),(ep[0], ep[1] - 6), self._encoder_color_bgr, 1)
+        return image
+
+    def overlay_history(self, image):
+        while True:
+            cv2.imshow('im', image)
+            key = chr(cv2.waitKey(1) & 0xFF)
+            if key == 'q':
+                break
+        theshold_top = int(((self.threshold + self.null_zone) / (255.0 * 3.0)) * image.shape[0])
+        theshold_bottom = int(((self.threshold - self.null_zone) / (255.0 * 3.0)) * image.shape[0])
+        image = image = cv2.line(image, (0, theshold_top),(10, theshold_top), self._THRESHOLD_MARKER_COLOR, 1)
+        image = image = cv2.line(image, (0, theshold_bottom),(10, theshold_bottom), self._THRESHOLD_MARKER_COLOR, 1)
+        # while True:
+        #     cv2.imshow('im', image)
+        #     key = chr(cv2.waitKey(1) & 0xFF)
+        #     if key == 'q':
+        #         break
         return image
