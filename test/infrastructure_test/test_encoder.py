@@ -36,11 +36,24 @@ class EncoderTest(unittest.TestCase):
 
         self.assertEqual(expected_degrees, encoder.degrees)
 
-    def test_encoder_points_increments_set_amount(self):
+
+    def test_degress_increments_set_amount_and_does_not_exceed_360(self):
+        blackimage = np.zeros((100,100,3),dtype='uint8')
+        whiteimage = np.ones((100,100,3),dtype='uint8') * 255
+        expected_degrees = 359.0
+        encoder = Encoder(degrees_per_step=1.0)
+
+        for image in range(0,720):
+            encoder.process(blackimage)
+            encoder.process(whiteimage)
+
+        self.assertEqual(expected_degrees, encoder.degrees)
+
+    def test_points_increments_set_amount(self):
         blackimage = np.zeros((100,100,3),dtype='uint8')
         whiteimage = np.ones((100,100,3),dtype='uint8') * 255
         expected_degrees = 8.0
-        encoder = Encoder(encoder_sections=180)
+        encoder = Encoder(sections=180)
 
         for image in [whiteimage, blackimage, whiteimage,blackimage, ]:
             encoder.process(image)
@@ -65,20 +78,34 @@ class EncoderTest(unittest.TestCase):
         whiteimage = np.zeros((100,100,3),dtype='uint8')
         whiteimage[4][4] = [255,255,255]
         expected_degrees = 4.0
-        encoder = Encoder(encoder_point=[4, 4])
+        encoder = Encoder(point=[4, 4])
 
         for image in [whiteimage, blackimage, whiteimage,blackimage, ]:
             encoder.process(image)
 
         self.assertEqual(expected_degrees, encoder.degrees)
 
-    def test_encoder_point_sets_encoder_point(self):
+    def test_point_sets_point(self):
         blackimage = np.zeros((100,100,3),dtype='uint8')
         whiteimage = np.zeros((100,100,3),dtype='uint8')
         whiteimage[4][4] = [255,255,255]
         expected_degrees = 4.0
-        encoder = Encoder(encoder_point=[0, 0])
-        encoder.encoder_point = [4, 4]
+        encoder = Encoder(point=[0, 0])
+        encoder.point = [4, 4]
+
+        for image in [whiteimage, blackimage, whiteimage,blackimage, ]:
+            encoder.process(image)
+
+        self.assertEqual(expected_degrees, encoder.degrees)
+
+
+    def test_point_sets_point_if_diffrent_xy(self):
+        blackimage = np.zeros((100,100,3),dtype='uint8')
+        whiteimage = np.zeros((100,100,3),dtype='uint8')
+        whiteimage[8][4] = [255,255,255]
+        expected_degrees = 4.0
+        encoder = Encoder(point=[0, 0])
+        encoder.point = [4, 8]
 
         for image in [whiteimage, blackimage, whiteimage,blackimage, ]:
             encoder.process(image)
@@ -114,7 +141,7 @@ class EncoderTest(unittest.TestCase):
 
     def test_overlay_places_encoder_indicator_correct_place(self):
         blackimage = np.zeros((100,100,3),dtype='uint8')
-        encoder = Encoder(encoder_point=[50, 50])
+        encoder = Encoder(point=[50, 50])
         encoder.process(blackimage)
         resulting_image = encoder.overlay_encoder(blackimage)
         #Encode indicator is a circle centered on point with some decoration, just checking for one point
@@ -122,7 +149,7 @@ class EncoderTest(unittest.TestCase):
 
     def test_overlay_encoder_places_encoder_indicator_correct_place_if_wont_fit(self):
         blackimage = np.zeros((100,100,3),dtype='uint8')
-        encoder = Encoder(encoder_point=[2, 2])
+        encoder = Encoder(point=[2, 2])
         encoder.process(blackimage)
         resulting_image = encoder.overlay_encoder(blackimage)
         #Encode indicator is a circle centered on point with some decoration, just checking for one point
@@ -132,7 +159,7 @@ class EncoderTest(unittest.TestCase):
         blackimage = np.zeros((100,100,3),dtype='uint8')
         greyimage = np.ones((100,100,3),dtype='uint8') * 128
         whiteimage = np.ones((100,100,3),dtype='uint8') * 255
-        encoder = Encoder(encoder_point=[50, 50],threshold=384, null_zone=50)
+        encoder = Encoder(point=[50, 50],threshold=384, null_zone=50)
         encoder.process(blackimage)
         resulting_image = encoder.overlay_encoder(blackimage)
         self.assertTrue((resulting_image[52][52] == [0, 0, 255]).all())
@@ -145,7 +172,7 @@ class EncoderTest(unittest.TestCase):
 
     def test_overlay_history_shows_threshold_and_null_lines(self):
         image = np.ones((255,255,3),dtype='uint8') * 10
-        encoder = Encoder(encoder_point=[50, 50],threshold=300, null_zone=150)
+        encoder = Encoder(point=[50, 50],threshold=300, null_zone=150)
         encoder.process(image)
         resulting_image = encoder.overlay_history(image)
         self.assertTrue((resulting_image[150][9] == [255,255,255]).all())
@@ -155,7 +182,7 @@ class EncoderTest(unittest.TestCase):
         blackimage = np.ones((255,255,3),dtype='uint8') * 10
         greyimage = np.ones((255,255,3),dtype='uint8') * 100
         whiteimage = np.ones((255,255,3),dtype='uint8') * 200
-        encoder = Encoder(encoder_point=[50, 50],threshold=300, null_zone=150, history_length=10)
+        encoder = Encoder(point=[50, 50],threshold=300, null_zone=150, history_length=10)
         for image in [
             blackimage, blackimage, blackimage, blackimage, 
             greyimage, greyimage, greyimage, greyimage, 

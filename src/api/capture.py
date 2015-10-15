@@ -9,6 +9,7 @@ from camera_control import CameraControl
 
 from infrastructure.point_converter import PointConverter
 from infrastructure.writer import PLYWriter
+from infrastructure.encoder import Encoder
 
 logger = logging.getLogger('peachy')
 
@@ -45,35 +46,37 @@ class ROIMixIn(object):
 
 class EncoderMixIn(object):
     def __init__(self):
-        self._encoder_point = None
-        self._encoder_threshold = 150
-        self._encoder_null_zone = 50
-        self._encoder_callback = None
-        self.ENCODER_POINTS = 200
+        self.ENCODER_SECTIONS = 200
+        self.encoder = Encoder(
+                 sections= self.ENCODER_SECTIONS,
+                 point = (0, 0),
+                 threshold = 382,
+                 null_zone = 382,
+                 history_length = 30)
 
     @property
     def encoder_threshold(self):
-        return self._encoder_threshold
+        return self.encoder.threshold
 
     @encoder_threshold.setter
     def encoder_threshold(self, value):
-        self._encoder_threshold = value
+        self.encoder.threshold = value
 
     @property
     def encoder_null_zone(self):
-        return self._encoder_null_zone
+        return self.encoder.null_zone
 
     @encoder_null_zone.setter
     def encoder_null_zone(self, value):
-        self._encoder_null_zone = value
+        self.encoder.null_zone = value
 
     @property
     def encoder_point(self):
-        return self._encoder_point
+        return self.encoder.point
 
     @encoder_point.setter
     def encoder_point(self, value):
-        self._encoder_point = value
+        self.encoder.point = value
 
     def select_encoder(self, callback):
         with self._setting_lock:
@@ -84,8 +87,7 @@ class EncoderMixIn(object):
         logger.info("Encoder Point Selected - {},{}".format(x, y))
         if frame.shape[0] > x and frame.shape[1] > y:
             logger.info("Encoder Point Accepted")
-            self._encoder_point = (x, y)
-            self._degrees = 0
+            self.encoder.point = (x, y)
             if self._encoder_callback:
                 self._encoder_callback((x, y))
         else:
@@ -93,60 +95,6 @@ class EncoderMixIn(object):
             self._encoder_point = None
             if self._encoder_callback:
                 self._encoder_callback(None)
-
-    def _draw_levels(self, frame, levels):
-        for idx in range(0, len(levels)):
-            level = levels[idx]
-            top = frame.shape[0]
-
-            h = int(float(top) * (level / (2.0 * (255 + 255 + 255))))
-            if level >= self._encoder_threshold + self._encoder_null_zone:
-                color = (0, 255, 0)
-            elif level <= self._encoder_threshold - self._encoder_null_zone:
-                color = (0, 0, 255)
-            else:
-                color = (255, 255, 0)
-            cv2.line(frame, (idx, top), (idx, top - h), color, 1)
-
-        h_hi = int(float(top) * ((self._encoder_threshold + self._encoder_null_zone) / (2.0 * (255 + 255 + 255))))
-        h_low = int(float(top) * ((self._encoder_threshold - self._encoder_null_zone) / (2.0 * (255 + 255 + 255))))
-        cv2.line(frame, (0, top - h_hi), (len(levels) + 5, top - h_hi), (255, 255, 255), 2)
-        cv2.line(frame, (0, top - h_low), (len(levels) + 5, top - h_low), (255, 255, 255), 2)
-
-    def _process_encoder(self, frame, original):
-        self._level.append(sum(original[self._encoder_point[1], self._encoder_point[0]]) + sum(original[self._encoder_point[1], self._encoder_point[0] + 1]))
-        self._level = self._level[-100:]
-
-        self._draw_levels(frame, self._level)
-
-        if self._level[-1] >= self._encoder_threshold + self._encoder_null_zone:
-            self._off_count = 0
-            self._on_count += 1
-            if self._on_count >= 2:
-                enc_color = (0, 200, 0)
-            else:
-                enc_color = (200, 200, 0)
-            if self._on_count == 2:
-                self._degrees += 1.8
-                if self._degrees >= 360.0:
-                    self._degrees -= 360.0
-        elif self._level[-1] <= self._encoder_threshold - self._encoder_null_zone:
-            self._on_count = 0
-            self._off_count += 1
-            if self._off_count >= 2:
-                enc_color = (0, 0, 200)
-            else:
-                enc_color = (200, 200, 0)
-            if self._off_count == 2:
-                self._degrees += 1.8
-                if self._degrees >= 360.0:
-                    self._degrees -= 360.0
-        else:
-            enc_color = (200, 200, 0)
-            self._on_count = 0
-            self._off_count = 0
-
-        cv2.circle(frame, self._encoder_point, 10, enc_color, 5)
 
 class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
     def __init__(self, status):
@@ -160,7 +108,6 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
         self.is_shutdown = False
         self._mouse_pos = [0, 0]
         self._drag_start = None
-        self._degrees = 0
         self._show_crosshair = False
         self._show_mask = False
         # self._cap = None
@@ -246,16 +193,15 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
             logger.info("Capture Init")
             self._status.operation = "Capturing Points"
             self._status.progress = 0.0
-            self._degrees = 0.0
+            self._last_degrees = self.encoder.degrees - 90.0
             self._frames_aquired = 0
-            self._last_degrees = -90.0
-            logger.info("Starting at {}".format(self._degrees))
-            self._capture_image = np.empty((self.ENCODER_POINTS, self._roi[3], 3))
-            self._capture_points = np.zeros((self.ENCODER_POINTS, self._roi[3]))
+            logger.info("Starting at {}".format(self.encoder.degrees))
+            self._capture_image = np.empty((self.ENCODER_SECTIONS, self._roi[3], 3))
+            self._capture_points = np.zeros((self.ENCODER_SECTIONS, self._roi[3]))
             logger.info("output array: {}".format(self._capture_image.shape))
             self._status.points = self._capture_points
         else:
-            if self._frames_aquired >= self.ENCODER_POINTS:
+            if self._frames_aquired >= self.ENCODER_SECTIONS:
                 logger.info("Capture Compelete")
                 self._status.points = self._capture_points
                 self._status.operation = "Capture Complete"
@@ -270,16 +216,16 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
                 if self._capturing_callback:
                     self._capturing_callback(self._capture_file)
                 return
-        if self._last_degrees is not self._degrees:
+        logger.info('{} == {}'.format(self._last_degrees, self.encoder.degrees))
+        if self._last_degrees is not self.encoder.degrees:
             roi = frame[self._roi[1]:self._roi[1] + self._roi[3], self._center[0]]
-            turns = int(self._degrees / 1.8)
             self._capture_image[self._frames_aquired] = roi
             self._capture_points[self._frames_aquired] = self._points
-            logger.info("Aquired Frame: {} at {}".format(self._frames_aquired, turns))
-            self._status.progress = self._frames_aquired / float(self.ENCODER_POINTS)
+            logger.info("Aquired Frame: {}".format(self._frames_aquired))
+            self._status.progress = self._frames_aquired / float(self.ENCODER_SECTIONS)
             self._status.points = self._capture_points
             self._frames_aquired += 1
-        self._last_degrees = self._degrees
+            self._last_degrees = self.encoder.degrees
 
     def run(self):
         cv2.namedWindow('frame', cv2.WINDOW_AUTOSIZE)
@@ -297,6 +243,8 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
                 start = time.time()
                 ret, original = self._cap.read()
                 frame = original
+
+                self.encoder.process(original)
 
                 if self._capturing:
                     self._start_capture(original)
@@ -330,13 +278,13 @@ class Capture(threading.Thread, ROIMixIn, EncoderMixIn):
                 if self._show_crosshair:
                     self._draw_cross_hair(frame, self._mouse_pos)
 
-                if self._encoder_point:
-                    self._process_encoder(frame, original)
+                frame = self.encoder.overlay_encoder(frame)
+                frame = self.encoder.overlay_history(frame)
 
                 self._frame = frame
 
                 cv2.putText(self._frame, "fps: {:.2f}".format(sum(fps) / float(len(fps))), (5, 20), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 255, 0), 2)
-                cv2.putText(self._frame, "Deg: {}".format(self._degrees), (5, 40), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 255, 0), 2)
+                cv2.putText(self._frame, "Deg: {}".format(self.encoder.degrees), (5, 40), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 255, 0), 2)
                 cv2.imshow('frame', self._frame)
 
                 # cv2.imshow('frame', frame)
