@@ -36,6 +36,17 @@ class EncoderTest(unittest.TestCase):
 
         self.assertEqual(expected_degrees, encoder.degrees)
 
+    def test_encoder_points_increments_set_amount(self):
+        blackimage = np.zeros((100,100,3))
+        whiteimage = np.ones((100,100,3)) * 255
+        expected_degrees = 8.0
+        encoder = Encoder(encoder_sections=180)
+
+        for image in [whiteimage, blackimage, whiteimage,blackimage, ]:
+            encoder.process(image)
+
+        self.assertEqual(expected_degrees, encoder.degrees)
+
 
     def test_process_given_alternating_BW_adds_expected_degrees_only_on_change(self):
         blackimage = np.zeros((100,100,3))
@@ -100,6 +111,31 @@ class EncoderTest(unittest.TestCase):
             encoder.process(image)
 
         self.assertEqual(expected_degrees, encoder.degrees)
+
+    def test_overlay_places_encoder_indicator_correct_place(self):
+        blackimage = np.zeros((100,100,3))
+        encoder = Encoder(encoder_point=[50, 50])
+        encoder.process(blackimage)
+        resulting_image = encoder.overlay(blackimage)
+        #Encode indicator is a circle centered on point with some decoration, just checking for one point
+        self.assertTrue((resulting_image[52][52] == [0, 0, 255]).all())
+
+    def test_overlay_encoder_indicator_color_is_correct(self):
+        blackimage = np.zeros((100,100,3))
+        greyimage = np.ones((100,100,3)) * 128
+        whiteimage = np.ones((100,100,3)) * 255
+        encoder = Encoder(encoder_point=[50, 50],threshold=384, null_zone=50)
+        encoder.process(blackimage)
+        resulting_image = encoder.overlay(blackimage)
+        self.assertTrue((resulting_image[52][52] == [0, 0, 255]).all())
+        encoder.process(greyimage)
+        resulting_image = encoder.overlay(blackimage)
+        self.assertTrue((resulting_image[52][52] == [0, 255, 255]).all())
+        encoder.process(whiteimage)
+        resulting_image = encoder.overlay(blackimage)
+        self.assertTrue((resulting_image[52][52] == [0, 255, 0]).all())
+
+
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level='INFO')
