@@ -19,10 +19,10 @@ class CaptureAPI(object):
         self.ENCODER_SECTIONS = 200
         self.encoder = Encoder(
                  sections= self.ENCODER_SECTIONS,
-                 point = (0, 0),
-                 threshold = 382,
-                 null_zone = 382,
-                 history_length = 30)
+                 point=(0, 0),
+                 threshold=382,
+                 null_zone=382,
+                 history_length=30)
         self._roi = ROI()
 
         self._roi_callback = None
@@ -182,7 +182,8 @@ class Capture(threading.Thread, CaptureAPI):
             logger.info("Capture Init")
             self._status.operation = "Capturing Points"
             self._status.progress = 0.0
-            self._last_degrees = self.encoder.degrees - 90.0
+            self._last_degrees = self.encoder.degrees - 90.0.
+            
             self._frames_aquired = 0
             logger.info("Starting at {}".format(self.encoder.degrees))
             self._capture_image = np.empty((self.ENCODER_SECTIONS, self._roi.h, 3))

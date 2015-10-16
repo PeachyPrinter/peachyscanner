@@ -9,7 +9,7 @@ class ROI(object):
         self.w = w
         self.h = h
 
-    def set(self,x,y,w,h):
+    def set(self, x, y, w, h):
         self.x = x
         self.y = y
         self.w = w
@@ -29,7 +29,9 @@ class ROI(object):
     def replace(self, full_frame, new_part):
         if self._complete():
             full_frame[self.y:self.y + self.h, self.x:self.x + self.w] = new_part
-        return full_frame
+            return full_frame
+        else:
+            return new_part
 
     def get(self, frame):
         if self._complete():
