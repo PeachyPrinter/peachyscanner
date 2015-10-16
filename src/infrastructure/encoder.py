@@ -5,13 +5,12 @@ import cv2
 logger = logging.getLogger('peachy')
 
 class Encoder(object):
-    def __init__(self, 
-                 degrees_per_step=1.0,
-                 sections= None,
-                 point = (0, 0),
-                 threshold = 382,
-                 null_zone = 382,
-                 history_length = 20
+    def __init__(self,
+                 sections=360,
+                 point=(0, 0),
+                 threshold=382,
+                 null_zone=382,
+                 history_length=20
                  ):
         self.threshold = threshold
         self.null_zone = null_zone
@@ -20,12 +19,11 @@ class Encoder(object):
         self.ENCODER_COLOR_HIGH_BGR = (0,   255, 0  )
         self.ENCODER_COLOR_NULL_BGR = (0,   255, 255)
         self.THRESHOLD_MARKER_COLOR = (255, 255, 255)
+        self.sections_per_rotation = sections
+        self._degrees_per_step = 360.0 / sections
+
         self.history_length = history_length
 
-        if sections:
-            self._degrees_per_step = 360.0 / sections
-        else:
-            self._degrees_per_step = degrees_per_step
         self._color_bgr = self.ENCODER_COLOR_LOW_BGR
         self._changes = 0
         self._is_high = False
@@ -56,10 +54,10 @@ class Encoder(object):
     def overlay_encoder(self, image):
         ep = self.point
         image = cv2.circle(image, ep, 3, self._color_bgr, 1)
-        image = cv2.line(image, (ep[0] + 3, ep[1]),(ep[0] + 6, ep[1]), self._color_bgr, 1)
-        image = cv2.line(image, (ep[0] - 3, ep[1]),(ep[0] - 6, ep[1]), self._color_bgr, 1)
-        image = cv2.line(image, (ep[0], ep[1] + 3),(ep[0], ep[1] + 6), self._color_bgr, 1)
-        image = cv2.line(image, (ep[0], ep[1] - 3),(ep[0], ep[1] - 6), self._color_bgr, 1)
+        image = cv2.line(image, (ep[0] + 3, ep[1]), (ep[0] + 6, ep[1]), self._color_bgr, 1)
+        image = cv2.line(image, (ep[0] - 3, ep[1]), (ep[0] - 6, ep[1]), self._color_bgr, 1)
+        image = cv2.line(image, (ep[0], ep[1] + 3), (ep[0], ep[1] + 6), self._color_bgr, 1)
+        image = cv2.line(image, (ep[0], ep[1] - 3), (ep[0], ep[1] - 6), self._color_bgr, 1)
         return image
 
     def overlay_history(self, image):
@@ -71,9 +69,9 @@ class Encoder(object):
                 color = self.ENCODER_COLOR_LOW_BGR
             else:
                 color = self.ENCODER_COLOR_NULL_BGR
-            image = cv2.line(image, (idx, image.shape[0]),(idx, image.shape[0] - height),color,1)
+            image = cv2.line(image, (idx, image.shape[0]), (idx, image.shape[0] - height), color,1)
         theshold_top = image.shape[0] - int(((self.threshold + self.null_zone) / (255.0 * 3.0)) * image.shape[0])
         theshold_bottom = image.shape[0] - int(((self.threshold - self.null_zone) / (255.0 * 3.0)) * image.shape[0])
-        image = cv2.line(image, (0, theshold_top),(self.history_length, theshold_top), self.THRESHOLD_MARKER_COLOR, 3)
-        image = cv2.line(image, (0, theshold_bottom),(self.history_length, theshold_bottom), self.THRESHOLD_MARKER_COLOR, 3)
+        image = cv2.line(image, (0, theshold_top), (self.history_length, theshold_top), self.THRESHOLD_MARKER_COLOR, 3)
+        image = cv2.line(image, (0, theshold_bottom), (self.history_length, theshold_bottom), self.THRESHOLD_MARKER_COLOR, 3)
         return image
