@@ -11,6 +11,7 @@ from infrastructure.point_converter import PointConverter
 from infrastructure.writer import PLYWriter
 from infrastructure.encoder import Encoder
 from infrastructure.roi import ROI
+from infrastructure.detector import Detector
 
 logger = logging.getLogger('peachy')
 
@@ -18,12 +19,14 @@ class CaptureAPI(object):
     def __init__(self):
         self.ENCODER_SECTIONS = 200
         self.encoder = Encoder(
-                 sections= self.ENCODER_SECTIONS,
+                 sections=self.ENCODER_SECTIONS,
                  point=(0, 0),
                  threshold=382,
                  null_zone=382,
                  history_length=30)
         self._roi = ROI()
+        self.point_converter = PointConverter()
+        self.detector = Detector(self.point_converter)
 
         self._roi_callback = None
         self._encoder_callback = None
@@ -128,10 +131,6 @@ class Capture(threading.Thread, CaptureAPI):
         self._frames_aquired = 0
         self._last_degrees = 0
 
-        self.point_converter = PointConverter()
-        self._points = None
-        
-
     def _clicky(self, event, x, y, flags, param):
         self._mouse_pos = (x, y)
         if event == cv2.EVENT_LBUTTONDOWN:
@@ -164,12 +163,14 @@ class Capture(threading.Thread, CaptureAPI):
         #TODO better this.
 
     def _draw_center_line(self, frame, color=(255, 255, 255), width=1):
-        cv2.line(frame, (self._center,0), (self._center,frame.shape[0]), color, width)
+        cv2.line(frame, (self._center, 0), (self._center, frame.shape[0]), color, width)
         return frame
 
     def show_range(self, low_RGB, high_RGB):
-        self._lower_range = np.array([int(min(low_RGB[2], high_RGB[2]) * 255), int(min(low_RGB[1], high_RGB[1]) * 255), int(min(low_RGB[0], high_RGB[0]) * 255)])
-        self._upper_range = np.array([int(max(low_RGB[2], high_RGB[2]) * 255), int(max(low_RGB[1], high_RGB[1]) * 255), int(max(low_RGB[0], high_RGB[0]) * 255)])
+        self._lower_range = np.array([int(min(low_RGB[2], high_RGB[2]) * 255), int(min(low_RGB[1], high_RGB[1]) * 255), int(min(low_RGB[0], high_RGB[0]) * 255)], dtype='uint8')
+        self.detector.lo_range_bgr = (int(min(low_RGB[2], high_RGB[2]) * 255), int(min(low_RGB[1], high_RGB[1]) * 255), int(min(low_RGB[0], high_RGB[0]) * 255))
+        self._upper_range = np.array([int(max(low_RGB[2], high_RGB[2]) * 255), int(max(low_RGB[1], high_RGB[1]) * 255), int(max(low_RGB[0], high_RGB[0]) * 255)], dtype='uint8')
+        self.detector.hi_range_bgr = (int(max(low_RGB[2], high_RGB[2]) * 255), int(max(low_RGB[1], high_RGB[1]) * 255), int(max(low_RGB[0], high_RGB[0]) * 255))
 
     def _draw_bounding_box(self, frame, tl, lr, color=(0, 0, 255), thickness=2):
         cv2.line(frame, (tl[0], tl[1]), (lr[0], tl[1]), color, thickness)
@@ -182,7 +183,7 @@ class Capture(threading.Thread, CaptureAPI):
             logger.info("Capture Init")
             self._status.operation = "Capturing Points"
             self._status.progress = 0.0
-            self._last_degrees = self.encoder.degrees - 90.0.
+            self._last_degrees = self.encoder.degrees - 90.0
             
             self._frames_aquired = 0
             logger.info("Starting at {}".format(self.encoder.degrees))
@@ -209,7 +210,7 @@ class Capture(threading.Thread, CaptureAPI):
         if self._last_degrees != self.encoder.degrees:
             roi = frame[self._roi.y:self._roi.y + self._roi.h, self._center]
             self._capture_image[self._frames_aquired] = roi
-            self._capture_points[self._frames_aquired] = self._points
+            self._capture_points[self._frames_aquired] = self.detector.points(frame)
             logger.info("Aquired Frame: {}".format(self._frames_aquired))
             self._status.progress = self._frames_aquired / float(self.ENCODER_SECTIONS)
             self._status.points = self._capture_points
@@ -234,28 +235,16 @@ class Capture(threading.Thread, CaptureAPI):
                 frame = original
 
                 self.encoder.process(original)
+                self.detector.process(original, self._roi)
 
                 if self._capturing:
                     self._start_capture(original)
-
-                if (self._lower_range is not None) and (self._upper_range is not None) and self._roi.x:
-                    roi = self._roi.get(original)
-                    mask = cv2.inRange(roi, self._lower_range, self._upper_range)
-                    mask_center = self._center - self._roi.x
-                    self._points = self.point_converter.get_points(mask, mask_center)
-                    b, g, r = cv2.split(roi)
-                    b = cv2.subtract(b, mask)
-                    g = cv2.add(g, mask)
-                    r = cv2.subtract(r, mask)
-                    if self._show_mask:
-                        self._roi.replace(frame, cv2.merge((mask, mask, mask)))
-                    else:
-                        self._roi.replace(frame, cv2.merge((b, g, r)))
 
                 if self._get_drag and self._dragging:
                     self._draw_bounding_box(frame, self._drag_start, self._mouse_pos)
 
                 frame = self._roi.overlay(frame)
+                frame = self.detector.overlay_mask(frame)
                 frame = self._draw_center_line(frame)
                 frame = self.encoder.overlay_encoder(frame)
                 frame = self.encoder.overlay_history(frame)

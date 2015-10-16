@@ -11,16 +11,18 @@ from infrastructure.detector import Detector
 from infrastructure.roi import ROI
 from infrastructure.point_converter import PointConverter
 
+from mock import Mock
+
 class DetectorTest(unittest.TestCase):
     def test_overlay_mask_returns_green_for_points_in_range(self):
         image = np.ones((5, 5, 3), dtype='uint8') * 200
         expected = np.ones((5, 5, 3), dtype='uint8') * 200
         image[1:4, 1:4] = (128, 128, 128)
         expected[1:4, 1:4] = (0, 255, 0)
-        detector = Detector(ROI(), PointConverter())
-        detector.process(image)
+        roi = ROI()
+        detector = Detector(PointConverter())
+        detector.process(image, roi)
         masked = detector.overlay_mask(image)
-        print masked
         self.assertTrue((expected == masked).all())
 
     def test_overlay_mask_returns_points_in_roi(self):
@@ -28,10 +30,34 @@ class DetectorTest(unittest.TestCase):
         expected = np.ones((5, 5, 3), dtype='uint8') * 128
         expected[1:4, 1:4] = (0, 255, 0)
         roi = ROI(1, 1, 3, 3)
-        detector = Detector(roi, PointConverter())
-        detector.process(image)
+        detector = Detector(PointConverter())
+        detector.process(image, roi)
         masked = detector.overlay_mask(image)
         self.assertTrue((expected == masked).all())
+
+    def test_overlay_mask_works_when_roi_changes(self):
+        image = np.ones((5, 5, 3), dtype='uint8') * 128
+        expected = np.ones((5, 5, 3), dtype='uint8') * 128
+        expected[1:4, 1:4] = (0, 255, 0)
+        roi = ROI(1, 1, 3, 3)
+        detector = Detector(PointConverter())
+        detector.process(image, roi)
+        roi.w = 4
+        detector.overlay_mask(image)
+
+    def test_points_calls_point_converter(self):
+        image = np.ones((10, 10, 3), dtype='uint8') * 128
+        expected = np.ones((3, 3), dtype='uint8') * 255
+        roi = ROI(1, 1, 3, 3)
+        point_converter = Mock()
+        point_converter.get_points.return_value = 'BeeBopWrrr'
+        detector = Detector(point_converter)
+        detector.process(image, roi)
+        points = detector.points(image)
+        self.assertTrue((expected == point_converter.get_points.call_args[0][0][0]).all())
+        self.assertEquals(4, point_converter.get_points.call_args[0][1])
+        self.assertEquals('BeeBopWrrr', points)
+
 
 
 if __name__ == '__main__':

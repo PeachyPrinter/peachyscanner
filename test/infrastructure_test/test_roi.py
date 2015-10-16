@@ -59,6 +59,15 @@ class ROITest(unittest.TestCase):
         replaced = roi.replace(test_array, newpart)
         self.assertTrue((replaced == newpart).all())
 
+    def test_copy_creates_copy(self):
+        roi = ROI(45, 48, 12, 12)
+        roi2 = roi.copy()
+        self.assertEqual(roi.x, roi2.x)
+        self.assertEqual(roi.y, roi2.y)
+        self.assertEqual(roi.w, roi2.w)
+        self.assertEqual(roi.h, roi2.h)
+
+
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level='INFO')
     unittest.main()

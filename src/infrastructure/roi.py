@@ -39,5 +39,8 @@ class ROI(object):
         else:
             return frame
 
+    def copy(self):
+        return ROI(self.x, self.y, self.w, self.h)
+
     def _complete(self):
         return not (self.x is None or self.y is None or self.w is None or self.h is None)
