@@ -63,7 +63,6 @@ class CaptureAPI(object):
     def encoder_point(self, value):
         self.encoder.point = value
 
-
     def select_encoder(self, callback):
         with self._setting_lock:
             self._encoder_callback = callback
@@ -80,6 +79,10 @@ class CaptureAPI(object):
             logger.info("Encoder Point Rejected")
             if self._encoder_callback:
                 self._encoder_callback(None)
+
+    def show_range(self, low_RGB, high_RGB):
+        self.detector.lo_range_bgr = (int(min(low_RGB[2], high_RGB[2]) * 255), int(min(low_RGB[1], high_RGB[1]) * 255), int(min(low_RGB[0], high_RGB[0]) * 255))
+        self.detector.hi_range_bgr = (int(max(low_RGB[2], high_RGB[2]) * 255), int(max(low_RGB[1], high_RGB[1]) * 255), int(max(low_RGB[0], high_RGB[0]) * 255))
 
     def select_roi(self, callback):
         with self._setting_lock:
@@ -115,9 +118,6 @@ class Capture(threading.Thread, CaptureAPI):
         self._center = self._frame.shape[1] / 2
         self.camera = CameraControl()
 
-        self._lower_range = None
-        self._upper_range = None
-
         self._left_click_call_backs = []
 
         self._capturing_callback = None
@@ -147,7 +147,6 @@ class Capture(threading.Thread, CaptureAPI):
             pass
 
     def toggle_mask(self, onoff):
-        with self._setting_lock:
             self._show_mask = onoff
 
     def start_capture(self, callback):
@@ -165,12 +164,6 @@ class Capture(threading.Thread, CaptureAPI):
     def _draw_center_line(self, frame, color=(255, 255, 255), width=1):
         cv2.line(frame, (self._center, 0), (self._center, frame.shape[0]), color, width)
         return frame
-
-    def show_range(self, low_RGB, high_RGB):
-        self._lower_range = np.array([int(min(low_RGB[2], high_RGB[2]) * 255), int(min(low_RGB[1], high_RGB[1]) * 255), int(min(low_RGB[0], high_RGB[0]) * 255)], dtype='uint8')
-        self.detector.lo_range_bgr = (int(min(low_RGB[2], high_RGB[2]) * 255), int(min(low_RGB[1], high_RGB[1]) * 255), int(min(low_RGB[0], high_RGB[0]) * 255))
-        self._upper_range = np.array([int(max(low_RGB[2], high_RGB[2]) * 255), int(max(low_RGB[1], high_RGB[1]) * 255), int(max(low_RGB[0], high_RGB[0]) * 255)], dtype='uint8')
-        self.detector.hi_range_bgr = (int(max(low_RGB[2], high_RGB[2]) * 255), int(max(low_RGB[1], high_RGB[1]) * 255), int(max(low_RGB[0], high_RGB[0]) * 255))
 
     def _draw_bounding_box(self, frame, tl, lr, color=(0, 0, 255), thickness=2):
         cv2.line(frame, (tl[0], tl[1]), (lr[0], tl[1]), color, thickness)
@@ -231,20 +224,20 @@ class Capture(threading.Thread, CaptureAPI):
                 fps.append(1.0 / (time.time() - start))
                 fps = fps[-10:]
                 start = time.time()
-                ret, original = self._cap.read()
-                frame = original
+                ret, frame = self._cap.read()
 
-                self.encoder.process(original)
-                self.detector.process(original, self._roi)
+                self.encoder.process(frame)
+                self.detector.process(frame, self._roi)
 
                 if self._capturing:
-                    self._start_capture(original)
+                    self._start_capture(frame)
 
                 if self._get_drag and self._dragging:
                     self._draw_bounding_box(frame, self._drag_start, self._mouse_pos)
 
                 frame = self._roi.overlay(frame)
-                frame = self.detector.overlay_mask(frame)
+                if self._show_mask:
+                    frame = self.detector.overlay_mask(frame)
                 frame = self._draw_center_line(frame)
                 frame = self.encoder.overlay_encoder(frame)
                 frame = self.encoder.overlay_history(frame)
