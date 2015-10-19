@@ -11,130 +11,86 @@ from infrastructure.encoder import Encoder
 
 
 class EncoderTest(unittest.TestCase):
-    def test_degrees_starts_at_0(self):
-        encoder = Encoder()
-        self.assertEqual(0.0, encoder.degrees)
 
     def test_process_given_alternating_BW_adds_expected_degrees(self):
         blackimage = np.zeros((100, 100, 3), dtype='uint8')
         whiteimage = np.ones((100, 100, 3), dtype='uint8') * 255
-        expected_degrees = 4.0
+        expected = [1, 1, 1, 1]
         encoder = Encoder()
 
-        for image in [whiteimage, blackimage, whiteimage, blackimage, ]:
-            encoder.process(image)
+        actual = [encoder.process(image) for image in [whiteimage, blackimage, whiteimage, blackimage, ]]
 
-        self.assertEqual(expected_degrees, encoder.degrees)
+        self.assertEqual(expected, actual)
 
-    def test_degress_increments_set_amount(self):
+    def test_process_given_alternating_BW_counts_only_on_change(self):
         blackimage = np.zeros((100, 100, 3), dtype='uint8')
         whiteimage = np.ones((100, 100, 3), dtype='uint8') * 255
-        expected_degrees = 8.0
-        encoder = Encoder(sections=180)
-
-        for image in [whiteimage, blackimage, whiteimage, blackimage, ]:
-            encoder.process(image)
-
-        self.assertEqual(expected_degrees, encoder.degrees)
-
-    def test_degress_increments_set_amount_and_does_not_exceed_360(self):
-        blackimage = np.zeros((100, 100, 3), dtype='uint8')
-        whiteimage = np.ones((100, 100, 3), dtype='uint8') * 255
-        expected_degrees = 359.0
-        encoder = Encoder(sections=360)
-
-        for image in range(0, 720):
-            encoder.process(blackimage)
-            encoder.process(whiteimage)
-
-        self.assertEqual(expected_degrees, encoder.degrees)
-
-    def test_points_increments_set_amount(self):
-        blackimage = np.zeros((100, 100, 3), dtype='uint8')
-        whiteimage = np.ones((100, 100, 3), dtype='uint8') * 255
-        expected_degrees = 8.0
-        encoder = Encoder(sections=180)
-
-        for image in [whiteimage, blackimage, whiteimage, blackimage, ]:
-            encoder.process(image)
-
-        self.assertEqual(expected_degrees, encoder.degrees)
-
-    def test_process_given_alternating_BW_adds_expected_degrees_only_on_change(self):
-        blackimage = np.zeros((100, 100, 3), dtype='uint8')
-        whiteimage = np.ones((100, 100, 3), dtype='uint8') * 255
-        expected_degrees = 2.0
+        expected = [1, 0, 1, 0]
         encoder = Encoder()
 
-        for image in [whiteimage, whiteimage, blackimage, blackimage]:
-            encoder.process(image)
+        actual = [encoder.process(image) for image in [whiteimage, whiteimage, blackimage, blackimage]]
 
-        self.assertEqual(expected_degrees, encoder.degrees)
+        self.assertEqual(expected, actual)
 
-    def test_process_given_alternating_BW_adds_expected_degrees_at_specific_point(self):
+    def test_process_given_alternating_BW_counts_at_specific_point(self):
         blackimage = np.zeros((100, 100, 3), dtype='uint8')
         whiteimage = np.zeros((100, 100, 3), dtype='uint8')
         whiteimage[4][4] = [255, 255, 255]
-        expected_degrees = 4.0
+        expected = [1, 1, 1, 1]
         encoder = Encoder(point=[4, 4])
 
-        for image in [whiteimage, blackimage, whiteimage, blackimage, ]:
-            encoder.process(image)
+        actual = [encoder.process(image) for image in [whiteimage, blackimage, whiteimage, blackimage, ]]
 
-        self.assertEqual(expected_degrees, encoder.degrees)
+        self.assertEqual(expected, actual)
 
     def test_point_sets_point(self):
         blackimage = np.zeros((100, 100, 3), dtype='uint8')
         whiteimage = np.zeros((100, 100, 3), dtype='uint8')
         whiteimage[4][4] = [255, 255, 255]
-        expected_degrees = 4.0
+        expected = [1, 1, 1, 1]
         encoder = Encoder(point=[0, 0])
         encoder.point = [4, 4]
 
-        for image in [whiteimage, blackimage, whiteimage, blackimage, ]:
-            encoder.process(image)
+        actual = [encoder.process(image) for image in [whiteimage, blackimage, whiteimage, blackimage, ]]
 
-        self.assertEqual(expected_degrees, encoder.degrees)
+        self.assertEqual(expected, actual)
 
     def test_point_sets_point_if_diffrent_xy(self):
         blackimage = np.zeros((100, 100, 3), dtype='uint8')
         whiteimage = np.zeros((100, 100, 3), dtype='uint8')
         whiteimage[8][4] = [255, 255, 255]
-        expected_degrees = 4.0
+        expected = [1, 1, 1, 1]
         encoder = Encoder(point=[0, 0])
         encoder.point = [4, 8]
 
-        for image in [whiteimage, blackimage, whiteimage, blackimage, ]:
-            encoder.process(image)
+        actual = [encoder.process(image) for image in [whiteimage, blackimage, whiteimage, blackimage, ]]
 
-        self.assertEqual(expected_degrees, encoder.degrees)
+        self.assertEqual(expected, actual)
 
     def test_process_given_alternating_BW_adds_expected_degrees_within_threshold(self):
         blackimage = np.ones((100, 100, 3), dtype='uint8') * 100
         nullimage = np.ones((100, 100, 3), dtype='uint8') * 150
         whiteimage = np.ones((100, 100, 3), dtype='uint8') * 200
-        expected_degrees = 4.0
+        expected = [1, 0, 1, 0, 0, 1, 0, 1]
         encoder = Encoder(threshold=450, null_zone=50)
 
-        for image in [whiteimage, nullimage, blackimage, nullimage, nullimage,  whiteimage, nullimage, blackimage, ]:
-            encoder.process(image)
+        actual = [encoder.process(image) for image in [whiteimage, nullimage, blackimage, nullimage, nullimage,  whiteimage, nullimage, blackimage, ]]
 
-        self.assertEqual(expected_degrees, encoder.degrees)
+        self.assertEqual(expected, actual)
 
     def test_thrshold_changes_threshold(self):
         blackimage = np.ones((100, 100, 3), dtype='uint8') * 100
         nullimage = np.ones((100, 100, 3), dtype='uint8') * 150
         whiteimage = np.ones((100, 100, 3), dtype='uint8') * 200
-        expected_degrees = 4.0
+        expected = [1, 0, 1, 0, 0, 1, 0, 1]
         encoder = Encoder(threshold=382, null_zone=382)
 
         encoder.threshold = 450
         encoder.null_zone = 50
 
-        for image in [whiteimage, nullimage, blackimage, nullimage, nullimage,  whiteimage, nullimage, blackimage, ]:
-            encoder.process(image)
+        actual = [encoder.process(image) for image in [whiteimage, nullimage, blackimage, nullimage, nullimage,  whiteimage, nullimage, blackimage, ]]
 
-        self.assertEqual(expected_degrees, encoder.degrees)
+        self.assertEqual(expected, actual)
 
     def test_overlay_places_encoder_indicator_correct_place(self):
         blackimage = np.zeros((100, 100, 3), dtype='uint8')
@@ -203,10 +159,6 @@ class EncoderTest(unittest.TestCase):
         self.assertTrue((resulting_image[255-200][8] == [0, 255, 0]).all())
         self.assertTrue((resulting_image[255-200][9] == [0, 255, 0]).all())
         self.assertFalse((resulting_image[255-201][9] == [0, 255, 0]).all())
-
-    def test_total_sections_returns_the_correct_number_of_points_for_complete_rotation(self):
-        encoder = Encoder(sections=200)
-        self.assertEqual(200, encoder.sections_per_rotation)
 
 
 if __name__ == '__main__':

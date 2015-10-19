@@ -15,8 +15,8 @@ from infrastructure.roi import ROI
 from infrastructure.capture import PointCapture, ImageCapture
 
 
-class PointCaptureTest(unittest.TestCase):
-    pass
+# class PointCaptureTest(unittest.TestCase):
+#     pass
 
 
 class ImageCaptureTest(unittest.TestCase):

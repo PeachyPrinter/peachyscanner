@@ -19,7 +19,6 @@ class CaptureAPI(object):
     def __init__(self):
         self.ENCODER_SECTIONS = 200
         self.encoder = Encoder(
-                 sections=self.ENCODER_SECTIONS,
                  point=(0, 0),
                  threshold=382,
                  null_zone=382,
@@ -96,6 +95,9 @@ class CaptureAPI(object):
         if self._roi_callback:
             self._roi_callback(self.roi)
 
+    def TTTT_start_capturing_image(self):
+        raise Exception()
+
 class Capture(threading.Thread, CaptureAPI):
     def __init__(self, status):
         threading.Thread.__init__(self)
@@ -130,6 +132,7 @@ class Capture(threading.Thread, CaptureAPI):
         self._capture_file = 'ImageMesh'
         self._frames_aquired = 0
         self._last_degrees = 0
+        self._new_section = False
 
     def _clicky(self, event, x, y, flags, param):
         self._mouse_pos = (x, y)
@@ -176,10 +179,8 @@ class Capture(threading.Thread, CaptureAPI):
             logger.info("Capture Init")
             self._status.operation = "Capturing Points"
             self._status.progress = 0.0
-            self._last_degrees = self.encoder.degrees - 90.0
             
             self._frames_aquired = 0
-            logger.info("Starting at {}".format(self.encoder.degrees))
             self._capture_image = np.empty((self.ENCODER_SECTIONS, self._roi.h, 3))
             self._capture_points = np.zeros((self.ENCODER_SECTIONS, self._roi.h))
             logger.info("output array: {}".format(self._capture_image.shape))
@@ -196,11 +197,10 @@ class Capture(threading.Thread, CaptureAPI):
                     self._ply_writer.write_polar_points(outfile, self._capture_points)
                 self._capture_image = None
                 self._capturing = False
-                self._last_degrees = False
                 if self._capturing_callback:
                     self._capturing_callback(self._capture_file)
                 return
-        if self._last_degrees != self.encoder.degrees:
+        if self._new_section:
             roi = frame[self._roi.y:self._roi.y + self._roi.h, self._center]
             self._capture_image[self._frames_aquired] = roi
             self._capture_points[self._frames_aquired] = self.detector.points(frame)
@@ -208,7 +208,6 @@ class Capture(threading.Thread, CaptureAPI):
             self._status.progress = self._frames_aquired / float(self.ENCODER_SECTIONS)
             self._status.points = self._capture_points
             self._frames_aquired += 1
-            self._last_degrees = self.encoder.degrees
 
     def run(self):
         cv2.namedWindow('frame', cv2.WINDOW_AUTOSIZE)
@@ -226,7 +225,7 @@ class Capture(threading.Thread, CaptureAPI):
                 start = time.time()
                 ret, frame = self._cap.read()
 
-                self.encoder.process(frame)
+                self._new_section = self.encoder.process(frame)
                 self.detector.process(frame, self._roi)
 
                 if self._capturing:
@@ -245,7 +244,6 @@ class Capture(threading.Thread, CaptureAPI):
                 self._frame = frame
 
                 cv2.putText(self._frame, "fps: {:.2f}".format(sum(fps) / float(len(fps))), (5, 20), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 255, 0), 2)
-                cv2.putText(self._frame, "Deg: {}".format(self.encoder.degrees), (5, 40), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 255, 0), 2)
                 cv2.imshow('frame', self._frame)
 
                 key = chr(cv2.waitKey(1) & 0xFF)
