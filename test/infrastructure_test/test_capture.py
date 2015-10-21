@@ -10,13 +10,11 @@ from mock import Mock
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
-from infrastructure.detector import Detector
-from infrastructure.roi import ROI
-from infrastructure.capture import PointCapture, ImageCapture
+from infrastructure.capture import PointsCapture, ImageCapture
 
 
-# class PointCaptureTest(unittest.TestCase):
-#     pass
+class PointCaptureTest(unittest.TestCase):
+    pass
 
 
 class ImageCaptureTest(unittest.TestCase):

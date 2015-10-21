@@ -26,7 +26,7 @@ class CaptureControl(Screen):
         self._converter = GLConverter()
         self.raw_points = np.array([])
 
-    def start_capture(self):
+    def start_points_capture(self):
         self._disable_all()
         App.get_running_app().capture.start_capture(self._capture_callback)
 
@@ -61,7 +61,7 @@ class ObjectRenderer(Widget):
         self.canvas = RenderContext(compute_normal_mat=True)
         self.canvas.shader.source = resource_find('simple.glsl')
         self.mesh_data = MeshData()
-        self.mesh_data.vertices = np.array([0,0,0,0,0,0,0,0])
+        self.mesh_data.vertices = np.array([0, 0, 0, 0, 0, 0, 0, 0])
         self.mesh_data.indices = np.array([0])
         super(ObjectRenderer, self).__init__(**kwargs)
         with self.canvas:

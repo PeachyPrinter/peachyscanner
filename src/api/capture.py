@@ -95,9 +95,6 @@ class CaptureAPI(object):
         if self._roi_callback:
             self._roi_callback(self.roi)
 
-    def TTTT_start_capturing_image(self):
-        raise Exception()
-
 class Capture(threading.Thread, CaptureAPI):
     def __init__(self, status):
         threading.Thread.__init__(self)

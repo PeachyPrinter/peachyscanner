@@ -9,9 +9,9 @@ setup(name='PeachyScanner',
       author='Peachy Printer Inc.',
       author_email='development@peachyprinter.com',
       url='www.peachyprinter.com',
-      packages=['numpy'],
+      packages=[],
       py_modules=['VERSION'],
-      install_requires=[],
+      install_requires=['numpy', 'kivy'],
       data_files=[],
-      include_package_data = True
+      include_package_data=True
      )
