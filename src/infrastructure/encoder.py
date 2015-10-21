@@ -9,7 +9,8 @@ class Encoder(object):
                  point=(0, 0),
                  threshold=382,
                  null_zone=382,
-                 history_length=20
+                 history_length=20,
+                 sections=1
                  ):
         self.threshold = threshold
         self.null_zone = null_zone
@@ -24,11 +25,20 @@ class Encoder(object):
         self._color_bgr = self.ENCODER_COLOR_LOW_BGR
         self._is_high = False
         self._history = []
+        self.position = 0
+        self.sections = sections
 
     @property
     def current_sections(self):
         return self._changes
-    
+
+    def should_capture_frame_at_index(self, image):
+        if self.process(image):
+            self.position = (self.position + 1) % self.sections
+            return (True, self.position)
+        else:
+            return (False, self.position)
+
 
     def process(self, image):
         point = image[self.point[1]][self.point[0]]
