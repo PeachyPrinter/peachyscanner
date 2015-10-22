@@ -138,6 +138,17 @@ class VideoProcessorTest(unittest.TestCase):
         self.assertEquals(len(subscriber.calls), 1)
         self.assertFalse(subscriber in video_processor.handlers)
 
+    def test_subscribe_with_callback_calls_callback_with_handler(self):
+        video_processor = self.create_video_processor()
+        self.encoder.should_capture_frame_for_section.return_value = (True, 44)
+        subscriber = TestHandler()
+        callback = Mock()
+        video_processor.subscribe(subscriber, callback)
+        video_processor.start()
+        time.sleep(0.1)
+        video_processor.stop()
+        self.assertEquals(subscriber, callback.call_args[0][0])
+
     # def test_make_it_go(self):
     #     camera = FakeCamera()
     #     while(True):
