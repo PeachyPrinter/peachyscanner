@@ -11,7 +11,7 @@ import cv2
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
-from api.capture2 import PointsCapture, ImageCapture
+from infrastructure.data_capture import PointsCapture, ImageCapture
 from helpers import FakeCamera
 
 
@@ -66,13 +66,24 @@ class ImageCaptureTest(unittest.TestCase):
 
         self.assertTrue((image_capture.image == expected).all())
 
-    def test_camera_displays_image(self):
-        camera = FakeCamera()
-        while True:
-            cv2.imshow('frame', camera.read())
-            key = chr(cv2.waitKey(1) & 0xFF)
-            if key == 'q':
-                break
+    def test_handle_should_return_false_given_all_sections_have_been_captured(self):
+        sections = 5
+        frame = np.ones((100, 130, 3), dtype='uint8') * 128
+        image_capture = ImageCapture(sections)
+        results = [image_capture.handle(frame, section) for section in range(5)]
+        self.assertEquals(5, len(results))
+        self.assertTrue(results[3])
+        self.assertFalse(results[4])
+
+
+
+   # def test_camera_displays_image(self):
+   #     camera = FakeCamera()
+   #     while True:
+   #         cv2.imshow('frame', camera.read())
+   #         key = chr(cv2.waitKey(1) & 0xFF)
+   #         if key == 'q':
+   #             break
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level='INFO')

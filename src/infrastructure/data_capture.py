@@ -3,10 +3,13 @@ class ImageCapture(object):
 
     def __init__(self, sections):
         self.sections = sections
+        self._section_count = 0
         self.image = None
 
     def handle(self, frame=None, section=0):
+        self._section_count += 1
         self._image(frame.shape[0])[:,section] = frame[:,-1]
+        return self._section_count < self.sections
 
     def _image(self, y_axis_dimension):
         if self.image is None:
