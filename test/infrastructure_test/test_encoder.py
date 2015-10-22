@@ -73,19 +73,19 @@ class EncoderTest(unittest.TestCase):
 
         self.assertEqual(expected, actual)
 
-    def test_should_capture_frame_at_index_returns_true_and_current_index_given_change_detected(self):
+    def test_should_capture_frame_for_section_returns_true_and_current_index_given_change_detected(self):
         encoder = Encoder(threshold=450, null_zone=50)
-        should_capture, idx = encoder.should_capture_frame_at_index(self.whiteimage)
+        should_capture, idx = encoder.should_capture_frame_for_section(self.whiteimage)
 
         self.assertTrue(should_capture)
-        should_capture, idx = encoder.should_capture_frame_at_index(self.whiteimage)
+        should_capture, idx = encoder.should_capture_frame_for_section(self.whiteimage)
         self.assertFalse(should_capture)
 
-    def test_should_capture_frame_at_index_should_reset_to_zero_if_number_of_sections_exceeds_total_sections(self):
+    def test_should_capture_frame_for_section_should_reset_to_zero_if_number_of_sections_exceeds_total_sections(self):
         encoder = Encoder(threshold=450, null_zone=50, sections=2)
-        encoder.should_capture_frame_at_index(self.blackimage)
-        encoder.should_capture_frame_at_index(self.whiteimage)
-        retVal, rotation = encoder.should_capture_frame_at_index(self.blackimage)
+        encoder.should_capture_frame_for_section(self.blackimage)
+        encoder.should_capture_frame_for_section(self.whiteimage)
+        retVal, rotation = encoder.should_capture_frame_for_section(self.blackimage)
 
         self.assertTrue(retVal)
         self.assertEqual(0, rotation)

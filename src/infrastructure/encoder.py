@@ -32,13 +32,12 @@ class Encoder(object):
     def current_sections(self):
         return self._changes
 
-    def should_capture_frame_at_index(self, image):
+    def should_capture_frame_for_section(self, image):
         if self.process(image):
             self.position = (self.position + 1) % self.sections
             return (True, self.position)
         else:
             return (False, self.position)
-
 
     def process(self, image):
         point = image[self.point[1]][self.point[0]]

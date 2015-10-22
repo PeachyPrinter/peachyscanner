@@ -24,13 +24,14 @@ class FakeCamera(object):
             self.image = image
         else:
             path = os.path.dirname(__file__)
-            print (os.path.join(path, file_image))
             image = cv2.imread(os.path.join(path, file_image))
             self.image = image
         self.calls = -1
 
     def read(self):
         self.calls += 1
-        idx = self.calls % self.image.shape[0]
+        a = self.image[:, -1]
+        b = self.image[:, 1:]
+        self.image[:,0] = a
+        self.image[:,1:] = b
         return self.image
-        # return cv2.warpAffine(self.image, np.array([[1,0,idx], [0,1,0]]), tuple(self.image.shape[:2]))
