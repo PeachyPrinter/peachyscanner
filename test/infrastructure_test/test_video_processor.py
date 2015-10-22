@@ -39,11 +39,9 @@ class VideoProcessorTest(unittest.TestCase):
         if roi:
             self.roi = roi
         else:
-            self.roi = ROI(10, 50, x_center + 1, 20, self.camera.image)
-        video_processor = VideoProcessor(self.camera, self.encoder)
-        video_processor.roi = self.roi
-        return video_processor
-
+            self.roi = ROI(10, 50, x_center + 1, 20, self.camera.image.shape)
+        return VideoProcessor(self.camera, self.encoder, self.roi)
+        
     def test_video_processor_starts_and_stops_given_shutdown_set_to_true(self):
         video_processor = self.create_video_processor()
         video_processor.start()

@@ -2,20 +2,21 @@ import threading
 
 
 class VideoProcessor(threading.Thread):
-    def __init__(self, camera, encoder):
+    def __init__(self, camera, encoder, roi):
         threading.Thread.__init__(self)
         self.camera = camera
         self.running = False
         self.handlers = []
         self.encoder = encoder
+        self.roi = roi
 
     def run(self):
         self.running = True
         while (self.running):
             frame = self.camera.read()
-            for handler in self.handlers:
-                should_capture, section = self.encoder.should_capture_frame_for_section(frame)
-                if should_capture:
+            should_capture, section = self.encoder.should_capture_frame_for_section(frame)
+            if should_capture:
+                for handler in self.handlers:
                     roi = self.roi.get_left_of_center(frame)
                     if not handler.handle(frame=roi, section=section):
                         self.unsubscribe(handler)

@@ -4,6 +4,10 @@ from threading import Lock
 
 logger = logging.getLogger('peachy')
 
+class Camera(object):
+    def read():
+        raise Exception("Not implemented")
+
 class CameraControl(object):
     def __init__(self):
         self._lock = Lock()
