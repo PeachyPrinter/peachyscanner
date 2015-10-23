@@ -2,6 +2,7 @@ import unittest
 import sys
 import os
 import logging
+import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
@@ -77,10 +78,96 @@ class ScannerAPITest(TestHelpers):
         cam = mock_camera.return_value
         cam.shape = [300, 100]
         api = ScannerAPI()
+        api.capture_image()
+        self.assertTrue(len(api.video_processor.handlers) > 0)
+        self.assertTrue(hasattr(api.video_processor.handlers[0][0], 'handle'))
+
+    @patch('api.scanner.Camera')
+    def test_capture_image_should_subscribe_with_expected_callback(self, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+        api = ScannerAPI()
         callback = Mock()
         api.capture_image(callback)
         self.assertTrue(len(api.video_processor.handlers) > 0)
-        self.assertTrue(hasattr(api.video_processor.handlers[0], 'handle'))
+        self.assertEqual(api.video_processor.handlers[0][1], callback)
+
+    @patch('api.scanner.Camera')
+    @patch('api.scanner.VideoProcessor')
+    def test_start_starts_the_camera_and_video_processor(self, mock_video_processor, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+        video = mock_video_processor.return_value
+        api = ScannerAPI()
+        api.start()
+        cam.start.assert_called_once_with()
+        video.start.assert_called_once_with()
+
+    @patch('api.scanner.Camera')
+    @patch('api.scanner.VideoProcessor')
+    def test_stop_stops_the_camera_and_video_processor(self, mock_video_processor, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+        video = mock_video_processor.return_value
+        api = ScannerAPI()
+        api.start()
+        api.stop()
+        cam.stop.assert_called_once_with()
+        video.stop.assert_called_once_with()
+
+    @patch('api.scanner.Camera')
+    @patch('api.scanner.VideoProcessor')
+    def test_stop_stops_the_video_processor_first(self, mock_video_processor, mock_camera):
+        global stop_time_camera
+        global stop_time_video
+        stop_time_camera = 0    
+        stop_time_video = 0
+        
+        def stop_camera():
+            global stop_time_camera
+            stop_time_camera = time.time()
+            time.sleep(0.01)
+
+        def stop_video():
+            global stop_time_video
+            stop_time_video = time.time()
+            time.sleep(0.01)
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+        cam.stop.side_effect = stop_camera
+        video = mock_video_processor.return_value
+        video.stop.side_effect = stop_video
+        api = ScannerAPI()
+        api.start()
+        api.stop()
+        self.assertTrue(stop_time_video < stop_time_camera, '{} !< {}'.format(stop_time_video, stop_time_camera))
+
+    @patch('api.scanner.Camera')
+    @patch('api.scanner.VideoProcessor')
+    def test_start_starts_the_camera_first(self, mock_video_processor, mock_camera):
+        global start_time_camera
+        global start_time_video
+        start_time_camera = 0
+        start_time_video = 0
+
+        def start_camera():
+            global start_time_camera
+            start_time_camera = time.time()
+            time.sleep(0.01)
+
+        def start_video():
+            global start_time_video
+            start_time_video = time.time()
+            time.sleep(0.01)
+
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+        cam.start.side_effect = start_camera
+        video = mock_video_processor.return_value
+        video.start.side_effect = start_video
+        api = ScannerAPI()
+        api.start()
+        self.assertTrue(start_time_video > start_time_camera, '{} !> {}'.format(start_time_video, start_time_camera))
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level='INFO')

@@ -8,6 +8,12 @@ class Camera(object):
     def read():
         raise Exception("Not implemented")
 
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
+
 class CameraControl(object):
     def __init__(self):
         self._lock = Lock()
