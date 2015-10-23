@@ -1,12 +1,12 @@
 import unittest
 import cv2
 import os
-import numpy as np
+
 
 class TestHelpers(unittest.TestCase):
     def assertListAlmostEqual(self, list1, list2, decimals=None, msg=None):
         if not msg:
-            new_msg = '{} did not almost equal {}'.format(list1,list2)
+            new_msg = '{} did not almost equal {}'.format(list1, list2)
         else:
             new_msg = msg
         self.assertEqual(len(list1), len(list2), new_msg)
@@ -24,8 +24,8 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(roi1.h, roi2.h)
         self.assertEqual(roi1.frame_shape, roi2.frame_shape)
 
-class FakeCamera(object):
 
+class FakeCamera(object):
     def __init__(self, image=None, file_image='fake_image.png'):
         if image is not None:
             self.image = image
@@ -39,6 +39,6 @@ class FakeCamera(object):
         self.calls += 1
         a = self.image[:, -1]
         b = self.image[:, 1:]
-        self.image[:,0] = a
-        self.image[:,1:] = b
+        self.image[:, 0] = a
+        self.image[:, 1:] = b
         return self.image

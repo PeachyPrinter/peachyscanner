@@ -6,7 +6,7 @@ import time
 from infrastructure.roi import ROI
 from infrastructure.encoder import Encoder
 
-from camera_control import Camera
+from infrastructure.camera import Camera
 from infrastructure.video_processor import VideoProcessor
 from infrastructure.data_capture import ImageCapture
 
@@ -17,6 +17,7 @@ class ScannerAPI(object):
 
     def __init__(self):
         self.camera = Camera()
+        self.camera.start()
         self._default_roi = ROI.set_from_points((0, 0), (self.camera.shape[0], self.camera.shape[1]), self.camera.shape)
         self._default_encoder = Encoder((self.camera.shape[0] / 3, self.camera.shape[1] / 2), 382, 100, 20, 200)
 
@@ -40,7 +41,6 @@ class ScannerAPI(object):
         self.video_processor.encoder = self.encoder
 
     def start(self):
-        self.camera.start()
         self.video_processor.start()
 
     def stop(self):
