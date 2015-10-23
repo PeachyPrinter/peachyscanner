@@ -9,10 +9,10 @@ class Camera(object):
         raise Exception("Not implemented")
 
     def start(self):
-        pass
+        raise Exception("Not implemented")
 
     def stop(self):
-        pass
+        raise Exception("Not implemented")
 
 class CameraControl(object):
     def __init__(self):
