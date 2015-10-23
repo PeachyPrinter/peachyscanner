@@ -15,16 +15,34 @@ from infrastructure.camera import Camera
 
 @patch('infrastructure.camera.VideoCapture')
 class CameraTest(unittest.TestCase):
-    def test_read_should_raise_exception_when_camera_not_started(self, mock_video_capture):
+    def test_read_should_raise_exception_when_camera_not_started(self, mock_VideoCapture):
         camera = Camera()
         with self.assertRaises(Exception):
             camera.read()
 
-    def test_start_should_start_cv_videoCapture(self, mock_video_capture):
+    def test_start_should_start_cv_videoCapture(self, mock_VideoCapture):
         camera = Camera()
         camera.start()
-        mock_video_capture.assert_called_once_with()
+        mock_VideoCapture.assert_called_once_with()
 
+    def test_stop_should_stop_cv_videoCapture(self, mock_VideoCapture):
+        camera = Camera()
+        camera.start()
+        camera.stop()
+        mock_video_capture = mock_VideoCapture.return_value
+        mock_video_capture.release.assert_called_once_with()
+
+    def test_read_should_return_image_if_camera_running(self, mock_VideoCapture):
+        expected_image = 'I am an image'
+        camera = Camera()
+        mock_video_capture = mock_VideoCapture.return_value
+        mock_video_capture.read.return_value = expected_image
+
+        camera.start()
+        actual_image = camera.read()
+        camera.stop()
+
+        self.assertEqual(expected_image, actual_image)
 
 
 if __name__ == '__main__':
