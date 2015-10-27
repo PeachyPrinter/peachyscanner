@@ -169,7 +169,6 @@ class ScannerAPITest(TestHelpers):
         api.start()
         self.assertTrue(start_time_video > start_time_camera, '{} !> {}'.format(start_time_video, start_time_camera))
 
-
     @patch('api.scanner.Camera')
     @patch('api.scanner.VideoProcessor')
     def test_get_feed_image_gets_image_from_feed(self, mock_video_processor, mock_camera):
