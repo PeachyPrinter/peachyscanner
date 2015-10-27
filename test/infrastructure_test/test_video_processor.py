@@ -178,7 +178,15 @@ class VideoProcessorTest(unittest.TestCase):
 
         self.assertEquals('KAWABUNGA', image['encoder'])
         
+    def test_get_bounded_image_gets_a_scaled_version_of_the_lastest_encoder_history(self):
+        video_processor = self.create_video_processor()
+        self.encoder.overlay_history.return_value = 'KAWABUNGA'
+        video_processor.start()
+        time.sleep(self.start_up_delay)
+        image = video_processor.get_bounded_image(400, 200)
+        video_processor.stop()
 
+        self.assertEquals('KAWABUNGA', image['history'])
 
     # def test_make_it_go(self):
     #     camera = FakeCamera()

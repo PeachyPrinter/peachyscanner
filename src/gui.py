@@ -7,7 +7,7 @@ from kivy.uix.screenmanager import ScreenManager
 from kivy.uix.boxlayout import BoxLayout
 from kivy.core.window import Window
 from kivy.metrics import dp
-from kivy.properties import NumericProperty, ObjectProperty
+from kivy.properties import NumericProperty, ObjectProperty, ListProperty
 from kivy.resources import resource_add_path
 from kivy.logger import Logger
 
@@ -28,11 +28,11 @@ class MyScreenManager(ScreenManager):
     def __init__(self, scanner, **kwargs):
         super(MyScreenManager, self).__init__(**kwargs)
         self.camera_control_ui = CameraControls(scanner.camera)
-        # self.posisition_control_ui = PositionControl()
+        self.posisition_control_ui = PositionControl(scanner)
         # self.laser_detection_ui = LaserDetection()
         # self.capture_control_ui = CaptureControl()
         self.add_widget(self.camera_control_ui)
-        # self.add_widget(self.posisition_control_ui)
+        self.add_widget(self.posisition_control_ui)
         # self.add_widget(self.laser_detection_ui)
         # self.add_widget(self.capture_control_ui)
         self.current = 'camera_control_ui'
@@ -52,6 +52,8 @@ class PeachyScannerApp(App):
     refresh_rate = NumericProperty(1.0 / 30.0)
     Config = ConfigParser(name='PeachyScanner')
     scanner = ObjectProperty()
+    video_pos = ListProperty()
+    video_size = ListProperty()
 
     def __init__(self, scanner, **kwargs):
         Window.size = (1024, 500)

@@ -6,6 +6,7 @@ from kivy.logger import Logger
 from kivy.lang import Builder
 from kivy.clock import Clock
 from kivy.properties import NumericProperty, ObjectProperty, StringProperty
+from kivy.core.window import Window
 
 import json
 
@@ -15,12 +16,14 @@ Builder.load_file('ui/posisition.kv')
 
 
 class PositionControl(Screen):
-    capture = ObjectProperty()
-
-    def __init__(self, **kwargs):
+    def __init__(self, scanner, **kwargs):
         super(PositionControl, self).__init__(**kwargs)
         Config.adddefaultsection('posisition')
-        Clock.schedule_once(self._post_init)
+        Window.bind(on_motion=self.on_motion)
+        # Clock.schedule_once(self._post_init)
+        self.scanner = scanner
+        self._encoder_point = (0, 0)
+        self._selecting_encoder = True
 
     def _post_init(self, instance):
         self._load_saved_settings()
@@ -53,12 +56,17 @@ class PositionControl(Screen):
 
     def select_encoder(self):
         self._disable_all()
-        self.capture.select_encoder(self._encoder_call_back)
+        self._selecting_encoder = True
 
-    def _encoder_call_back(self, encoder_pos):
+    def _encoder_selected(self, encoder_pos):
+        self._encoder_point = encoder_pos
+        Logger.info('Encoder point set at: {}'.format(str(encoder_pos)))
+        self._configure_encoder()
+        self._selecting_encoder = False
         self._enable_all()
-        Logger.info('Found Encoder: {}'.format(encoder_pos))
-        Config.set('posisition', 'encoder_point', json.dumps(encoder_pos))
+
+    def _configure_encoder(self):
+        self.scanner.configure_encoder(self._encoder_point, 500, 100, 100)
 
     def select_roi(self):
         self._disable_all()
@@ -90,3 +98,15 @@ class PositionControl(Screen):
     def _enable_all(self):
         for child in self.children:
             child.disabled = False
+
+    def on_motion(self, instance, etype, motionevent):
+        if etype == 'end':
+            if self._selecting_encoder:
+                video_pos = App.get_running_app().video_pos
+                video_size = App.get_running_app().video_size
+                x = motionevent.pos[0] - video_pos[0]
+                y = motionevent.pos[1] - video_pos[1]
+                if (x >= 0 and x < video_size[0]) and (y >= 0 and y < video_size[1]):
+                    self._encoder_selected((x / video_size[0], 1.0 - (y / video_size[1])))
+                else:
+                    pass

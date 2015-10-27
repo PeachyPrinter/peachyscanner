@@ -19,7 +19,7 @@ class ScannerAPI(object):
         self.camera = Camera()
         self.camera.start()
         self._default_roi = ROI.set_from_points((0, 0), (self.camera.shape[0], self.camera.shape[1]), self.camera.shape)
-        self._default_encoder = Encoder((self.camera.shape[0] / 3, self.camera.shape[1] / 2), 382, 100, 20, 200)
+        self._default_encoder = Encoder((0.2, 0.2), 382, 100, 20, 200)
 
         self.encoder = self._default_encoder
         self.roi = self._default_roi

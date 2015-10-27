@@ -14,7 +14,6 @@ class Encoder(object):
                  ):
         self.threshold = threshold
         self.null_zone = null_zone
-        self.point = tuple(point)
         self.ENCODER_COLOR_LOW_BGR =  (0,   0,   255)
         self.ENCODER_COLOR_HIGH_BGR = (0,   255, 0  )
         self.ENCODER_COLOR_NULL_BGR = (0,   255, 255)
@@ -27,7 +26,7 @@ class Encoder(object):
         self._history = []
         self.position = 0
         self.sections = sections
-        self.relitive_point = (1, 1)
+        self.relitive_point_xy = point
 
     @property
     def current_sections(self):
@@ -41,8 +40,9 @@ class Encoder(object):
             return (False, self.position)
 
     def process(self, image):
-        point = image[self.point[1]][self.point[0]]
-        self.relitive_point = (self.point[1] / float(image.shape[1]), self.point[0] / float(image.shape[0]))
+        absolute_point_xy = (int(image.shape[1] * self.relitive_point_xy[0]), int(image.shape[0] * self.relitive_point_xy[1]))
+        logger.info('(x%,y%)-{} --> (xpx,ypx)-{}'.format(str(self.relitive_point_xy), str(absolute_point_xy)))
+        point = image[absolute_point_xy[1], absolute_point_xy[0]]
         value = np.sum(point)
         self._history.append(value)
         self._history = self._history[-self.history_length:]
@@ -62,7 +62,7 @@ class Encoder(object):
 
     def overlay_encoder(self, image):
         mask = np.zeros(image.shape, dtype='uint8')
-        ep = (int(self.relitive_point[1] * image.shape[1]), int(self.relitive_point[0] * image.shape[0]))
+        ep = (int(self.relitive_point_xy[0] * image.shape[1]), int(self.relitive_point_xy[1] * image.shape[0]))
         mask = cv2.circle(mask, ep, 3, self._color_bgr, 1)
         mask = cv2.line(mask, (ep[0] + 3, ep[1]), (ep[0] + 6, ep[1]), self._color_bgr, 1)
         mask = cv2.line(mask, (ep[0] - 3, ep[1]), (ep[0] - 6, ep[1]), self._color_bgr, 1)
@@ -71,17 +71,18 @@ class Encoder(object):
         return mask
 
     def overlay_history(self, image):
+        mask = np.zeros(image.shape, dtype='uint8')
         for idx in range(len(self._history)):
-            height = int((self._history[idx] / (255.0 * 3.0)) * image.shape[0])
+            height = int((self._history[idx] / (255.0 * 3.0)) * mask.shape[0])
             if self._history[idx] > self.threshold + self.null_zone:
                 color = self.ENCODER_COLOR_HIGH_BGR
             elif self._history[idx] <= self.threshold - self.null_zone:
                 color = self.ENCODER_COLOR_LOW_BGR
             else:
                 color = self.ENCODER_COLOR_NULL_BGR
-            image = cv2.line(image, (idx, image.shape[0]), (idx, image.shape[0] - height), color, 1)
-        theshold_top = image.shape[0] - int(((self.threshold + self.null_zone) / (255.0 * 3.0)) * image.shape[0])
-        theshold_bottom = image.shape[0] - int(((self.threshold - self.null_zone) / (255.0 * 3.0)) * image.shape[0])
-        image = cv2.line(image, (0, theshold_top), (self.history_length, theshold_top), self.THRESHOLD_MARKER_COLOR, 3)
-        image = cv2.line(image, (0, theshold_bottom), (self.history_length, theshold_bottom), self.THRESHOLD_MARKER_COLOR, 3)
-        return image
+            mask = cv2.line(mask, (idx, mask.shape[0]), (idx, mask.shape[0] - height), color, 1)
+        theshold_top = mask.shape[0] - int(((self.threshold + self.null_zone) / (255.0 * 3.0)) * mask.shape[0])
+        theshold_bottom = mask.shape[0] - int(((self.threshold - self.null_zone) / (255.0 * 3.0)) * mask.shape[0])
+        mask = cv2.line(mask, (0, theshold_top), (self.history_length, theshold_top), self.THRESHOLD_MARKER_COLOR, 3)
+        mask = cv2.line(mask, (0, theshold_bottom), (self.history_length, theshold_bottom), self.THRESHOLD_MARKER_COLOR, 3)
+        return mask
