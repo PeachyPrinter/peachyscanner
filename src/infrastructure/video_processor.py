@@ -45,7 +45,8 @@ class VideoProcessor(threading.Thread):
         image = self.image['frame']
         ratio = self._get_new_size(requested_x, requested_y, image.shape[1], image.shape[0])
         scaled_image = cv2.resize(image, ratio)
-        return {'frame': scaled_image}
+        encoder_overlay = self.encoder.overlay_encoder(scaled_image)
+        return {'frame': scaled_image, 'encoder': encoder_overlay}
 
     def stop(self):
         self.running = False

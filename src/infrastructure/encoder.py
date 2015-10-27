@@ -61,14 +61,14 @@ class Encoder(object):
         return False
 
     def overlay_encoder(self, image):
+        mask = np.zeros(image.shape, dtype='uint8')
         ep = (int(self.relitive_point[1] * image.shape[1]), int(self.relitive_point[0] * image.shape[0]))
-        print(ep)
-        image = cv2.circle(image, ep, 3, self._color_bgr, 1)
-        image = cv2.line(image, (ep[0] + 3, ep[1]), (ep[0] + 6, ep[1]), self._color_bgr, 1)
-        image = cv2.line(image, (ep[0] - 3, ep[1]), (ep[0] - 6, ep[1]), self._color_bgr, 1)
-        image = cv2.line(image, (ep[0], ep[1] + 3), (ep[0], ep[1] + 6), self._color_bgr, 1)
-        image = cv2.line(image, (ep[0], ep[1] - 3), (ep[0], ep[1] - 6), self._color_bgr, 1)
-        return image
+        mask = cv2.circle(mask, ep, 3, self._color_bgr, 1)
+        mask = cv2.line(mask, (ep[0] + 3, ep[1]), (ep[0] + 6, ep[1]), self._color_bgr, 1)
+        mask = cv2.line(mask, (ep[0] - 3, ep[1]), (ep[0] - 6, ep[1]), self._color_bgr, 1)
+        mask = cv2.line(mask, (ep[0], ep[1] + 3), (ep[0], ep[1] + 6), self._color_bgr, 1)
+        mask = cv2.line(mask, (ep[0], ep[1] - 3), (ep[0], ep[1] - 6), self._color_bgr, 1)
+        return mask
 
     def overlay_history(self, image):
         for idx in range(len(self._history)):

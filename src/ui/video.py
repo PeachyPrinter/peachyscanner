@@ -5,6 +5,8 @@ from kivy.properties import ObjectProperty, ListProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.lang import Builder
 
+import cv2
+
 import numpy as np
 
 Builder.load_file('ui/video.kv')
@@ -21,7 +23,9 @@ class ImageDisplay(BoxLayout):
         Clock.schedule_interval(self.update_image, 1 / 30.)
 
     def update_image(self, largs):
-        image = self.scanner.get_feed_image(self.size)['frame']
+        image_data = self.scanner.get_feed_image(self.size)
+        image = image_data['frame']
+        image = cv2.bitwise_or(image, image_data['encoder'])
         image = np.rot90(np.swapaxes(image, 0, 1))
         texture = Texture.create(size=(image.shape[1], image.shape[0]), colorfmt='rgb')
         texture.blit_buffer(image.tostring(), colorfmt='bgr', bufferfmt='ubyte')

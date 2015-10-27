@@ -111,6 +111,15 @@ class EncoderTest(unittest.TestCase):
         # Encode indicator is a circle centered on point with some decoration, just checking for one point
         self.assertTrue((resulting_image[27][27] == [0, 0, 255]).all())
 
+    def test_overlay_encoder_places_indicator_correct_place_on_black_mask(self):
+        encoder = Encoder(point=[50, 50])
+        encoder.process(self.whiteimage)
+        self.small_white_image = np.ones((50, 50, 3)) * 255
+        resulting_image = encoder.overlay_encoder(self.small_white_image)
+        # Encode indicator is a circle centered on point with some decoration, just checking for one point
+        self.assertTrue((resulting_image[0][0] == [0, 0, 0]).all())
+
+
     def test_overlay_encoder_places_indicator_in_relitive_correct_place(self):
         encoder = Encoder(point=[50, 50])
         encoder.process(self.blackimage)
