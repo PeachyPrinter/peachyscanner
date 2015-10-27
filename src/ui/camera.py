@@ -62,27 +62,27 @@ class CameraControls(BoxLayout):
     def on_focus(self, instance, value):
         Logger.info("Setting focus - {}".format(value))
         Config.set('camera', 'focus', value)
-        self.capture.camera.focus = value
+        # self.capture.camera.focus = value
 
     def on_brightness(self, instance, value):
         Logger.info("Setting brightness - {}".format(value))
         Config.set('camera', 'brightness', value)
-        self.capture.camera.brightness = value
+        # self.capture.camera.brightness = value
 
     def on_contrast(self, instance, value):
         Logger.info("Setting contrast - {}".format(value))
         Config.set('camera', 'contrast', value)
-        self.capture.camera.contrast = value
+        # self.capture.camera.contrast = value
 
     def on_white_balance(self, instance, value):
         Logger.info("Setting white_balance - {}".format(value))
         Config.set('camera', 'white_balance', value)
-        self.capture.camera.white_balance = value
+        # self.capture.camera.white_balance = value
 
     def on_sharpness(self, instance, value):
         Logger.info("Setting sharpness - {}".format(value))
         Config.set('camera', 'sharpness', value)
-        self.capture.camera.sharpness = value
+        # self.capture.camera.sharpness = value
 
     def save(self):
         Logger.info('Saving camera settings')

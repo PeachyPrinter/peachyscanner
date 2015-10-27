@@ -120,9 +120,9 @@ class ScannerAPITest(TestHelpers):
     def test_stop_stops_the_video_processor_first(self, mock_video_processor, mock_camera):
         global stop_time_camera
         global stop_time_video
-        stop_time_camera = 0    
+        stop_time_camera = 0
         stop_time_video = 0
-        
+
         def stop_camera():
             global stop_time_camera
             stop_time_camera = time.time()
@@ -168,6 +168,18 @@ class ScannerAPITest(TestHelpers):
         api = ScannerAPI()
         api.start()
         self.assertTrue(start_time_video > start_time_camera, '{} !> {}'.format(start_time_video, start_time_camera))
+
+
+    @patch('api.scanner.Camera')
+    @patch('api.scanner.VideoProcessor')
+    def test_get_feed_image_gets_image_from_feed(self, mock_video_processor, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+        video = mock_video_processor.return_value
+        video.image = 'Expected Image'
+        api = ScannerAPI()
+        result = api.get_feed_image()
+        self.assertEqual('Expected Image', result)
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level='INFO')

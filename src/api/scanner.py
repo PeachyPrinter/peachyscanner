@@ -36,6 +36,9 @@ class ScannerAPI(object):
         else:
             self.video_processor.subscribe(ImageCapture(self.encoder.sections))
 
+    def get_feed_image(self):
+        return self.video_processor.image
+
     def configure_encoder(self, point, threshold, null_zone, sections):
         self.encoder = Encoder(point, threshold, null_zone, 20, sections)
         self.video_processor.encoder = self.encoder

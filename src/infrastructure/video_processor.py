@@ -1,5 +1,10 @@
 import threading
 
+import numpy as np
+
+import logging
+
+logger = logging.getLogger('peachy')
 
 class VideoProcessor(threading.Thread):
     def __init__(self, camera, encoder, roi):
@@ -9,8 +14,10 @@ class VideoProcessor(threading.Thread):
         self.handlers = []
         self.encoder = encoder
         self.roi = roi
+        self.image = {'frame': np.array([[[255, 255, 255]]])}
 
     def run(self):
+        logger.info("Starting video capture")
         self.running = True
         while (self.running):
             frame = self.camera.read()
@@ -22,10 +29,14 @@ class VideoProcessor(threading.Thread):
                     callback(handler)
                     if not result:
                         self.unsubscribe((handler, callback))
+            self.image = {'frame': frame}
+        logger.info("Shutting down")
 
     def stop(self):
         self.running = False
-        self.join()
+        while self.is_alive():
+            logger.info("Joining main thread")
+            self.join(1)
 
     def subscribe(self, handler, callback=lambda x: x):
         self.handlers.append((handler, callback))

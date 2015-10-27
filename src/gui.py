@@ -10,10 +10,14 @@ from kivy.properties import NumericProperty, ObjectProperty
 from kivy.resources import resource_add_path
 from kivy.logger import Logger
 
+
 from ui.camera import CameraControlWrapper
 from ui.posisition import PositionControl
 from ui.laserdetection import LaserDetection
 from ui.capture_control import CaptureControl
+from ui.video import ImageDisplay
+
+
 
 kivy.require('1.9.0')
 
@@ -21,13 +25,13 @@ class MyScreenManager(ScreenManager):
     def __init__(self, **kwargs):
         super(MyScreenManager, self).__init__(**kwargs)
         self.camera_control_ui = CameraControlWrapper()
-        self.posisition_control_ui = PositionControl()
-        self.laser_detection_ui = LaserDetection()
-        self.capture_control_ui = CaptureControl()
+        # self.posisition_control_ui = PositionControl()
+        # self.laser_detection_ui = LaserDetection()
+        # self.capture_control_ui = CaptureControl()
         self.add_widget(self.camera_control_ui)
-        self.add_widget(self.posisition_control_ui)
-        self.add_widget(self.laser_detection_ui)
-        self.add_widget(self.capture_control_ui)
+        # self.add_widget(self.posisition_control_ui)
+        # self.add_widget(self.laser_detection_ui)
+        # self.add_widget(self.capture_control_ui)
         self.current = 'camera_control_ui'
 
 
@@ -37,19 +41,18 @@ class PeachyScannerApp(App):
     input_height = NumericProperty(dp(30))
     refresh_rate = NumericProperty(1.0 / 30.0)
     Config = ConfigParser(name='PeachyScanner')
-    capture = ObjectProperty()
+    scanner = ObjectProperty()
 
-    def __init__(self, capture, status, **kwargs):
-        Window.size = (350, 900)
-        Window.minimum_width = 450
-        Window.minimum_height = 900
+    def __init__(self, scanner, **kwargs):
+        Window.size = (1024, 500)
+        Window.minimum_width = 900
+        Window.minimum_height = 600
         Window.x = 0
         Window.y = 0
         resource_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resources')
         resource_add_path(resource_path)
         resource_add_path(os.path.join(resource_path, 'shaders'))
-        self.capture = capture
-        self.status = status
+        self.scanner = scanner
         super(PeachyScannerApp, self).__init__(**kwargs)
         Config.set("input", "mouse", "mouse,disable_multitouch")
         Config.set("kivy", "exit_on_escape", 0)
@@ -59,6 +62,4 @@ class PeachyScannerApp(App):
         self.shutdown()
 
     def shutdown(self, *args):
-        if self.capture:
-            self.capture.shutdown()
         exit()

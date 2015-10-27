@@ -3,8 +3,7 @@ import sys
 import os
 import logging
 import time
-import cv2 
-import numpy as np
+import cv2
 from mock import Mock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
@@ -28,6 +27,7 @@ class TestHandler(object):
         return self.unsubscribe_after != 0
 
 class VideoProcessorTest(unittest.TestCase):
+    start_up_delay = 0.005
     def show_it(self, image):
         cv2.imshow('frame', image)
 
@@ -41,20 +41,22 @@ class VideoProcessorTest(unittest.TestCase):
         else:
             self.roi = ROI(10, 50, x_center + 1, 20, self.camera.image.shape)
         return VideoProcessor(self.camera, self.encoder, self.roi)
-        
+
     def test_video_processor_starts_and_stops_given_shutdown_set_to_true(self):
         video_processor = self.create_video_processor()
         video_processor.start()
+        time.sleep(self.start_up_delay) # wait for loop to start
         self.assertTrue(video_processor.is_alive())
         video_processor.stop()
         self.assertFalse(video_processor.is_alive())
+
 
     def test_subscribe_adds_a_subscriber_which_is_called(self):
         video_processor = self.create_video_processor()
         handler = TestHandler()
         video_processor.subscribe(handler)
         video_processor.start()
-        time.sleep(0.1)
+        time.sleep(self.start_up_delay)
         video_processor.stop()
 
         self.assertTrue(len(handler.calls) > 0)
@@ -64,7 +66,7 @@ class VideoProcessorTest(unittest.TestCase):
         subscriber = TestHandler()
         video_processor.subscribe(subscriber)
         video_processor.start()
-        time.sleep(0.1)
+        time.sleep(self.start_up_delay)
         video_processor.stop()
         self.assertTrue((subscriber.calls[0]['frame'] == self.clipped_image()).all())
 
@@ -75,7 +77,7 @@ class VideoProcessorTest(unittest.TestCase):
         video_processor.subscribe(subscriber1)
         video_processor.subscribe(subscriber2)
         video_processor.start()
-        time.sleep(0.1)
+        time.sleep(self.start_up_delay)
         video_processor.stop()
         clipped_image = self.clipped_image()
 
@@ -88,7 +90,7 @@ class VideoProcessorTest(unittest.TestCase):
         subscriber = TestHandler()
         video_processor.subscribe(subscriber)
         video_processor.start()
-        time.sleep(0.1)
+        time.sleep(self.start_up_delay)
         video_processor.stop()
         x_center = self.camera.image.shape[1] // 2
         actual = subscriber.calls[0]['frame']
@@ -102,7 +104,7 @@ class VideoProcessorTest(unittest.TestCase):
         subscriber = TestHandler()
         video_processor.subscribe(subscriber)
         video_processor.start()
-        time.sleep(0.1)
+        time.sleep(self.start_up_delay)
         video_processor.stop()
         self.assertEquals(0, len(subscriber.calls))
 
@@ -112,7 +114,7 @@ class VideoProcessorTest(unittest.TestCase):
         subscriber = TestHandler()
         video_processor.subscribe(subscriber)
         video_processor.start()
-        time.sleep(0.1)
+        time.sleep(self.start_up_delay)
         video_processor.stop()
         self.assertEquals(0, len(subscriber.calls))
 
@@ -122,7 +124,7 @@ class VideoProcessorTest(unittest.TestCase):
         subscriber = TestHandler()
         video_processor.subscribe(subscriber)
         video_processor.start()
-        time.sleep(0.1)
+        time.sleep(self.start_up_delay)
         video_processor.stop()
         self.assertTrue(len(subscriber.calls) > 0)
         self.assertEquals(44, subscriber.calls[0]['section'])
@@ -133,7 +135,7 @@ class VideoProcessorTest(unittest.TestCase):
         subscriber = TestHandler(unsubscribe_after=1)
         video_processor.subscribe(subscriber)
         video_processor.start()
-        time.sleep(0.1)
+        time.sleep(self.start_up_delay)
         video_processor.stop()
         self.assertEquals(len(subscriber.calls), 1)
         self.assertFalse(subscriber in video_processor.handlers)
@@ -145,9 +147,13 @@ class VideoProcessorTest(unittest.TestCase):
         callback = Mock()
         video_processor.subscribe(subscriber, callback)
         video_processor.start()
-        time.sleep(0.1)
+        time.sleep(self.start_up_delay)
         video_processor.stop()
         self.assertEquals(subscriber, callback.call_args[0][0])
+
+    def test_image_is_a_one_pixel_frame_when_called_before_started(self):
+        video_processor = self.create_video_processor()
+        self.assertEqual((1, 1, 3), video_processor.image['frame'].shape)
 
     # def test_make_it_go(self):
     #     camera = FakeCamera()
@@ -165,3 +171,4 @@ class VideoProcessorTest(unittest.TestCase):
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level='INFO')
     unittest.main()
+
