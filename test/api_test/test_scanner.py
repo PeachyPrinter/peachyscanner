@@ -177,7 +177,7 @@ class ScannerAPITest(TestHelpers):
         video = mock_video_processor.return_value
         video.image = 'Expected Image'
         api = ScannerAPI()
-        result = api.get_feed_image()
+        result = api.get_feed_image(200, 100)
         self.assertEqual('Expected Image', result)
 
 if __name__ == '__main__':

@@ -1,6 +1,8 @@
 <MyScreenManager>:
 
-BoxLayout:
+
+<ScannerGUI>:
+    screen_manager: screen_manager
     GridLayout:
         size_hint_x: None
         width: '350dp'
@@ -12,24 +14,24 @@ BoxLayout:
                 size_hint_y: None
                 height: app.button_height
                 text: "CAM"
-                on_release: manager.current = 'camera_control_ui'
+                on_release: root.manager.current = 'camera_control_ui'
 #            Button:
 #                size_hint_y: None
 #                height: app.button_height
 #                text: "POS"
-#                on_release: manager.current = 'posisition_control_ui'
+#                on_release: root.manager.current = 'posisition_control_ui'
 #            Button:
 #                size_hint_y: None
 #                height: app.button_height
 #                text: "COL"
-#                on_release: manager.current = 'color_control_ui'
+#                on_release: root.manager.current = 'color_control_ui'
 #            Button:
 #                size_hint_y: None
 #                height: app.button_height
 #                text: "GET"
-#                on_release: manager.current = 'capture_control_ui'
-        MyScreenManager:
-            id: manager
+#                on_release: root.manager.current = 'capture_control_ui'
+        BoxLayout:
+            id: screen_manager
         Button:
             size_hint_y: None
             height: app.button_height

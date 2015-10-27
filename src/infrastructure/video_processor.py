@@ -1,10 +1,11 @@
 import threading
-
+import cv2
 import numpy as np
 
 import logging
 
 logger = logging.getLogger('peachy')
+
 
 class VideoProcessor(threading.Thread):
     def __init__(self, camera, encoder, roi):
@@ -31,6 +32,20 @@ class VideoProcessor(threading.Thread):
                         self.unsubscribe((handler, callback))
             self.image = {'frame': frame}
         logger.info("Shutting down")
+
+    def _get_new_size(self, dest_x, dest_y, source_x, source_y):
+        source_ratio = source_x / float(source_y)
+        dest_ratio = dest_x / float(dest_y)
+        if dest_ratio > source_ratio:
+            return (int(source_x * dest_y / source_y), int(dest_y))
+        else:
+            return (int(dest_x), int(source_y * dest_x / source_x))
+
+    def get_bounded_image(self, requested_x, requested_y):
+        image = self.image['frame']
+        ratio = self._get_new_size(requested_x, requested_y, image.shape[1], image.shape[0])
+        scaled_image = cv2.resize(image, ratio)
+        return {'frame': scaled_image}
 
     def stop(self):
         self.running = False

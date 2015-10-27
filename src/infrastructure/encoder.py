@@ -27,6 +27,7 @@ class Encoder(object):
         self._history = []
         self.position = 0
         self.sections = sections
+        self.relitive_point = (1, 1)
 
     @property
     def current_sections(self):
@@ -41,6 +42,7 @@ class Encoder(object):
 
     def process(self, image):
         point = image[self.point[1]][self.point[0]]
+        self.relitive_point = (self.point[1] / float(image.shape[1]), self.point[0] / float(image.shape[0]))
         value = np.sum(point)
         self._history.append(value)
         self._history = self._history[-self.history_length:]
@@ -59,7 +61,8 @@ class Encoder(object):
         return False
 
     def overlay_encoder(self, image):
-        ep = self.point
+        ep = (int(self.relitive_point[1] * image.shape[1]), int(self.relitive_point[0] * image.shape[0]))
+        print(ep)
         image = cv2.circle(image, ep, 3, self._color_bgr, 1)
         image = cv2.line(image, (ep[0] + 3, ep[1]), (ep[0] + 6, ep[1]), self._color_bgr, 1)
         image = cv2.line(image, (ep[0] - 3, ep[1]), (ep[0] - 6, ep[1]), self._color_bgr, 1)

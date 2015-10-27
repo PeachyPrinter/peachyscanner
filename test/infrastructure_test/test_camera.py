@@ -134,7 +134,7 @@ class CameraTest(unittest.TestCase):
 
         camera = Camera()
         camera.start()
-        results = camera.set_setting('Hue', 1.0)
+        camera.set_setting('Hue', 1.0)
 
         mock_video_capture.set.assert_called_once_with(cv2.CAP_PROP_HUE, 1.0)
 

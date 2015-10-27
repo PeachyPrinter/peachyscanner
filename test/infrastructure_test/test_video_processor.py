@@ -155,6 +155,20 @@ class VideoProcessorTest(unittest.TestCase):
         video_processor = self.create_video_processor()
         self.assertEqual((1, 1, 3), video_processor.image['frame'].shape)
 
+    def test_get_bounded_image_gets_a_scaled_version_of_the_lastest_frame(self):
+        video_processor = self.create_video_processor()
+        expected_x = 400
+        expected_y = int(self.camera.image.shape[0] * float(expected_x) / self.camera.image.shape[1])
+
+        video_processor.start()
+        time.sleep(self.start_up_delay)
+        image = video_processor.get_bounded_image(400, 200)
+        video_processor.stop()
+
+        self.assertEquals(expected_x, image['frame'].shape[1])
+        self.assertEquals(expected_y, image['frame'].shape[0])
+
+
     # def test_make_it_go(self):
     #     camera = FakeCamera()
     #     while(True):

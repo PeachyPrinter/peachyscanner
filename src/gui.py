@@ -4,6 +4,7 @@ import kivy
 from kivy.app import App
 from kivy.config import Config, ConfigParser
 from kivy.uix.screenmanager import ScreenManager
+from kivy.uix.boxlayout import BoxLayout
 from kivy.core.window import Window
 from kivy.metrics import dp
 from kivy.properties import NumericProperty, ObjectProperty
@@ -11,7 +12,7 @@ from kivy.resources import resource_add_path
 from kivy.logger import Logger
 
 
-from ui.camera import CameraControlWrapper
+from ui.camera import CameraControls
 from ui.posisition import PositionControl
 from ui.laserdetection import LaserDetection
 from ui.capture_control import CaptureControl
@@ -21,10 +22,12 @@ from ui.video import ImageDisplay
 
 kivy.require('1.9.0')
 
+
 class MyScreenManager(ScreenManager):
-    def __init__(self, **kwargs):
+
+    def __init__(self, scanner, **kwargs):
         super(MyScreenManager, self).__init__(**kwargs)
-        self.camera_control_ui = CameraControlWrapper()
+        self.camera_control_ui = CameraControls(scanner.camera)
         # self.posisition_control_ui = PositionControl()
         # self.laser_detection_ui = LaserDetection()
         # self.capture_control_ui = CaptureControl()
@@ -33,6 +36,13 @@ class MyScreenManager(ScreenManager):
         # self.add_widget(self.laser_detection_ui)
         # self.add_widget(self.capture_control_ui)
         self.current = 'camera_control_ui'
+
+
+class ScannerGUI(BoxLayout):
+    def __init__(self, scanner, **kwargs):
+        super(ScannerGUI, self).__init__(**kwargs)
+        self.manager = MyScreenManager(scanner)
+        self.ids.screen_manager.add_widget(self.manager)
 
 
 class PeachyScannerApp(App):
@@ -57,6 +67,9 @@ class PeachyScannerApp(App):
         Config.set("input", "mouse", "mouse,disable_multitouch")
         Config.set("kivy", "exit_on_escape", 0)
         Logger.info("Starting up")
+
+    def build(self):
+        return(ScannerGUI(self.scanner))
 
     def exit_app(self, *args):
         self.shutdown()
