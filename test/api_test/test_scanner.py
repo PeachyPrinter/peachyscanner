@@ -17,20 +17,42 @@ from helpers import TestHelpers
 class ScannerAPITest(TestHelpers):
 
     @patch('api.scanner.Camera')
-    def test_set_region_of_interest_should_create_expected_roi(self, mock_camera):
+    def test_set_region_of_interest_from_abs_points_should_create_expected_roi(self, mock_camera):
         cam = mock_camera.return_value
         cam.shape = [300, 100]
         api = ScannerAPI()
-        expected_roi = ROI.set_from_points((0, 0), (151, 90), [100, 300, 3])
-        api.set_region_of_interest((0, 0), (151, 90))
+        expected_roi = ROI.set_from_abs_points((0, 0), (151, 90), [100, 300, 3])
+
+        api.set_region_of_interest_from_abs_points((0, 0), (151, 90), [300, 100])
+
         self.assertROIEquals(expected_roi, api.roi)
 
     @patch('api.scanner.Camera')
-    def test_set_region_of_interest_should_replace_the_roi_on_the_video_processor_with_new_roi(self, mock_camera):
+    def test_set_region_of_interest_from_abs_points_should_replace_the_roi_on_the_video_processor_with_new_roi(self, mock_camera):
         cam = mock_camera.return_value
         cam.shape = [300, 100]
         api = ScannerAPI()
-        api.set_region_of_interest((0, 0), (151, 90))
+        api.set_region_of_interest_from_abs_points((0, 0), (151, 90), [300, 100])
+        self.assertNotEquals(api._default_roi, api.video_processor.roi)
+        self.assertEquals(api.roi, api.video_processor.roi)
+
+    @patch('api.scanner.Camera')
+    def test_set_region_of_interest_rel_points_should_create_expected_roi(self, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+        api = ScannerAPI()
+        expected_roi = ROI(0.0, 0.0, 0.5, 0.9)
+
+        api.set_region_of_interest_from_rel_points(0, 0, 0.5, 0.9)
+
+        self.assertROIEquals(expected_roi, api.roi)
+
+    @patch('api.scanner.Camera')
+    def test_set_region_of_interest_rel_points_should_replace_the_roi_on_the_video_processor_with_new_roi(self, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+        api = ScannerAPI()
+        api.set_region_of_interest_from_rel_points(0.0, 0.0, 0.5, 0.9)
         self.assertNotEquals(api._default_roi, api.video_processor.roi)
         self.assertEquals(api.roi, api.video_processor.roi)
 

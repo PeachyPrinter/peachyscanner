@@ -41,9 +41,7 @@ class Encoder(object):
             return (False, self.position)
 
     def process(self, image):
-        # logger.info('(x%,y%)-{} --> (yipx,xipx)-{}'.format(str(self.relitive_point_xy), str(image.shape)))
         absolute_point_xy = (int(image.shape[1] * self.relitive_point_xy[0]), int(image.shape[0] * self.relitive_point_xy[1]))
-        # logger.info('(x%,y%)-{} --> (xpx,ypx)-{}'.format(str(self.relitive_point_xy), str(absolute_point_xy)))
         point = image[absolute_point_xy[1], absolute_point_xy[0]]
         value = np.sum(point)
         self._history.append(value)
