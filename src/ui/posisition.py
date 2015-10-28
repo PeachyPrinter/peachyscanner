@@ -17,42 +17,39 @@ Builder.load_file('ui/posisition.kv')
 
 class PositionControl(Screen):
     def __init__(self, scanner, **kwargs):
-        super(PositionControl, self).__init__(**kwargs)
-        Config.adddefaultsection('posisition')
-        Window.bind(on_motion=self.on_motion)
-        # Clock.schedule_once(self._post_init)
         self.scanner = scanner
-        self._encoder_point = (0, 0)
-        self._selecting_encoder = True
+        self._selecting_encoder = False
+        self._encoder_segments = 200
+        Config.adddefaultsection('posisition')
+        self._load_saved_settings()
+        super(PositionControl, self).__init__(**kwargs)
+        Window.bind(on_motion=self.on_motion)
+        Clock.schedule_once(self._post_init)
 
     def _post_init(self, instance):
-        self._load_saved_settings()
+        self.encoder_null_zone_widget.value = self._encoder_null_zone
+        self.encoder_threshold_widget.value = self._encoder_threshold
+        self._configure_encoder()
 
     def _load_saved_settings(self):
 
-        roi = Config.getdefault('posisition', 'roi', None)
-        if roi:
-            Logger.info("ROI Loaded - {}".format(roi))
-            self.capture.roi = json.loads(roi)
+        # roi = Config.getdefault('posisition', 'roi', None)
+        # if roi:
+        #     Logger.info("ROI Loaded - {}".format(roi))
+        #     self.capture.roi = json.loads(roi)
 
-        roi = Config.getdefault('posisition', 'roi', None)
-        if roi:
-            Logger.info("ROI Loaded - {}".format(roi))
-            self.capture.roi = json.loads(roi)
+        # roi = Config.getdefault('posisition', 'roi', None)
+        # if roi:
+        #     Logger.info("ROI Loaded - {}".format(roi))
+        #     self.capture.roi = json.loads(roi)
 
-        encoder_threshold = float(Config.getdefault('posisition', 'encoder_threshold', 200))
-        self.capture.encoder_threshold = encoder_threshold
-        self.encoder_threshold_widget.value = encoder_threshold
-
-
-        encoder_null_zone = float(Config.getdefault('posisition', 'encoder_null_zone', 50))
-        self.capture.encoder_null_zone = encoder_null_zone
-        self.encoder_null_zone_widget.value = encoder_null_zone
-
-        encoder_point = Config.getdefault('posisition', 'encoder_point', None)
-        if encoder_point:
-            Logger.info("Encoder Point Loaded - {}".format(encoder_point))
-            self.capture.encoder_point = tuple(json.loads(encoder_point))
+        self._encoder_threshold = int(Config.getdefault('posisition', 'encoder_threshold', 200))
+        self._encoder_null_zone = int(Config.getdefault('posisition', 'encoder_null_zone', 50))
+        encoder_point = Config.getdefault('posisition', 'encoder_point', [0.5, 0.5])
+        self._encoder_point = tuple([float(p) for p in json.loads(encoder_point)])
+        if self._encoder_point[0] > 1.0 or self._encoder_point[1] > 1.0:
+            self._encoder_point[0] == 0.5
+            self._encoder_point[1] == 0.5
 
     def select_encoder(self):
         self._disable_all()
@@ -61,31 +58,34 @@ class PositionControl(Screen):
     def _encoder_selected(self, encoder_pos):
         self._encoder_point = encoder_pos
         Logger.info('Encoder point set at: {}'.format(str(encoder_pos)))
+        Config.set('posisition', 'encoder_point', json.dumps(self._encoder_point))
         self._configure_encoder()
         self._selecting_encoder = False
         self._enable_all()
 
     def _configure_encoder(self):
-        self.scanner.configure_encoder(self._encoder_point, 500, 100, 100)
+        self.scanner.configure_encoder(self._encoder_point, self._encoder_threshold, self._encoder_null_zone, self._encoder_segments)
 
-    def select_roi(self):
-        self._disable_all()
-        self.capture.select_roi(self._roi_call_back)
+    # def select_roi(self):
+    #     self._disable_all()
+    #     self.capture.select_roi(self._roi_call_back)
 
-    def _roi_call_back(self, roi):
-        self._enable_all()
-        Logger.info('Found ROI (x,y,w,h: {}'.format(roi))
-        Config.set('posisition', 'roi', json.dumps(roi))
+    # def _roi_call_back(self, roi):
+    #     self._enable_all()
+    #     Logger.info('Found ROI (x,y,w,h: {}'.format(roi))
+    #     Config.set('posisition', 'roi', json.dumps(roi))
 
     def encoder_threshold(self, value):
-        self.capture.encoder_threshold = value
-        Logger.info('Encoder Threshold Set at : {}'.format(value))
-        Config.set('posisition', 'encoder_threshold', value)
+        self._encoder_threshold = int(value)
+        Logger.info('Encoder Threshold Set at : {}'.format(self._encoder_threshold))
+        Config.set('posisition', 'encoder_threshold', self._encoder_threshold)
+        self._configure_encoder()
 
     def encoder_null_zone(self, value):
-        self.capture.encoder_null_zone = value
-        Logger.info('Encoder Null Zone Set at : {}'.format(value))
-        Config.set('posisition', 'encoder_null_zone', value)
+        self._encoder_null_zone = int(value)
+        Logger.info('Encoder Null Zone Set at : {}'.format(self._encoder_null_zone))
+        Config.set('posisition', 'encoder_null_zone', self._encoder_null_zone)
+        self._configure_encoder()
 
     def save_settings(self):
         Logger.info('Saving Settings')

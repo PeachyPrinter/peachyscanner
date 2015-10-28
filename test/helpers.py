@@ -18,12 +18,10 @@ class TestHelpers(unittest.TestCase):
             self.assertAlmostEqual(list1[idx], list2[idx], decimals, new_msg)
 
     def assertROIEquals(self, roi1, roi2):
-        self.assertEqual(roi1.x, roi2.x)
-        self.assertEqual(roi1.y, roi2.y)
-        self.assertEqual(roi1.w, roi2.w)
-        self.assertEqual(roi1.h, roi2.h)
-        self.assertEqual(roi1.frame_shape, roi2.frame_shape)
-
+        self.assertEqual(roi1.x_rel, roi2.x_rel)
+        self.assertEqual(roi1.y_rel, roi2.y_rel)
+        self.assertEqual(roi1.w_rel, roi2.w_rel)
+        self.assertEqual(roi1.h_rel, roi2.h_rel)
 
 class FakeCamera(object):
     def __init__(self, image=None, file_image='fake_image.png'):

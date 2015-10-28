@@ -39,8 +39,8 @@ class ScannerAPITest(TestHelpers):
         cam = mock_camera.return_value
         cam.shape = [300, 100]
         api = ScannerAPI()
-        api.configure_encoder((50, 50), 500, 100, 200)
-        self.assertEquals((50, 50), api.encoder.point)
+        api.configure_encoder((0.5, 0.5), 500, 100, 200)
+        self.assertEquals((0.5, 0.5), api.encoder.relitive_point_xy)
         self.assertEquals(500, api.encoder.threshold)
         self.assertEquals(100, api.encoder.null_zone)
         self.assertEquals(200, api.encoder.sections)
@@ -175,9 +175,9 @@ class ScannerAPITest(TestHelpers):
         cam = mock_camera.return_value
         cam.shape = [300, 100]
         video = mock_video_processor.return_value
-        video.image = 'Expected Image'
+        video.get_bounded_image.return_value = 'Expected Image'
         api = ScannerAPI()
-        result = api.get_feed_image(200, 100)
+        result = api.get_feed_image((200, 100))
         self.assertEqual('Expected Image', result)
 
 if __name__ == '__main__':

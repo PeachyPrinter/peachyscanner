@@ -18,7 +18,7 @@ class ScannerAPI(object):
     def __init__(self):
         self.camera = Camera()
         self.camera.start()
-        self._default_roi = ROI.set_from_points((0, 0), (self.camera.shape[0], self.camera.shape[1]), self.camera.shape)
+        self._default_roi = ROI(0.0, 0.0, 1.0, 1.0)
         self._default_encoder = Encoder((0.2, 0.2), 382, 100, 20, 200)
 
         self.encoder = self._default_encoder
@@ -27,7 +27,7 @@ class ScannerAPI(object):
 
     def set_region_of_interest(self, point1, point2):
         frame_shape = self.camera.shape
-        self.roi = ROI.set_from_points(point1, point2, [frame_shape[1], frame_shape[0], 3])
+        self.roi = ROI.set_from_abs_points(point1, point2, [frame_shape[1], frame_shape[0], 3])
         self.video_processor.roi = self.roi
 
     def capture_image(self, call_back=None):
