@@ -1,20 +1,36 @@
+<NumpyImage>:
+    canvas.before:
+        Rectangle:
+            pos: self.tex_pos
+            texture: self.texture
+            size: self.tex_size
+
 <CaptureControl>:
     name: 'capture_control_ui'
-    progress: progress
-    render: render
+#    progress: progress
+#    render: render
+    image_box: image_box
     GridLayout:
         cols: 1
         Button:
             size_hint_y: None
             height: app.button_height
-            id: find_centre
-            text: "Start Points Capture"
-            on_release: root.start_points_capture()
-        ProgressBar:
-            id: progress
-            size_hint_y: None
-            height: app.button_height
-            max: 1.0
-            value: 0.0
-        ObjectRenderer:
-            id:render
+            id: image_capture_button
+            text: "Start Image Capture"
+            on_release: root.start_image_capture()
+        NumpyImage:
+            id:image_box
+#        Button:
+#            size_hint_y: None
+#            height: app.button_height
+#            id: find_centre
+#            text: "Start Points Capture"
+#            on_release: root.start_points_capture()
+#        ProgressBar:
+#            id: progress
+#            size_hint_y: None
+#            height: app.button_height
+#            max: 1.0
+#            value: 0.0
+#        ObjectRenderer:
+#            id:render

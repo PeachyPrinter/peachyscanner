@@ -9,6 +9,8 @@ from kivy.graphics.transformation import Matrix
 from kivy.graphics import RenderContext, Callback, PushMatrix, PopMatrix, Color, Translate, Rotate, UpdateNormalMatrix, Mesh
 from kivy.clock import Clock
 from kivy.properties import ObjectProperty
+from kivy.graphics.texture import Texture
+from kivy.uix.boxlayout import BoxLayout
 from threading import Lock
 
 import numpy as np
@@ -18,20 +20,53 @@ from infrastructure.point_converter import GLConverter
 
 Builder.load_file('ui/capture_control.kv')
 
+
+class NumpyImage(BoxLayout):
+    texture = ObjectProperty(Texture.create(size=(1, 1), colorfmt='rgb'))
+    tex_pos = ObjectProperty([0, 0])
+    tex_size = ObjectProperty([1, 1])
+
+    def _get_new_size(self, source_x, source_y):
+        source_ratio = source_x / float(source_y)
+        dest_ratio = self.width / float(self.height)
+        if dest_ratio > source_ratio:
+            return (int(source_x * self.height / source_y), int(self.height))
+        else:
+            return (int(self.width), int(source_y * self.width / source_x))
+
+    def set_image(self, value):
+        image = np.rot90(np.swapaxes(value, 0, 1))
+        texture = Texture.create(size=(image.shape[1], image.shape[0]), colorfmt='rgb')
+        texture.blit_buffer(image.tostring(), colorfmt='bgr', bufferfmt='ubyte')
+        self.tex_size = self._get_new_size(texture.size[0], texture.size[1])
+        self.tex_pos = (self.x + (self.width - self.tex_size[0]) / 2, self.y + (self.height - self.tex_size[1]) / 2)
+        self.texture = texture
+
+    def on_size(self, instance, value):
+        self.tex_size = self._get_new_size(self.texture.size[0], self.texture.size[1])
+        self.tex_pos = (self.x + (self.width - self.tex_size[0]) / 2, self.y + (self.height - self.tex_size[1]) / 2)
+
+
 class CaptureControl(Screen):
 
-    def __init__(self, **kwargs):
+    def __init__(self, scanner, **kwargs):
         super(CaptureControl, self).__init__(**kwargs)
-        App.get_running_app().status.register_handler(self.update_progress)
-        self._converter = GLConverter()
-        self.raw_points = np.array([])
+        self.scanner = scanner
+    #   self._converter = GLConverter()
+    #   self.raw_points = np.array([])
+    # def start_points_capture(self):
+    #     self._disable_all()
+    #     App.get_running_app().capture.start_capture(self._capture_callback)
 
-    def start_points_capture(self):
-        self._disable_all()
-        App.get_running_app().capture.start_capture(self._capture_callback)
+    def start_image_capture(self):
+        self.scanner.capture_image(self._capture_image_callback)
 
-    def _capture_callback(self, file_name):
-        self._enable_all()
+    def _capture_image_callback(self, handler):
+        self._image = handler.image
+        Clock.schedule_once(self._update_image)
+
+    def _update_image(self, *args):
+        self.image_box.set_image(self._image)
 
     def _enable_all(self):
         for child in self.children:
@@ -41,17 +76,17 @@ class CaptureControl(Screen):
         for child in self.children:
             child.disabled = True
 
-    def update_progress(self, status):
-        self.raw_points = status.points
-        self.progress.value = status.progress
-        Clock.unschedule(self.update_model)
-        Clock.schedule_once(self.update_model)
+    # def update_progress(self, status):
+    #     self.raw_points = status.points
+    #     self.progress.value = status.progress
+    #     Clock.unschedule(self.update_model)
+    #     Clock.schedule_once(self.update_model)
 
-    def update_model(self, *largs):
-        if len(self.raw_points) > 0:
-            scale = min(0.05, 1.0 / np.amax(self.raw_points))
-            points = self._converter.convert(self.raw_points, scale=scale)
-            self.render.update_mesh(points)
+    # def update_model(self, *largs):
+    #     if len(self.raw_points) > 0:
+    #         scale = min(0.05, 1.0 / np.amax(self.raw_points))
+    #         points = self._converter.convert(self.raw_points, scale=scale)
+    #         self.render.update_mesh(points)
 
 
 

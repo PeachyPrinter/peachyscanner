@@ -25,6 +25,8 @@ class ImageDisplay(BoxLayout):
         with self.canvas.after:
             Color(1., 0., 0)
             self.ret = Line(rectangle=(0, 0, 0, 0))
+            Color(1, 1, 1)
+            self.center_line = Line(points=[0, 0, 0, 0], width=1)
         Clock.schedule_interval(self.update_image, 1 / 30.)
 
     def update_image(self, largs):
@@ -40,6 +42,8 @@ class ImageDisplay(BoxLayout):
         texture.blit_buffer(image.tostring(), colorfmt='bgr', bufferfmt='ubyte')
         self.tex_size = texture.size
         self.tex_pos = (self.x + (self.width - self.tex_size[0]) / 2, self.y + (self.height - self.tex_size[1]) / 2)
+        center = self.tex_pos[0] + (self.tex_size[0] / 2)
+        self.center_line.points = [center, self.tex_pos[1], center, self.tex_pos[1] + self.tex_size[1]]
         self.image = texture
         App.get_running_app().video_pos = self.tex_pos
         App.get_running_app().video_size = self.tex_size
