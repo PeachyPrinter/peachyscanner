@@ -39,7 +39,7 @@ class VideoProcessorTest(unittest.TestCase):
         if roi:
             self.roi = roi
         else:
-            self.roi = ROI(10, 50, x_center + 1, 20, self.camera.image.shape)
+            self.roi = ROI.set_from_abs_points((10, 50), (x_center + 1, 70), self.camera.image.shape)
         return VideoProcessor(self.camera, self.encoder, self.roi)
 
     def test_video_processor_starts_and_stops_given_shutdown_set_to_true(self):
@@ -177,7 +177,7 @@ class VideoProcessorTest(unittest.TestCase):
         video_processor.stop()
 
         self.assertEquals('KAWABUNGA', image['encoder'])
-        
+
     def test_get_bounded_image_gets_a_scaled_version_of_the_lastest_encoder_history(self):
         video_processor = self.create_video_processor()
         self.encoder.overlay_history.return_value = 'KAWABUNGA'
@@ -187,6 +187,17 @@ class VideoProcessorTest(unittest.TestCase):
         video_processor.stop()
 
         self.assertEquals('KAWABUNGA', image['history'])
+
+    def test_get_bounded_image_gets_a_scaled_version_of_the_roi_highlighted_image(self):
+        mock_roi = Mock()
+        video_processor = self.create_video_processor(roi=mock_roi)
+        mock_roi.overlay.return_value = 'KAWABUNGA'
+        video_processor.start()
+        time.sleep(self.start_up_delay)
+        image = video_processor.get_bounded_image(400, 200)
+        video_processor.stop()
+
+        self.assertEquals('KAWABUNGA', image['roi_frame'])
 
     # def test_make_it_go(self):
     #     camera = FakeCamera()

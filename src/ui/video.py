@@ -5,6 +5,7 @@ from kivy.properties import ObjectProperty, ListProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.lang import Builder
 from kivy.logger import Logger
+from kivy.graphics import Color, Line
 
 import cv2
 
@@ -21,12 +22,14 @@ class ImageDisplay(BoxLayout):
 
     def __init__(self, **kwargs):
         super(ImageDisplay, self).__init__(**kwargs)
-
+        with self.canvas.after:
+            Color(1., 0., 0)
+            self.ret = Line(rectangle=(0, 0, 0, 0))
         Clock.schedule_interval(self.update_image, 1 / 30.)
 
     def update_image(self, largs):
         image_data = self.scanner.get_feed_image(self.size)
-        image = image_data['frame']
+        image = image_data['roi_frame']
         overlays = cv2.add(image_data['encoder'],image_data['history'],)
         img2gray = cv2.cvtColor(overlays, cv2.COLOR_BGR2GRAY)
         ret, mask = cv2.threshold(img2gray, 10, 255, cv2.THRESH_BINARY)
@@ -40,3 +43,7 @@ class ImageDisplay(BoxLayout):
         self.image = texture
         App.get_running_app().video_pos = self.tex_pos
         App.get_running_app().video_size = self.tex_size
+
+    def selection(self, x, y, w, h):
+        with self.canvas.after:
+            self.ret.rectangle = (x, y, w, h)

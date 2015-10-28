@@ -18,6 +18,10 @@ class ROITest(unittest.TestCase):
                 sample_array[x, y] = [x, y, 0]
         return sample_array
 
+    def test_get_points_should_return_a_list_of_points(self):
+        roi = ROI(0, 0, 1, 1)
+        self.assertEquals([0, 0, 1, 1], roi.get_points())
+
     def test_get_returns_roi_of_expected_size(self):
         test_array = self.tarray()
         roi = ROI(0, 0, 1, 1)

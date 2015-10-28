@@ -55,3 +55,6 @@ class ROI(object):
         x_abs, y_abs, w_abs, h_abs = self._get_absolute(frame.shape)
         center = frame.shape[1] / 2
         return frame[y_abs:y_abs + h_abs, x_abs:center]
+
+    def get_points(self):
+        return [self.x_rel, self.y_rel, self.w_rel, self.h_rel]

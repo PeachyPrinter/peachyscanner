@@ -25,10 +25,10 @@ kivy.require('1.9.0')
 
 class MyScreenManager(ScreenManager):
 
-    def __init__(self, scanner, **kwargs):
+    def __init__(self, scanner, video_widget, **kwargs):
         super(MyScreenManager, self).__init__(**kwargs)
         self.camera_control_ui = CameraControls(scanner.camera)
-        self.posisition_control_ui = PositionControl(scanner)
+        self.posisition_control_ui = PositionControl(scanner, video_widget)
         # self.laser_detection_ui = LaserDetection()
         # self.capture_control_ui = CaptureControl()
         self.add_widget(self.camera_control_ui)
@@ -41,7 +41,7 @@ class MyScreenManager(ScreenManager):
 class ScannerGUI(BoxLayout):
     def __init__(self, scanner, **kwargs):
         super(ScannerGUI, self).__init__(**kwargs)
-        self.manager = MyScreenManager(scanner)
+        self.manager = MyScreenManager(scanner, self.ids.video)
         self.ids.screen_manager.add_widget(self.manager)
 
 

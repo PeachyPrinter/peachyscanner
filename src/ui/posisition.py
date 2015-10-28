@@ -7,6 +7,7 @@ from kivy.lang import Builder
 from kivy.clock import Clock
 from kivy.properties import NumericProperty, ObjectProperty, StringProperty
 from kivy.core.window import Window
+from kivy.graphics import Color, Line
 
 import json
 
@@ -16,9 +17,13 @@ Builder.load_file('ui/posisition.kv')
 
 
 class PositionControl(Screen):
-    def __init__(self, scanner, **kwargs):
+    video = ObjectProperty()
+    def __init__(self, scanner, video_widget, **kwargs):
         self.scanner = scanner
         self._selecting_encoder = False
+        self._selecting_roi = False
+        self.video_widget = video_widget
+
         self._encoder_segments = 200
         Config.adddefaultsection('posisition')
         self._load_saved_settings()
@@ -32,17 +37,8 @@ class PositionControl(Screen):
         self._configure_encoder()
 
     def _load_saved_settings(self):
-
-        # roi = Config.getdefault('posisition', 'roi', None)
-        # if roi:
-        #     Logger.info("ROI Loaded - {}".format(roi))
-        #     self.capture.roi = json.loads(roi)
-
-        # roi = Config.getdefault('posisition', 'roi', None)
-        # if roi:
-        #     Logger.info("ROI Loaded - {}".format(roi))
-        #     self.capture.roi = json.loads(roi)
-
+        roi = json.loads((Config.getdefault('posisition', 'roi', "[0.0, 0.0, 1.0, 1.0]")))
+        self.scanner.set_region_of_interest_from_rel_points(*roi)
         self._encoder_threshold = int(Config.getdefault('posisition', 'encoder_threshold', 200))
         self._encoder_null_zone = int(Config.getdefault('posisition', 'encoder_null_zone', 50))
         encoder_point = Config.getdefault('posisition', 'encoder_point', [0.5, 0.5])
@@ -66,9 +62,16 @@ class PositionControl(Screen):
     def _configure_encoder(self):
         self.scanner.configure_encoder(self._encoder_point, self._encoder_threshold, self._encoder_null_zone, self._encoder_segments)
 
-    # def select_roi(self):
-    #     self._disable_all()
-    #     self.capture.select_roi(self._roi_call_back)
+    def select_roi(self):
+        self._disable_all()
+        self._selecting_roi = True
+
+    def _roi_selected(self, point1, point2, video_size):
+        self._selecting_roi = False
+        self.scanner.set_region_of_interest_from_abs_points(point1, point2, video_size)
+        Config.set('posisition', 'roi', json.dumps(self.scanner.roi.get_points()))
+        self._enable_all()
+
 
     # def _roi_call_back(self, roi):
     #     self._enable_all()
@@ -100,13 +103,30 @@ class PositionControl(Screen):
             child.disabled = False
 
     def on_motion(self, instance, etype, motionevent):
+        video_pos = App.get_running_app().video_pos
+        video_size = App.get_running_app().video_size
+
+        if etype == 'begin':
+            self.drag_start = None
         if etype == 'end':
+            self.drag_end = (motionevent.pos[0], motionevent.pos[1])
+            self.video_widget.selection(0, 0, 0, 0)
             if self._selecting_encoder:
-                video_pos = App.get_running_app().video_pos
-                video_size = App.get_running_app().video_size
                 x = motionevent.pos[0] - video_pos[0]
                 y = motionevent.pos[1] - video_pos[1]
                 if (x >= 0 and x < video_size[0]) and (y >= 0 and y < video_size[1]):
                     self._encoder_selected((x / video_size[0], 1.0 - (y / video_size[1])))
-                else:
-                    pass
+            if self._selecting_roi:
+                x1 = self.drag_start[0] - video_pos[0]
+                y1 = video_size[1] - self.drag_start[1] - video_pos[1]
+                x2 = motionevent.pos[0] - video_pos[0]
+                y2 = video_size[1] - motionevent.pos[1] - video_pos[1]
+                self._roi_selected((x1, y1), (x2, y2), video_size)
+
+        if etype == 'update' and self._selecting_roi:
+            if self.drag_start is None:
+                self.drag_start = (motionevent.pos[0], motionevent.pos[1])
+            self.drag_current = (motionevent.pos[0], motionevent.pos[1])
+            size = (self.drag_current[0] - self.drag_start[0], self.drag_current[1] - self.drag_start[1])
+            self.video_widget.selection(self.drag_start[0], self.drag_start[1], size[0], size[1])
+            
