@@ -19,7 +19,7 @@ class DetectorTest(unittest.TestCase):
         expected = np.ones((5, 5, 3), dtype='uint8') * 200
         image[1:4, 1:4] = (128, 128, 128)
         expected[1:4, 1:4] = (0, 255, 0)
-        roi = ROI()
+        roi = ROI(0,0,1,1)
         detector = Detector(PointConverter())
         detector.process(image, roi)
         masked = detector.overlay_mask(image)

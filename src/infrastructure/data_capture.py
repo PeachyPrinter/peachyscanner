@@ -1,4 +1,7 @@
 import numpy as np
+
+from infrastructure.point_converter import PointConverter
+
 class ImageCapture(object):
 
     def __init__(self, sections):
@@ -8,7 +11,7 @@ class ImageCapture(object):
 
     def handle(self, frame=None, section=0):
         self._section_count += 1
-        self._image(frame.shape[0])[:,section] = frame[:,-1]
+        self._image(frame.shape[0])[:, section] = frame[:, -1]
         return self._section_count < self.sections
 
     def _image(self, y_axis_dimension):
@@ -18,10 +21,12 @@ class ImageCapture(object):
 
 
 class PointsCapture():
-    def __init__(self, shape):
-        pass
+    def __init__(self, sections):
+        self.focal_length_camera = 1
+        self.camera_distance = 1
+        self.angle_laser = 0
 
-    def handle(self, mask=None):
+    def handle(self, frame=None, section=0):
         # data = self.get_points(mask)
         # pop array
         # if array is full

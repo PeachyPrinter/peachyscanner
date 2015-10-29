@@ -94,6 +94,7 @@ class ScannerAPITest(TestHelpers):
         self.assertTrue(api.video_processor is not None)
         self.assertEquals(api._default_encoder, api.video_processor.encoder)
         self.assertEquals(api._default_roi, api.video_processor.roi)
+        self.assertEquals(api._default_laser_detector, api.video_processor._default_laser_detector)
 
     @patch('api.scanner.Camera')
     def test_capture_image_should_create_an_image_handler_and_subscribe_it_to_video_processor(self, mock_camera):

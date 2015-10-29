@@ -5,6 +5,7 @@ import logging
 import time
 import cv2
 from mock import Mock
+import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
@@ -12,6 +13,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 from helpers import FakeCamera
 from infrastructure.video_processor import VideoProcessor
 from infrastructure.roi import ROI
+from infrastructure.laser_detector import LaserDetector
 
 class TestHandler(object):
     def __init__(self, unsubscribe_after=-1):
@@ -21,7 +23,7 @@ class TestHandler(object):
     def handle(self, **kwargs):
         arg = {}
         self.calls.append({
-            'frame':kwargs['frame'].copy(),
+            'frame': kwargs['frame'].copy(),
             'section': kwargs['section']})
         self.unsubscribe_after -= 1
         return self.unsubscribe_after != 0
@@ -35,12 +37,14 @@ class VideoProcessorTest(unittest.TestCase):
         self.camera = FakeCamera()
         self.encoder = Mock()
         self.encoder.should_capture_frame_for_section.return_value = (True, 0)
+        self.mock_laser_detector = Mock()
+        self.mock_laser_detector.detect.return_value = np.ones((self.camera.image.shape[0], self.camera.image.shape[1]), dtype='uint8') * 255
         x_center = self.camera.image.shape[1] // 2
         if roi:
             self.roi = roi
         else:
             self.roi = ROI.set_from_abs_points((10, 50), (x_center + 1, 70), self.camera.image.shape)
-        return VideoProcessor(self.camera, self.encoder, self.roi)
+        return VideoProcessor(self.camera, self.encoder, self.roi, self.mock_laser_detector)
 
     def test_video_processor_starts_and_stops_given_shutdown_set_to_true(self):
         video_processor = self.create_video_processor()
@@ -199,6 +203,15 @@ class VideoProcessorTest(unittest.TestCase):
 
         self.assertEquals('KAWABUNGA', image['roi_frame'])
 
+    def test_get_bounded_image_gets_a_scaled_version_of_the_color_match_mask(self):
+        video_processor = self.create_video_processor()
+        video_processor.start()
+        time.sleep(self.start_up_delay)
+        image = video_processor.get_bounded_image(400, 200)
+        video_processor.stop()
+
+        self.assertTrue((image['laser_detection'] == 255).all())
+
     # def test_make_it_go(self):
     #     camera = FakeCamera()
     #     while(True):
@@ -216,3 +229,4 @@ if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level='INFO')
     unittest.main()
 
+477777

@@ -15,8 +15,8 @@ from infrastructure.data_capture import PointsCapture, ImageCapture
 from helpers import FakeCamera
 
 
-# class PointCaptureTest(unittest.TestCase):
-#     def 
+class PointCaptureTest(unittest.TestCase):
+    def test_handle_give_region_containing_no_data()
 
 
 class ImageCaptureTest(unittest.TestCase):
