@@ -39,7 +39,7 @@ class MyScreenManager(ScreenManager):
 class ScannerGUI(BoxLayout):
     def __init__(self, scanner, **kwargs):
         super(ScannerGUI, self).__init__(**kwargs)
-        self.manager = MyScreenManager(scanner, self.ids.video)
+        self.manager = MyScreenManager(scanner, self.video)
         self.ids.screen_manager.add_widget(self.manager)
 
 
@@ -50,8 +50,6 @@ class PeachyScannerApp(App):
     refresh_rate = NumericProperty(1.0 / 30.0)
     Config = ConfigParser(name='PeachyScanner')
     scanner = ObjectProperty()
-    video_pos = ListProperty()
-    video_size = ListProperty()
 
     def __init__(self, scanner, **kwargs):
         Window.size = (1024, 500)

@@ -68,8 +68,11 @@ class PositionControl(Screen):
 
     def _roi_selected(self, point1, point2, video_size):
         self._selecting_roi = False
-        self.scanner.set_region_of_interest_from_abs_points(point1, point2, video_size)
-        Config.set('posisition', 'roi', json.dumps(self.scanner.roi.get_points()))
+        try:
+            self.scanner.set_region_of_interest_from_abs_points(point1, point2, video_size)
+            Config.set('posisition', 'roi', json.dumps(self.scanner.roi.get_points()))
+        except:
+            pass
         self._enable_all()
 
 
@@ -103,8 +106,8 @@ class PositionControl(Screen):
             child.disabled = False
 
     def on_motion(self, instance, etype, motionevent):
-        video_pos = App.get_running_app().video_pos
-        video_size = App.get_running_app().video_size
+        video_pos = self.video_widget.video_pos
+        video_size = self.video_widget.video_size
 
         if etype == 'begin':
             self.drag_start = None
@@ -129,4 +132,4 @@ class PositionControl(Screen):
             self.drag_current = (motionevent.pos[0], motionevent.pos[1])
             size = (self.drag_current[0] - self.drag_start[0], self.drag_current[1] - self.drag_start[1])
             self.video_widget.selection(self.drag_start[0], self.drag_start[1], size[0], size[1])
-            
+

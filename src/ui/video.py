@@ -17,8 +17,8 @@ Builder.load_file('ui/video.kv')
 class ImageDisplay(BoxLayout):
     scanner = ObjectProperty()
     texture = ObjectProperty(Texture.create(size=(1, 1), colorfmt='rgb'))
-    tex_pos = ListProperty([0, 0])
-    tex_size = ListProperty([1, 1])
+    video_pos = ListProperty([0, 0])
+    video_size = ListProperty([1, 1])
     show_encoder = BooleanProperty(True)
     show_encoder_history = BooleanProperty(True)
     show_roi = BooleanProperty(True)
@@ -32,9 +32,6 @@ class ImageDisplay(BoxLayout):
             self.ret = Line(rectangle=(0, 0, 0, 0))
             Color(1, 1, 1)
             self.center_line = Line(points=[0, 0, 0, 0], width=1)
-
-        App.get_running_app().video_pos = self.tex_pos
-        App.get_running_app().video_size = self.tex_size
 
         Clock.schedule_interval(self.update_image, 1 / 30.)
 
@@ -51,12 +48,12 @@ class ImageDisplay(BoxLayout):
         return texture
 
     def on_texture(self, instance, value):
-        self.tex_size = self.texture.size
-        self.tex_pos = (self.x + (self.width - self.tex_size[0]) / 2, self.y + (self.height - self.tex_size[1]) / 2)
+        self.video_size = self.texture.size
+        self.video_pos = (self.x + (self.width - self.video_size[0]) / 2, self.y + (self.height - self.video_size[1]) / 2)
 
         if self.show_center:
-            center = self.tex_pos[0] + (self.tex_size[0] / 2)
-            self.center_line.points = [center, self.tex_pos[1], center, self.tex_pos[1] + self.tex_size[1]]
+            center = self.video_pos[0] + (self.video_size[0] / 2)
+            self.center_line.points = [center, self.video_pos[1], center, self.video_pos[1] + self.video_size[1]]
         else:
             self.center_line.points = [0, 0, 0, 0]
 

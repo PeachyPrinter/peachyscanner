@@ -20,10 +20,14 @@ class ROI(object):
         w_abs = abs(point1[0] - point2[0])
         h_abs = abs(point1[1] - point2[1])
 
+        logger.info('ABS ROI {} {} {} {} FRAME {} {}'.format(x_abs, y_abs, w_abs, h_abs, frame_shape[0], frame_shape[1]))
+
         x_rel = x_abs / float(frame_shape[1])
         y_rel = y_abs / float(frame_shape[0])
         w_rel = w_abs / float(frame_shape[1])
         h_rel = h_abs / float(frame_shape[0])
+
+        logger.info('REL ROI {} {} {} {}'.format(x_rel, y_rel, w_rel, h_rel))
 
         return ROI(x_rel, y_rel, w_rel, h_rel)
 
