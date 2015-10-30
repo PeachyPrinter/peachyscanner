@@ -22,10 +22,11 @@ class ScannerAPI(object):
         self.camera.start()
         self._default_roi = ROI(0.0, 0.0, 1.0, 1.0)
         self._default_encoder = Encoder((0.2, 0.2), 382, 100, 20, 200)
+        self._default_laser_detector = LaserDetector.from_rgb_float((0.8, 0.0, 0.0), (1.0, 0.2, 0.2))
 
         self.encoder = self._default_encoder
         self.roi = self._default_roi
-        self._laser_detector = LaserDetector.from_rgb_float((0.8, 0.0, 0.0), (1.0, 0.2, 0.2))
+        self.laser_detector = self._default_laser_detector
         self.video_processor = VideoProcessor(self.camera, self.encoder, self.roi, self.laser_detector)
 
     def set_region_of_interest_from_abs_points(self, point1, point2, frame_shape_xy):
@@ -48,6 +49,10 @@ class ScannerAPI(object):
     def configure_encoder(self, point, threshold, null_zone, sections):
         self.encoder = Encoder(point, threshold, null_zone, 20, sections)
         self.video_processor.encoder = self.encoder
+
+    def configure_laser_detector(self, low_rbg_float, high_rgb_float):
+        self.laser_detector = LaserDetector.from_rgb_float(low_rbg_float, high_rgb_float)
+        self.video_processor.laser_detector = self.laser_detector
 
     def start(self):
         self.video_processor.start()

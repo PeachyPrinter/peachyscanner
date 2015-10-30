@@ -86,6 +86,36 @@ class ScannerAPITest(TestHelpers):
         self.assertNotEquals(api._default_encoder, api.video_processor.encoder)
         self.assertEquals(api.encoder, api.video_processor.encoder)
 
+
+    @patch('api.scanner.Camera')
+    def test_configure_laser_detector_should_create_an_laser_detector_with_the_given_config(self, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+        api = ScannerAPI()
+        api.configure_laser_detector((0.0, 0.0, 0.0), (0.0, 0.0, 0.5))
+        self.assertEquals((0, 0, 0), api.laser_detector.low_bgr)
+        self.assertEquals((127, 0, 0), api.laser_detector.high_bgr)
+        
+    @patch('api.scanner.Camera')
+    def test_configure_laser_detector_should_replace_the_existing_laser_detector_with_new_laser_detector(self, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+        api = ScannerAPI()
+        api.configure_laser_detector((0.0, 0.0, 0.0), (0.0, 0.0, 0.5))
+        initial = api.laser_detector
+        api.configure_laser_detector((0.5, 0.5, 0.5), (1.0, 1.0, 1.0))
+        self.assertNotEquals(api.laser_detector, initial)
+
+    @patch('api.scanner.Camera')
+    def test_configure_laser_detector_should_replace_the_laser_detector_on_the_video_processor_with_new_laser_detector(self, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+        api = ScannerAPI()
+        api.configure_laser_detector((0.0, 0.0, 0.0), (0.0, 0.0, 1.0))
+        self.assertNotEquals(api._default_laser_detector, api.video_processor.laser_detector)
+        self.assertEquals(api.laser_detector, api.video_processor.laser_detector)
+
+
     @patch('api.scanner.Camera')
     def test_init_should_construct_a_video_processor(self, mock_camera):
         cam = mock_camera.return_value
@@ -94,7 +124,7 @@ class ScannerAPITest(TestHelpers):
         self.assertTrue(api.video_processor is not None)
         self.assertEquals(api._default_encoder, api.video_processor.encoder)
         self.assertEquals(api._default_roi, api.video_processor.roi)
-        self.assertEquals(api._default_laser_detector, api.video_processor._default_laser_detector)
+        self.assertEquals(api._default_laser_detector, api.video_processor.laser_detector)
 
     @patch('api.scanner.Camera')
     def test_capture_image_should_create_an_image_handler_and_subscribe_it_to_video_processor(self, mock_camera):

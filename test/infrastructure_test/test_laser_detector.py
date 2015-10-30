@@ -53,8 +53,8 @@ class LaserDetectorTest(unittest.TestCase):
         laser_detector = LaserDetector((128, 128, 128), (130, 130, 130))
         result = laser_detector.detect(test)
 
-        self.assertTrue((expected == result).all(), "{} != {}".format(expected, result) )
-
+        self.assertTrue((expected == result).all(), "{} != {}".format(expected, result))
+        self.assertEquals(expected.dtype, result.dtype)
 
 
 if __name__ == '__main__':

@@ -1,23 +1,78 @@
+<SimpleColorPicker>:
+    color: [0.0, 0.0, 0.0]
+    GridLayout:
+        cols:   3
+        canvas.before:
+            Color:
+                rgb: root.color
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: "R"
+            color: [1.0, 1.0, 1.0, 1.0] if sum(root.color) < 1.3 else [0.0, 0.0, 0.0, 1.0]
+            size_hint_x: None
+            width: '35dp'
+        Slider:
+            id: red_slider
+            min: 0
+            max: 255
+            value: int(root.color[0] * 255)
+            on_value: root.color[0] = self.value / 255.0
+            step: 1
+        Label:
+            text: str(red_slider.value)
+            color: [1.0, 1.0, 1.0, 1.0] if sum(root.color) < 1.3 else [0.0, 0.0, 0.0, 1.0]
+            size_hint_x: None
+            width: '35dp'
+        Label:
+            text: "G"
+            color: [1.0, 1.0, 1.0, 1.0] if sum(root.color) < 1.3 else [0.0, 0.0, 0.0, 1.0]
+            size_hint_x: None
+            width: '35dp'
+        Slider:
+            id: green_slider
+            min: 0
+            max: 255
+            value: int(root.color[1] * 255)
+            on_value: root.color[1] = self.value / 255.0
+            step: 1
+        Label:
+            text: str(green_slider.value)
+            color: [1.0, 1.0, 1.0, 1.0] if sum(root.color) < 1.3 else [0.0, 0.0, 0.0, 1.0]
+            size_hint_x: None
+            width: '35dp'
+        Label:
+            text: "B"
+            color: [1.0, 1.0, 1.0, 1.0] if sum(root.color) < 1.3 else [0.0, 0.0, 0.0, 1.0]
+            size_hint_x: None
+            width: '35dp'
+        Slider:
+            id: blue_slider
+            min: 0
+            max: 255
+            value: int(root.color[2] * 255)
+            on_value: root.color[2] = self.value / 255.0
+            step: 1
+        Label:
+            text: str(blue_slider.value)
+            color: [1.0, 1.0, 1.0, 1.0] if sum(root.color) < 1.3 else [0.0, 0.0, 0.0, 1.0]
+            size_hint_x: None
+            width: '35dp'
 
 <LaserDetection>:
     name: 'color_control_ui'
-    capture: app.capture
     dark_color: dark_color
     light_color: light_color
     GridLayout:
         cols: 1
-        ToggleButton:
-            size_hint_y: None
-            height: app.button_height
-            text: "Show Mask"
-            on_release: root.toggle_mask(self.state)
         BoxLayout:
             orientation: 'vertical'
             Label:
                 size_hint_y: None
                 height: app.label_height
                 text: "Color Dark"
-            ColorPicker:
+            SimpleColorPicker:
                 id: dark_color
         BoxLayout:
             orientation: 'vertical'
@@ -25,7 +80,7 @@
                 size_hint_y: None
                 height: app.label_height
                 text: "Color Light"
-            ColorPicker:
+            SimpleColorPicker:
                 id: light_color
         Button:
             size_hint_y: None

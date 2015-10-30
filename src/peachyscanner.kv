@@ -21,11 +21,11 @@
                 height: app.button_height
                 text: "POS"
                 on_release: root.manager.current = 'posisition_control_ui'
-#            Button:
-#                size_hint_y: None
-#                height: app.button_height
-#                text: "COL"
-#                on_release: root.manager.current = 'color_control_ui'
+            Button:
+                size_hint_y: None
+                height: app.button_height
+                text: "COL"
+                on_release: root.manager.current = 'color_control_ui'
             Button:
                 size_hint_y: None
                 height: app.button_height
@@ -59,7 +59,7 @@
                 height: app.button_height
                 text: "M"
                 state: 'down'
-                on_release: video.show_mask = True if self.state == 'down' else False
+                on_release: video.show_laser_detector = True if self.state == 'down' else False
             ToggleButton:
                 size_hint_y: None
                 height: app.button_height

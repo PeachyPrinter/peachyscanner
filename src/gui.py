@@ -27,11 +27,11 @@ class MyScreenManager(ScreenManager):
         super(MyScreenManager, self).__init__(**kwargs)
         self.camera_control_ui = CameraControls(scanner.camera)
         self.posisition_control_ui = PositionControl(scanner, video_widget)
-        # self.laser_detection_ui = LaserDetection()
+        self.laser_detection_ui = LaserDetection(scanner)
         self.capture_control_ui = CaptureControl(scanner)
         self.add_widget(self.camera_control_ui)
         self.add_widget(self.posisition_control_ui)
-        # self.add_widget(self.laser_detection_ui)
+        self.add_widget(self.laser_detection_ui)
         self.add_widget(self.capture_control_ui)
         self.current = 'camera_control_ui'
 

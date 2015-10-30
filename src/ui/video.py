@@ -22,8 +22,9 @@ class ImageDisplay(BoxLayout):
     show_encoder = BooleanProperty(True)
     show_encoder_history = BooleanProperty(True)
     show_roi = BooleanProperty(True)
-    show_mask = BooleanProperty(True)
+    show_laser_detector = BooleanProperty(True)
     show_center = BooleanProperty(True)
+    laser_detector_color_bgr = ListProperty([255, 0, 0])
 
     def __init__(self, **kwargs):
         super(ImageDisplay, self).__init__(**kwargs)
@@ -64,6 +65,9 @@ class ImageDisplay(BoxLayout):
         else:
             image = image_data['frame']
         overlays = np.zeros(image.shape, dtype=image.dtype)
+        if self.show_laser_detector:
+            colormask = np.ones(overlays.shape, dtype='uint8') * np.array(self.laser_detector_color_bgr, dtype='uint8')
+            overlays = cv2.bitwise_and(colormask, colormask, mask=image_data['laser_detection'])
         if self.show_encoder:
             overlays = cv2.add(overlays, image_data['encoder'])
         if self.show_encoder_history:
