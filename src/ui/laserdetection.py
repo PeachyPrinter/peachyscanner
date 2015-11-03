@@ -35,7 +35,6 @@ class LaserDetection(Screen):
         Logger.info("Loading dark Color - {}".format(dark))
         self.light_color.color = light
         self.dark_color.color = dark
-        # self.scanner.configure_laser_detector(self.light_color.color, self.dark_color.color)
 
     def _color_changed(self, instance, value):
         for idx in range(3):

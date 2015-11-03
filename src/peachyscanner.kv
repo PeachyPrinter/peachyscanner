@@ -14,23 +14,28 @@
             Button:
                 size_hint_y: None
                 height: app.button_height
-                text: "CAM"
+                text: "Camera"
                 on_release: root.manager.current = 'camera_control_ui'
             Button:
                 size_hint_y: None
                 height: app.button_height
-                text: "POS"
+                text: "Encoder"
                 on_release: root.manager.current = 'posisition_control_ui'
             Button:
                 size_hint_y: None
                 height: app.button_height
-                text: "COL"
+                text: "Color"
                 on_release: root.manager.current = 'color_control_ui'
             Button:
                 size_hint_y: None
                 height: app.button_height
-                text: "GET"
-                on_release: root.manager.current = 'capture_control_ui'
+                text: "Image"
+                on_release: root.manager.current = 'image_capture_ui'
+            Button:
+                size_hint_y: None
+                height: app.button_height
+                text: "Points"
+                on_release: root.manager.current = 'points_capture_ui'
         BoxLayout:
             id: screen_manager
         BoxLayout:
@@ -39,38 +44,33 @@
             ToggleButton:
                 size_hint_y: None
                 height: app.button_height
-                text: "E"
+                text: "Encoder"
                 state: 'down'
                 on_release: video.show_encoder = True if self.state == 'down' else False
             ToggleButton:
                 size_hint_y: None
                 height: app.button_height
-                text: "H"
+                text: "History"
                 state: 'down'
                 on_release: video.show_encoder_history = True if self.state == 'down' else False
             ToggleButton:
                 size_hint_y: None
                 height: app.button_height
-                text: "R"
+                text: "ROI"
                 state: 'down'
                 on_release: video.show_roi = True if self.state == 'down' else False
             ToggleButton:
                 size_hint_y: None
                 height: app.button_height
-                text: "M"
+                text: "Mask"
                 state: 'down'
                 on_release: video.show_laser_detector = True if self.state == 'down' else False
             ToggleButton:
                 size_hint_y: None
                 height: app.button_height
-                text: "C"
+                text: "Centre"
                 state: 'down'
                 on_release: video.show_center = True if self.state == 'down' else False
-#        Button:
-#            size_hint_y: None
-#            height: app.button_height
-#            text: "Quit"
-#            on_release: app.shutdown()
     ImageDisplay:
         id: video
         scanner: app.scanner

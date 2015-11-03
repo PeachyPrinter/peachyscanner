@@ -47,10 +47,10 @@ class NumpyImage(BoxLayout):
         self.tex_pos = (self.x + (self.width - self.tex_size[0]) / 2, self.y + (self.height - self.tex_size[1]) / 2)
 
 
-class CaptureControl(Screen):
+class ImageCapture(Screen):
 
     def __init__(self, scanner, **kwargs):
-        super(CaptureControl, self).__init__(**kwargs)
+        super(ImageCapture, self).__init__(**kwargs)
         self.scanner = scanner
     #   self._converter = GLConverter()
     #   self.raw_points = np.array([])
@@ -88,6 +88,12 @@ class CaptureControl(Screen):
     #         points = self._converter.convert(self.raw_points, scale=scale)
     #         self.render.update_mesh(points)
 
+
+class PointsCapture(Screen):
+
+    def __init__(self, scanner, **kwargs):
+        super(PointsCapture, self).__init__(**kwargs)
+        self.scanner = scanner
 
 
 class ObjectRenderer(Widget):

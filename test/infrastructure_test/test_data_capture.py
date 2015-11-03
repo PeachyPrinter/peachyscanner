@@ -16,7 +16,8 @@ from helpers import FakeCamera
 
 
 class PointCaptureTest(unittest.TestCase):
-    def test_handle_give_region_containing_no_data()
+    def test_handle_give_region_containing_no_data(self):
+        pass
 
 
 class ImageCaptureTest(unittest.TestCase):

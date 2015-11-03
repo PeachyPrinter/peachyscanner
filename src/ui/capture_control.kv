@@ -5,10 +5,8 @@
             texture: self.texture
             size: self.tex_size
 
-<CaptureControl>:
-    name: 'capture_control_ui'
-#    progress: progress
-#    render: render
+<ImageCapture>:
+    name: 'image_capture_ui'
     image_box: image_box
     GridLayout:
         cols: 1
@@ -20,6 +18,10 @@
             on_release: root.start_image_capture()
         NumpyImage:
             id:image_box
+
+
+<PointsCapture>:
+    name: 'points_capture_ui'
 #        Button:
 #            size_hint_y: None
 #            height: app.button_height
