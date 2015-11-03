@@ -21,10 +21,11 @@ class TestHandler(object):
         self.calls = []
 
     def handle(self, **kwargs):
-        arg = {}
         self.calls.append({
             'frame': kwargs['frame'].copy(),
-            'section': kwargs['section']})
+            'section': kwargs['section'],
+            'roi_center_y': kwargs['roi_center_y'],
+            })
         self.unsubscribe_after -= 1
         return self.unsubscribe_after != 0
 
@@ -132,6 +133,20 @@ class VideoProcessorTest(unittest.TestCase):
         video_processor.stop()
         self.assertTrue(len(subscriber.calls) > 0)
         self.assertEquals(44, subscriber.calls[0]['section'])
+
+    def test_handler_should_be_given_the_center_of_roi_when_called(self):
+        video_processor = self.create_video_processor()
+        self.encoder.should_capture_frame_for_section.return_value = (True, 44)
+        subscriber = TestHandler()
+        video_processor.subscribe(subscriber)
+        video_processor.start()
+        time.sleep(self.start_up_delay)
+        video_processor.stop()
+        self.assertTrue(len(subscriber.calls) > 0)
+        y_center = self.camera.image.shape[0] // 2
+        y_offset = video_processor.roi.y_rel * self.camera.image.shape[0]
+        roi_y_center = y_center - y_offset
+        self.assertEquals(roi_y_center, subscriber.calls[0]['roi_center_y'])
 
     def test_when_handler_returns_false_unsubscribe_them(self):
         video_processor = self.create_video_processor()
