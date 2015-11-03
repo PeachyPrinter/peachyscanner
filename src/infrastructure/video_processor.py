@@ -54,11 +54,11 @@ class VideoProcessor(threading.Thread):
         encoder_overlay = self.encoder.overlay_encoder(scaled_image)
         encoder_history = self.encoder.overlay_history(scaled_image)
         return {
-        'frame': scaled_image,
-        'laser_detection': scaled_detected,
-        'encoder': encoder_overlay,
-        'history': encoder_history,
-        'roi_frame': roi_frame
+            'frame': scaled_image,
+            'laser_detection': scaled_detected,
+            'encoder': encoder_overlay,
+            'history': encoder_history,
+            'roi_frame': roi_frame
         }
 
     def stop(self):

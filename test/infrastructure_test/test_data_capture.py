@@ -11,13 +11,18 @@ import cv2
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
-from infrastructure.data_capture import PointsCapture, ImageCapture
+from infrastructure.data_capture import PointCapture, ImageCapture
 from helpers import FakeCamera
 
 
 class PointCaptureTest(unittest.TestCase):
-    def test_handle_give_region_containing_no_data(self):
-        pass
+    def test_handle_give_region_containing_no_data_returns_no_points(self):
+        sections = 200
+        detected = np.zeros((100, 130, 1), dtype='uint8')
+        expected = np.zeros((100, sections), dtype='uint8')
+        point_capture = PointCapture(sections)
+        point_capture.handle(detected=detected, section=0, roi_center_y=50)
+        self.assertTrue((expected == point_capture.points).all())
 
 
 class ImageCaptureTest(unittest.TestCase):

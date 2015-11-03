@@ -20,17 +20,21 @@ class ImageCapture(object):
         return self.image
 
 
-class PointsCapture():
-    def __init__(self, sections):
-        self.focal_length_camera = 1
-        self.camera_distance = 1
-        self.angle_laser = 0
+class PointCapture(object):
 
-    def handle(self, frame=None, section=0):
-        # data = self.get_points(mask)
-        # pop array
-        # if array is full
+    def __init__(self, sections):
+        self.sections = sections
+        self.points = None
+
+    def handle(self, **kwargs): 
+        self._points(kwargs['detected'].shape[0])
         return 0
+
+    def _points(self, height):
+        if self.points is None:
+            self.points = np.zeros((height, self.sections), dtype='int32')
+        else:
+            self.points
 
     def get_points(self, frame):
         # maxindex = np.argmax(frame, axis=1)
