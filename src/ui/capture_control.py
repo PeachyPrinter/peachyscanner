@@ -16,7 +16,7 @@ from threading import Lock
 import numpy as np
 import time
 
-from infrastructure.point_converter import GLConverter
+from infrastructure.gl_point_converter import GLConverter
 
 Builder.load_file('ui/capture_control.kv')
 
