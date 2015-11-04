@@ -154,13 +154,15 @@ class VideoProcessorTest(unittest.TestCase):
     def test_handler_should_be_given_the_detected_laser(self):
         video_processor = self.create_video_processor()
         self.encoder.should_capture_frame_for_section.return_value = (True, 44)
+        expected = self.roi.get_left_of_center(self.detected_image)
+
         subscriber = TestHandler()
         video_processor.subscribe(subscriber)
         video_processor.start()
         time.sleep(self.start_up_delay)
         video_processor.stop()
         self.assertTrue(len(subscriber.calls) > 0)
-        self.assertTrue((self.detected_image == subscriber.calls[0]['laser_detection']).all())
+        self.assertTrue((expected == subscriber.calls[0]['laser_detection']).all())
 
     def test_when_handler_returns_false_unsubscribe_them(self):
         video_processor = self.create_video_processor()

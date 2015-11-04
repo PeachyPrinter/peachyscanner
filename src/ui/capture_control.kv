@@ -22,17 +22,19 @@
 
 <PointsCapture>:
     name: 'points_capture_ui'
-#        Button:
-#            size_hint_y: None
-#            height: app.button_height
-#            id: find_centre
-#            text: "Start Points Capture"
-#            on_release: root.start_points_capture()
+    render: render
+    GridLayout:
+        cols: 1
+        Button:
+            size_hint_y: None
+            height: app.button_height
+            text: "Start Points Capture"
+            on_release: root.start_points_capture()
 #        ProgressBar:
 #            id: progress
 #            size_hint_y: None
 #            height: app.button_height
 #            max: 1.0
 #            value: 0.0
-#        ObjectRenderer:
-#            id:render
+        ObjectRenderer:
+            id:render

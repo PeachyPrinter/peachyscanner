@@ -23,7 +23,8 @@ class PointConverterTest(unittest.TestCase):
         data = np.array([[0, 0, 1],
                          [0, 1, 0],
                          [1, 0, 0]])
-        expected_result = np.array([0, 1, 0])
+
+        expected_result = np.array([0, 1, 2])
 
         result = self.test_converter.get_points(data, 2)
 
@@ -33,7 +34,7 @@ class PointConverterTest(unittest.TestCase):
         data = np.array([[1, 0, 0],
                          [0, 1, 0],
                          [0, 0, 1]])
-        expected_result = np.array([0, 1, 0])
+        expected_result = np.array([2., 1., 0])
 
         result = self.test_converter.get_points(data, 2)
 
@@ -45,7 +46,7 @@ class PointConverterTest(unittest.TestCase):
                          [0, 0, 1]])
         expected_result = np.array([0, 1, 0])
 
-        result = self.test_converter.get_points(data,2)
+        result = self.test_converter.get_points(data, 2)
 
         self.assertTrue((expected_result == result).all(), str(result))
 
@@ -63,27 +64,18 @@ class PointConverterTest(unittest.TestCase):
         data = np.array([[0, 0, 1, 0, 0, 0, 0],
                          [0, 0, 0, 1, 0, 0, 0],
                          [0, 0, 0, 0, 1, 0, 0]])
-        expected_result = np.array([2, 1, 0])
+        expected_result = np.array([4, 3, 2])
 
         result = self.test_converter.get_points(data, 4)
 
         self.assertTrue((expected_result == result).all(), str(result))
 
-    def test_get_points_returns_0_when_points_beyond_center(self):
-        data = np.array([[0, 0, 1, 0, 0, 0, 0],
-                         [0, 0, 0, 1, 0, 0, 0],
-                         [0, 0, 0, 0, 1, 0, 0]])
-        expected_result = np.array([0, 0, 0])
-
-        result = self.test_converter.get_points(data, 2)
-
-        self.assertTrue((expected_result == result).all(), str(result))
 
     def test_get_points_returns_offset_points_when_centered_and_missing(self):
         data = np.array([[0, 0, 1, 0, 0, 0, 0],
                          [0, 0, 0, 0, 0, 0, 0],
                          [0, 0, 0, 0, 1, 0, 0]])
-        expected_result = np.array([2, 0, 0])
+        expected_result = np.array([4, 0, 2])
 
         result = self.test_converter.get_points(data, 4)
 
@@ -93,7 +85,7 @@ class PointConverterTest(unittest.TestCase):
         data = np.array([[0, 0, 1, 0, 0, 0, 0],
                          [0, 0, 0, 1, 0, 0, 0],
                          [0, 0, 1, 1, 1, 1, 1]])
-        expected_result = np.array([2, 1, 2])
+        expected_result = np.array([4, 3, 0])
 
         result = self.test_converter.get_points(data, 4)
 
@@ -105,7 +97,7 @@ class PointConverterTest(unittest.TestCase):
                          [0, 0, 0, 1, 0, 0, 0, 0],
                          [0, 0, 0, 1, 0, 0, 0, 0],
                          [0, 0, 1, 0, 0, 0, 0, 0]])
-        expected_result = np.array([3, 2, 1, 1, 2])
+        expected_result = np.array([6, 5, 4, 4, 5])
 
         result = self.test_converter.get_points(data, 4)
 
@@ -121,14 +113,14 @@ class PointCaptureTest(unittest.TestCase):
         mock_point_converter.get_points.return_value = return_array
         sections = 200
         detected = np.zeros((100, 130, 1), dtype='uint8')
-        expected = np.zeros((100, sections), dtype='uint8')
-        expected[:, 0] = return_array
+        expected = np.zeros((sections,100), dtype='uint8')
+        expected[0] = return_array
 
         point_capture = PointCapture(sections)
-        result = point_capture.handle(detected=detected, section=0, roi_center_y=50)
+        result = point_capture.handle(laser_detection=detected, section=0, roi_center_y=50)
 
         self.assertTrue(result)
-        self.assertTrue((expected == point_capture.points).all())
+        self.assertTrue((expected == point_capture.points_tyr).all())
 
     def test_handle_give_region_containing_data_returns_expected_point_in_simple_example(self, mock_PointConverter):
         mock_point_converter = mock_PointConverter.return_value
@@ -136,14 +128,14 @@ class PointCaptureTest(unittest.TestCase):
         sections = 200
         detected = np.zeros((1, 10, 1), dtype='uint8')
         detected[:][0] = 255
-        expected = np.zeros((1, sections), dtype='uint8')
-        expected[:, 0] = np.array([1])
+        expected = np.zeros((sections, 1), dtype='uint8')
+        expected[0] = np.array([1])
 
         point_capture = PointCapture(sections)
-        result = point_capture.handle(detected=detected, section=0, roi_center_y=50)
+        result = point_capture.handle(laser_detection=detected, section=0, roi_center_y=50)
 
         self.assertTrue(result)
-        self.assertTrue((expected == point_capture.points).all())
+        self.assertTrue((expected == point_capture.points_tyr).all())
 
     def test_after_handling_all_sections_should_return_0(self, mock_PointConverter):
         mock_point_converter = mock_PointConverter.return_value
@@ -151,12 +143,12 @@ class PointCaptureTest(unittest.TestCase):
         sections = 200
         detected = np.zeros((1, 10, 1), dtype='uint8')
         detected[:][0] = 255
-        expected = np.zeros((1, sections), dtype='uint8')
+        expected = np.zeros((sections, 1), dtype='uint8')
         expected[:, 0] = np.array([1])
 
         point_capture = PointCapture(sections)
         for idx in range(sections):
-            result = point_capture.handle(detected=detected, section=idx, roi_center_y=50)
+            result = point_capture.handle(laser_detection=detected, section=idx, roi_center_y=50)
 
         self.assertFalse(result)
 
@@ -172,9 +164,39 @@ class PointCaptureTest(unittest.TestCase):
         point_capture = PointCapture(sections)
         for idx in range(sections):
             index = (idx + 50) % 200
-            result = point_capture.handle(detected=detected, section=index, roi_center_y=50)
+            result = point_capture.handle(laser_detection=detected, section=index, roi_center_y=50)
 
         self.assertFalse(result)
+
+    def test_complete_should_be_false_if_all_sections_unhandled(self, mock_PointConverter):
+        mock_point_converter = mock_PointConverter.return_value
+        mock_point_converter.get_points.return_value = np.ones((1), dtype='uint32')
+        sections = 200
+        detected = np.zeros((1, 10, 1), dtype='uint8')
+        detected[:][0] = 255
+        expected = np.zeros((1, sections), dtype='uint8')
+        expected[:, 0] = np.array([1])
+
+        point_capture = PointCapture(sections)
+        for idx in range(sections - 2):
+            point_capture.handle(laser_detection=detected, section=idx, roi_center_y=50)
+
+        self.assertFalse(point_capture.complete)
+
+    def test_complete_should_be_true_if_all_sections_handled(self, mock_PointConverter):
+        mock_point_converter = mock_PointConverter.return_value
+        mock_point_converter.get_points.return_value = np.ones((1), dtype='uint32')
+        sections = 200
+        detected = np.zeros((1, 10, 1), dtype='uint8')
+        detected[:][0] = 255
+        expected = np.zeros((1, sections), dtype='uint8')
+        expected[:, 0] = np.array([1])
+
+        point_capture = PointCapture(sections)
+        for idx in range(sections):
+            point_capture.handle(laser_detection=detected, section=idx, roi_center_y=50)
+
+        self.assertTrue(point_capture.complete)
 
 
 class ImageCaptureTest(unittest.TestCase):
@@ -193,7 +215,7 @@ class ImageCaptureTest(unittest.TestCase):
         expected = np.zeros((100, sections, 3), dtype='uint8')
         expected[:, 0] = (255, 0, 0)
         image_capture = ImageCapture(sections)
-        image_capture.handle(frame)
+        image_capture.handle(frame=frame)
 
         self.assertTrue((image_capture.image[0] == expected[0]).all())
 
@@ -204,7 +226,7 @@ class ImageCaptureTest(unittest.TestCase):
         expected = np.zeros((100, sections, 3), dtype='uint8')
         expected[:, 20] = (255, 0, 0)
         image_capture = ImageCapture(sections)
-        image_capture.handle(frame, 20)
+        image_capture.handle(frame=frame, section=20)
 
         self.assertTrue((image_capture.image == expected).all())
 
@@ -219,8 +241,8 @@ class ImageCaptureTest(unittest.TestCase):
         expected[:, 1] = (0, 0, 255)
         image_capture = ImageCapture(sections)
 
-        image_capture.handle(frame, 0)
-        image_capture.handle(frame2, 1)
+        image_capture.handle(frame=frame, section=0)
+        image_capture.handle(frame=frame2, section=1)
 
         self.assertTrue((image_capture.image == expected).all())
 
@@ -228,10 +250,36 @@ class ImageCaptureTest(unittest.TestCase):
         sections = 5
         frame = np.ones((100, 130, 3), dtype='uint8') * 128
         image_capture = ImageCapture(sections)
-        results = [image_capture.handle(frame, section) for section in range(5)]
+        results = [image_capture.handle(frame=frame, section=section) for section in range(5)]
         self.assertEquals(5, len(results))
         self.assertTrue(results[3])
         self.assertFalse(results[4])
+
+    def test_complete_should_be_false_before_all_sections_have_been_captured(self):
+        sections = 5
+        frame = np.ones((100, 130, 3), dtype='uint8') * 128
+        image_capture = ImageCapture(sections)
+        results = [image_capture.handle(frame=frame, section=section) for section in range(4)]
+        
+        self.assertFalse(image_capture.complete)
+
+    def test_complete_should_be_true_when_all_sections_have_been_captured(self):
+        sections = 5
+        frame = np.ones((100, 130, 3), dtype='uint8') * 128
+        image_capture = ImageCapture(sections)
+        
+        results = [image_capture.handle(frame=frame, section=section) for section in range(5)]
+        
+        self.assertTrue(image_capture.complete)
+
+    def test_handle_can_handle_erronous_keywords(self):
+        sections = 5
+        frame = np.ones((100, 130, 3), dtype='uint8') * 128
+        image_capture = ImageCapture(sections)
+        
+        results = [image_capture.handle(frame=frame, section=section, kitten='bohahaha') for section in range(5)]
+        
+        self.assertTrue(image_capture.complete)
 
 
 

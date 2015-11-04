@@ -10,6 +10,7 @@ class ROI(object):
         self.w_rel = w_rel
         self.h_rel = h_rel
         self.center_line = 0.5
+        logger.info("ROI Created {} - {}, {} - {}".format(self.x_rel, self.y_rel, self.w_rel, self.h_rel))
         if self.center_line > (self.x_rel + self.w_rel) or self.center_line < self.x_rel:
             raise Exception('Region of interest must span the center of frame: {}->{}'.format(self.x_rel, self.w_rel))
 

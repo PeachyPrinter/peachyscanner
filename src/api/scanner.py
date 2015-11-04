@@ -8,7 +8,7 @@ from infrastructure.encoder import Encoder
 
 from infrastructure.camera import Camera
 from infrastructure.video_processor import VideoProcessor
-from infrastructure.data_capture import ImageCapture
+from infrastructure.data_capture import ImageCapture, PointCapture
 from infrastructure.laser_detector import LaserDetector
 
 
@@ -42,6 +42,12 @@ class ScannerAPI(object):
             self.video_processor.subscribe(ImageCapture(self.encoder.sections), call_back)
         else:
             self.video_processor.subscribe(ImageCapture(self.encoder.sections))
+
+    def capture_points(self, call_back=None):
+        if call_back:
+            self.video_processor.subscribe(PointCapture(self.encoder.sections), call_back)
+        else:
+            self.video_processor.subscribe(PointCapture(self.encoder.sections))
 
     def get_feed_image(self, size):
         return self.video_processor.get_bounded_image(*size)

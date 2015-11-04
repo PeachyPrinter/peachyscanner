@@ -1,6 +1,8 @@
 import numpy as np
+import logging
 
-# from infrastructure.point_converter import PointConverter
+logger = logging.getLogger('peachy')
+
 
 class ImageCapture(object):
 
@@ -9,7 +11,11 @@ class ImageCapture(object):
         self._section_count = 0
         self.image = None
 
-    def handle(self, frame=None, section=0):
+    @property
+    def complete(self):
+        return self._section_count >= self.sections
+
+    def handle(self, frame=None, section=0, **kwargs):
         self._section_count += 1
         self._image(frame.shape[0])[:, section] = frame[:, -1]
         return self._section_count < self.sections
@@ -26,27 +32,27 @@ class PointCapture(object):
         self.sections = sections
         self._section_count = 0
         self.point_converter = PointConverter()
-        self.points = None
+        self.points_tyr = None  #(theta, height, radius)
 
-    def handle(self, **kwargs):
+    @property
+    def complete(self):
+        return self._section_count >= self.sections
+
+    def handle(self, laser_detection=None, section=0, roi_center_y=0, **kwargs):
         self._section_count += 1
-        points = self._points(kwargs['detected'].shape[0])
-        data = kwargs['detected'].copy()
-        section = kwargs['section']
-        points[:, section] = self.point_converter.get_points(data, kwargs['roi_center_y'])
+        points = self._points(laser_detection.shape[0])
+        points[section] = self.point_converter.get_points(laser_detection, laser_detection.shape[0])
         return self._section_count < self.sections
 
     def _points(self, height):
-        if self.points is None:
-            self.points = np.zeros((height, self.sections), dtype='int32')
-        return self.points
+        if self.points_tyr is None:
+            self.points_tyr = np.zeros((self.sections, height), dtype='int32')
+        return self.points_tyr
 
 
 class PointConverter(object):
-    def get_points(self, mask, center):
-        roi = mask
+    def get_points(self, mask, center_y):
+        roi = np.fliplr(mask)
         maxindex = np.argmax(roi, axis=1)
-        data = (np.ones(maxindex.shape[0]) * center) - maxindex
-        data[data < 0] = 0
-        data[data == center] = 0
-        return data
+        # maxindex = np.ones(maxindex.shape[0]) * np.linspace(0, 100, maxindex.shape[0])
+        return maxindex

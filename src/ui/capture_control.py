@@ -6,7 +6,7 @@ from kivy.uix.widget import Widget
 from kivy.resources import resource_find
 from kivy.graphics.opengl import GL_DEPTH_TEST, glEnable, glDisable
 from kivy.graphics.transformation import Matrix
-from kivy.graphics import RenderContext, Callback, PushMatrix, PopMatrix, Color, Translate, Rotate, UpdateNormalMatrix, Mesh
+from kivy.graphics import RenderContext, Callback, PushMatrix, PopMatrix, Color, Translate, Rotate, UpdateNormalMatrix, Mesh, Line
 from kivy.clock import Clock
 from kivy.properties import ObjectProperty
 from kivy.graphics.texture import Texture
@@ -52,17 +52,15 @@ class ImageCapture(Screen):
     def __init__(self, scanner, **kwargs):
         super(ImageCapture, self).__init__(**kwargs)
         self.scanner = scanner
-    #   self._converter = GLConverter()
-    #   self.raw_points = np.array([])
-    # def start_points_capture(self):
-    #     self._disable_all()
-    #     App.get_running_app().capture.start_capture(self._capture_callback)
 
     def start_image_capture(self):
+        self._disable_all()
         self.scanner.capture_image(self._capture_image_callback)
 
     def _capture_image_callback(self, handler):
         self._image = handler.image
+        if handler.complete:
+            self._enable_all()
         Clock.schedule_once(self._update_image)
 
     def _update_image(self, *args):
@@ -76,25 +74,45 @@ class ImageCapture(Screen):
         for child in self.children:
             child.disabled = True
 
-    # def update_progress(self, status):
-    #     self.raw_points = status.points
-    #     self.progress.value = status.progress
-    #     Clock.unschedule(self.update_model)
-    #     Clock.schedule_once(self.update_model)
-
-    # def update_model(self, *largs):
-    #     if len(self.raw_points) > 0:
-    #         scale = min(0.05, 1.0 / np.amax(self.raw_points))
-    #         points = self._converter.convert(self.raw_points, scale=scale)
-    #         self.render.update_mesh(points)
-
 
 class PointsCapture(Screen):
 
     def __init__(self, scanner, **kwargs):
         super(PointsCapture, self).__init__(**kwargs)
         self.scanner = scanner
+        self._converter = GLConverter()
+        self.raw_points_tyr = np.array([])
 
+    def start_points_capture(self):
+        self._disable_all()
+        self.scanner.capture_points(self._capture_points_callback)
+
+    def _capture_points_callback(self, handler):
+        self.raw_points_tyr = handler.points_tyr
+        if handler.complete:
+            self._enable_all()
+            # Logger.info('Done: {}'.format(self.raw_points_tyr))
+            from infrastructure.writer import PLYWriter
+            with open('out.ply', 'w') as afile:
+                PLYWriter().write_polar_points(afile, self.raw_points_tyr)
+        Clock.unschedule(self.update_model)
+        Clock.schedule_once(self.update_model)
+
+    def _enable_all(self):
+        for child in self.children:
+            child.disabled = False
+
+    def _disable_all(self):
+        for child in self.children:
+            child.disabled = True
+
+    def update_model(self, *largs):
+        amax = np.amax(self.raw_points_tyr)
+        if amax > 0:
+            scale = min(0.05, 1.0 / np.amax(self.raw_points_tyr))
+            # Logger.info('Scale: {}'.format(scale))
+            points = self._converter.convert(self.raw_points_tyr, scale=scale)
+            self.render.update_mesh(points)
 
 class ObjectRenderer(Widget):
     def __init__(self, **kwargs):
@@ -121,6 +139,7 @@ class ObjectRenderer(Widget):
 
     def update_glsl(self, *largs):
         asp = self.width / float(self.height)
+        # Logger.info("X,Y: {},{}".format(self.width, self.height))
         proj = Matrix().view_clip(-asp, asp, -1, 1, 1, 100, 1)
         self.canvas['projection_mat'] = proj
         with self.lock:
