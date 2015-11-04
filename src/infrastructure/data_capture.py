@@ -33,7 +33,7 @@ class PointCapture(object):
         points = self._points(kwargs['detected'].shape[0])
         data = kwargs['detected'].copy()
         section = kwargs['section']
-        points[:, section] = self.point_converter.get_points(data)
+        points[:, section] = self.point_converter.get_points(data, kwargs['roi_center_y'])
         return self._section_count < self.sections
 
     def _points(self, height):
@@ -42,12 +42,11 @@ class PointCapture(object):
         return self.points
 
 
-
 class PointConverter(object):
-
-    def get_points(self, frame):
-        maxindex = np.argmax(frame, axis=1)[:][0]
-        # data = (np.ones(maxindex.shape[0]) * maxindex.shape[0]) - maxindex
-        # data[data < 0] = 0
-        # data[data == maxindex.shape[0]] = 0
-        return maxindex
+    def get_points(self, mask, center):
+        roi = mask
+        maxindex = np.argmax(roi, axis=1)
+        data = (np.ones(maxindex.shape[0]) * center) - maxindex
+        data[data < 0] = 0
+        data[data == center] = 0
+        return data
