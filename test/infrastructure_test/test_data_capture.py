@@ -4,7 +4,7 @@ import os
 import numpy as np
 import logging
 
-from mock import Mock
+from mock import Mock, patch
 import cv2
 
 
@@ -14,15 +14,68 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 from infrastructure.data_capture import PointCapture, ImageCapture
 from helpers import FakeCamera
 
-
+@patch('infrastructure.data_capture.PointConverter')
 class PointCaptureTest(unittest.TestCase):
-    def test_handle_give_region_containing_no_data_returns_no_points(self):
+    def test_handle_give_region_containing_no_data_returns_no_points(self, mock_PointConverter):
+        mock_point_converter = mock_PointConverter.return_value
+        return_array = np.ones((100), dtype='uint32')
+        mock_point_converter.get_points.return_value = return_array
         sections = 200
         detected = np.zeros((100, 130, 1), dtype='uint8')
         expected = np.zeros((100, sections), dtype='uint8')
+        expected[:,0] = return_array
+
         point_capture = PointCapture(sections)
-        point_capture.handle(detected=detected, section=0, roi_center_y=50)
+        result = point_capture.handle(detected=detected, section=0, roi_center_y=50)
+
+        self.assertTrue(result)
         self.assertTrue((expected == point_capture.points).all())
+
+    def test_handle_give_region_containing_data_returns_expected_point_in_simple_example(self, mock_PointConverter):
+        mock_point_converter = mock_PointConverter.return_value
+        mock_point_converter.get_points.return_value = np.ones((1), dtype='uint32')
+        sections = 200
+        detected = np.zeros((1, 10, 1), dtype='uint8')
+        detected[:][0] = 255
+        expected = np.zeros((1, sections), dtype='uint8')
+        expected[:, 0] = np.array([1])
+
+        point_capture = PointCapture(sections)
+        result = point_capture.handle(detected=detected, section=0, roi_center_y=50)
+
+        self.assertTrue(result)
+        self.assertTrue((expected == point_capture.points).all())
+
+    def test_after_handling_all_sections_should_return_0(self, mock_PointConverter):
+        mock_point_converter = mock_PointConverter.return_value
+        mock_point_converter.get_points.return_value = np.ones((1), dtype='uint32')
+        sections = 200
+        detected = np.zeros((1, 10, 1), dtype='uint8')
+        detected[:][0] = 255
+        expected = np.zeros((1, sections), dtype='uint8')
+        expected[:, 0] = np.array([1])
+
+        point_capture = PointCapture(sections)
+        for idx in range(sections):
+            result = point_capture.handle(detected=detected, section=idx, roi_center_y=50)
+
+        self.assertFalse(result)
+
+    def test_should_handle_all_sections_if_starting_at_not_0_index(self, mock_PointConverter):
+        mock_point_converter = mock_PointConverter.return_value
+        mock_point_converter.get_points.return_value = np.ones((1), dtype='uint32')
+        sections = 200
+        detected = np.zeros((1, 10, 1), dtype='uint8')
+        detected[:][0] = 255
+        expected = np.zeros((1, sections), dtype='uint8')
+        expected[:, 0] = np.array([1])
+
+        point_capture = PointCapture(sections)
+        for idx in range(sections):
+            index = (idx + 50) % 200
+            result = point_capture.handle(detected=detected, section=index, roi_center_y=50)
+
+        self.assertFalse(result)
 
 
 class ImageCaptureTest(unittest.TestCase):

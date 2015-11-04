@@ -1,6 +1,6 @@
 import numpy as np
 
-from infrastructure.point_converter import PointConverter
+# from infrastructure.point_converter import PointConverter
 
 class ImageCapture(object):
 
@@ -24,21 +24,30 @@ class PointCapture(object):
 
     def __init__(self, sections):
         self.sections = sections
+        self._section_count = 0
+        self.point_converter = PointConverter()
         self.points = None
 
-    def handle(self, **kwargs): 
-        self._points(kwargs['detected'].shape[0])
-        return 0
+    def handle(self, **kwargs):
+        self._section_count += 1
+        points = self._points(kwargs['detected'].shape[0])
+        data = kwargs['detected'].copy()
+        section = kwargs['section']
+        points[:, section] = self.point_converter.get_points(data)
+        return self._section_count < self.sections
 
     def _points(self, height):
         if self.points is None:
             self.points = np.zeros((height, self.sections), dtype='int32')
-        else:
-            self.points
+        return self.points
+
+
+
+class PointConverter(object):
 
     def get_points(self, frame):
-        # maxindex = np.argmax(frame, axis=1)
+        maxindex = np.argmax(frame, axis=1)[:][0]
         # data = (np.ones(maxindex.shape[0]) * maxindex.shape[0]) - maxindex
         # data[data < 0] = 0
         # data[data == maxindex.shape[0]] = 0
-        return 0
+        return maxindex
