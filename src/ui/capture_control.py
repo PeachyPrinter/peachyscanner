@@ -9,7 +9,7 @@ from kivy.graphics.opengl import GL_DEPTH_TEST, glEnable, glDisable
 from kivy.graphics.transformation import Matrix
 from kivy.graphics import RenderContext, Callback, PushMatrix, PopMatrix, Color, Translate, Rotate, UpdateNormalMatrix, Mesh, Line
 from kivy.clock import Clock
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.graphics.texture import Texture
 from kivy.uix.boxlayout import BoxLayout
 from threading import Lock
@@ -101,12 +101,10 @@ class PointsCapture(Screen):
         Clock.schedule_once(self.update_model)
 
     def _enable_all(self):
-        for child in self.children:
-            child.disabled = False
+        self.go_button.disabled = False
 
     def _disable_all(self):
-        for child in self.children:
-            child.disabled = True
+        self.go_button.disabled = True
 
     def update_model(self, *largs):
         amax = np.amax(self.raw_points_tyr)
@@ -116,7 +114,9 @@ class PointsCapture(Screen):
             points = self._converter.convert(self.raw_points_tyr, scale=scale)
             self.render.update_mesh(points)
 
+
 class ObjectRenderer(BoxLayout):
+    mesh_mode = BooleanProperty(False)
     def __init__(self, **kwargs):
         self.lock = Lock()
         self.gl_depth = -3
@@ -125,6 +125,7 @@ class ObjectRenderer(BoxLayout):
         self.mesh_data = MeshData()
         self.mesh_data.vertices = np.array([0, 0, 0, 0, 0, 0, 0, 0])
         self.mesh_data.indices = np.array([0])
+        self.points = None
         super(ObjectRenderer, self).__init__(**kwargs)
         with self.canvas:
             self.cb = Callback(self.setup_gl_context)
@@ -158,11 +159,26 @@ class ObjectRenderer(BoxLayout):
         self.rot.angle += -3
 
     def update_mesh(self, points):
+        self.points = points
         #TODO make this dynamic or something
         points = np.array(np.hsplit(points, points.shape[0] // 8))[::4].flatten()
         with self.lock:
             self.mesh_data.vertices = points
-            self.mesh_data.indices = np.arange(len(points) // 8)
+            indicies = np.arange(len(points) // 8)
+            if self.mesh_mode:
+                idx = []
+                rows = len(indicies) / 200
+                for pos in range(len(indicies) - (rows +1)):
+                    A = indicies[pos]
+                    B = indicies[pos + 1]
+                    C = indicies[pos + rows]
+                    D = indicies[pos + rows + 1]
+                    idx.extend([A, C, D, A, D, B])
+                self.mesh_data.indices = idx
+                self.mesh.mode = 'triangles'
+            else:
+                self.mesh_data.indices = indicies
+                self.mesh.mode = 'points'
 
     def setup_scene(self):
         self.canvas['diffuse_light'] = (1.0, 1.0, 0.8)
@@ -178,7 +194,7 @@ class ObjectRenderer(BoxLayout):
                 vertices=self.mesh_data.vertices,
                 indices=self.mesh_data.indices,
                 fmt=self.mesh_data.vertex_format,
-                mode='points',
+                mode=self.mesh_data.mode,
             )
         # self.show_axis()
         PopMatrix()
@@ -233,6 +249,8 @@ class ObjectRenderer(BoxLayout):
                 mode='line_strip',
             )
 
+    def on_mesh_mode(self, instance, value):
+        self.update_mesh(self.points)
 
 class MeshData(object):
     def __init__(self, **kwargs):
@@ -243,3 +261,4 @@ class MeshData(object):
             (b'v_tc0', 2, 'float')]
         self.vertices = []
         self.indices = []
+        self.mode = 'points'

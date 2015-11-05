@@ -23,9 +23,11 @@
 <PointsCapture>:
     name: 'points_capture_ui'
     render: render
+    go_button: go_button
     GridLayout:
         cols: 1
         Button:
+            id: go_button
             size_hint_y: None
             height: app.button_height
             text: "Start Points Capture"
@@ -38,3 +40,9 @@
 #            value: 0.0
         ObjectRenderer:
             id:render
+            mesh_mode: False
+        ToggleButton:
+            size_hint_y: None
+            height: app.button_height
+            text: "Mesh / Points"
+            on_release: render.mesh_mode = True if self.state == 'down' else False

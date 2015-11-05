@@ -54,5 +54,5 @@ class PointConverter(object):
     def get_points(self, mask, center_y):
         roi = np.fliplr(mask)
         maxindex = np.argmax(roi, axis=1)
-        # maxindex = np.ones(maxindex.shape[0]) * np.linspace(0, 100, maxindex.shape[0])
+        # maxindex = np.ones(maxindex.shape[0]) * np.linspace(0, 20, maxindex.shape[0])
         return maxindex
