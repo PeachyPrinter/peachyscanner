@@ -3,6 +3,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.logger import Logger
 from kivy.lang import Builder
 from kivy.uix.widget import Widget
+from kivy.core.window import Window
 from kivy.resources import resource_find
 from kivy.graphics.opengl import GL_DEPTH_TEST, glEnable, glDisable
 from kivy.graphics.transformation import Matrix
@@ -12,6 +13,7 @@ from kivy.properties import ObjectProperty
 from kivy.graphics.texture import Texture
 from kivy.uix.boxlayout import BoxLayout
 from threading import Lock
+from math import tan, atan
 
 import numpy as np
 import time
@@ -114,7 +116,7 @@ class PointsCapture(Screen):
             points = self._converter.convert(self.raw_points_tyr, scale=scale)
             self.render.update_mesh(points)
 
-class ObjectRenderer(Widget):
+class ObjectRenderer(BoxLayout):
     def __init__(self, **kwargs):
         self.lock = Lock()
         self.canvas = RenderContext(compute_normal_mat=True)
@@ -138,8 +140,23 @@ class ObjectRenderer(Widget):
         glDisable(GL_DEPTH_TEST)
 
     def update_glsl(self, *largs):
-        asp = self.width / float(self.height)
-        # Logger.info("X,Y: {},{}".format(self.width, self.height))
+        asp = Window.width / float(Window.height)
+        center_px = Window.width / 2
+        center2widget_edge_px = center_px - self.width
+        center2widget_center_px = center2widget_edge_px + self.width / 2
+        percentage_distance_from_center = center2widget_center_px / center_px
+        self.lr_translate.x = asp * (-3 * percentage_distance_from_center)
+
+
+        Logger.info("ASP  {}".format(asp))
+        Logger.info("Cen  {}".format(center_px))
+        Logger.info("C2WE {}".format(center2widget_edge_px))
+        Logger.info("C2WC {}".format(center2widget_center_px))
+        Logger.info("PDC  {}".format(percentage_distance_from_center))
+        Logger.info("x    {}".format(self.lr_translate.x))
+        Logger.info("------")
+
+
         proj = Matrix().view_clip(-asp, asp, -1, 1, 1, 100, 1)
         self.canvas['projection_mat'] = proj
         with self.lock:
@@ -157,20 +174,73 @@ class ObjectRenderer(Widget):
     def setup_scene(self):
         self.canvas['diffuse_light'] = (1.0, 1.0, 0.8)
         self.canvas['ambient_light'] = (0.1, 0.1, 0.1)
-        Color(1, 0, 0, 1)
         PushMatrix()
+        Translate(0, 0, 0)
+        self.lr_translate = Translate(-3, 0, 0)
         Translate(0, 0, -3)
-        Translate(0, 1, 0)
         Rotate(90, 1, 0, 0)
         self.rot = Rotate(1, 0, 0, 1)
         UpdateNormalMatrix()
+        Color(1, 0, 0, 1)
         self.mesh = Mesh(
                 vertices=self.mesh_data.vertices,
                 indices=self.mesh_data.indices,
                 fmt=self.mesh_data.vertex_format,
                 mode='points',
             )
+        self.show_axis()
         PopMatrix()
+
+    def show_axis(self):
+        Color(1, 1, 0, 1) #Yellow
+        Mesh(
+                vertices=[
+                     -1,        0,      0, 1, 1, 0, 0, 0,
+                      1,        0,      0, 1, 1, 0, 0, 0,
+                    0.8,      0.1,      0, 1, 1, 0, 0, 0,
+                    0.8,     -0.1,      0, 1, 1, 0, 0, 0,
+                      1,        0,      0, 1, 1, 0, 0, 0,
+                    0.8,        0,   -0.1, 1, 1, 0, 0, 0,
+                    0.8,        0,    0.1, 1, 1, 0, 0, 0,
+                      1,        0,      0, 1, 1, 0, 0, 0,
+                  ],
+                indices=[0, 1, 2, 3, 4, 5, 6, 7],
+                fmt=self.mesh_data.vertex_format,
+                mode='line_strip',
+            )
+        Color(1, 0, 1, 1) # purple
+        Mesh(
+                vertices=[
+                       0,      0,      -1, 0, 1, 1, 0, 0,
+                       0,      0,       1, 0, 1, 1, 0, 0,
+                     0.1,      0,     0.8, 0, 1, 1, 0, 0,
+                    -0.1,      0,     0.8, 0, 1, 1, 0, 0,
+                       0,      0,       1, 0, 1, 1, 0, 0,
+                       0,   -0.1,     0.8, 0, 1, 1, 0, 0,
+                       0,    0.1,     0.8, 0, 1, 1, 0, 0,
+                       0,      0,       1, 0, 1, 1, 0, 0,
+                  ],
+                indices=[0, 1, 2, 3, 4, 5, 6, 7],
+                fmt=self.mesh_data.vertex_format,
+                mode='line_strip',
+            )
+        Color(0, 1, 1, 1) # Baby Blue
+        Mesh(
+                vertices=[
+                       0,      -1,      0, 1, 1, 0, 0, 0,
+                       0,       1,      0, 1, 1, 0, 0, 0,
+                     0.1,     0.8,      0, 1, 1, 0, 0, 0,
+                    -0.1,     0.8,      0, 1, 1, 0, 0, 0,
+                       0,       1,      0, 1, 1, 0, 0, 0,
+                       0,     0.8,   -0.1, 1, 1, 0, 0, 0,
+                       0,     0.8,    0.1, 1, 1, 0, 0, 0,
+                       0,       1,      0, 1, 1, 0, 0, 0,
+                  ],
+                indices=[0, 1, 2, 3, 4, 5, 6, 7],
+                fmt=self.mesh_data.vertex_format,
+                mode='line_strip',
+            )
+
 
 class MeshData(object):
     def __init__(self, **kwargs):
