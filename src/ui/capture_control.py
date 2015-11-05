@@ -119,6 +119,7 @@ class PointsCapture(Screen):
 class ObjectRenderer(BoxLayout):
     def __init__(self, **kwargs):
         self.lock = Lock()
+        self.gl_depth = -3
         self.canvas = RenderContext(compute_normal_mat=True)
         self.canvas.shader.source = resource_find('simple.glsl')
         self.mesh_data = MeshData()
@@ -132,6 +133,7 @@ class ObjectRenderer(BoxLayout):
             PopMatrix()
             self.cb = Callback(self.reset_gl_context)
         Clock.schedule_interval(self.update_glsl, 1 / 10.)
+        
 
     def setup_gl_context(self, *args):
         glEnable(GL_DEPTH_TEST)
@@ -140,22 +142,13 @@ class ObjectRenderer(BoxLayout):
         glDisable(GL_DEPTH_TEST)
 
     def update_glsl(self, *largs):
+        # self.canvas.shader.source = resource_find('simple.glsl')
         asp = Window.width / float(Window.height)
-        center_px = Window.width / 2
-        center2widget_edge_px = center_px - self.width
-        center2widget_center_px = center2widget_edge_px + self.width / 2
-        percentage_distance_from_center = center2widget_center_px / center_px
-        self.lr_translate.x = asp * (-3 * percentage_distance_from_center)
+        x_offset = (-float(self.width) / float(Window.width)) + 1.0
+        y_offset = ((2.0 * (self.y - self.height)) / Window.height) + 1.0
 
-
-        Logger.info("ASP  {}".format(asp))
-        Logger.info("Cen  {}".format(center_px))
-        Logger.info("C2WE {}".format(center2widget_edge_px))
-        Logger.info("C2WC {}".format(center2widget_center_px))
-        Logger.info("PDC  {}".format(percentage_distance_from_center))
-        Logger.info("x    {}".format(self.lr_translate.x))
-        Logger.info("------")
-
+        self.translate.x = asp * (self.gl_depth * x_offset)
+        self.translate.y = (1 / asp) * (self.gl_depth * y_offset)
 
         proj = Matrix().view_clip(-asp, asp, -1, 1, 1, 100, 1)
         self.canvas['projection_mat'] = proj
@@ -175,9 +168,8 @@ class ObjectRenderer(BoxLayout):
         self.canvas['diffuse_light'] = (1.0, 1.0, 0.8)
         self.canvas['ambient_light'] = (0.1, 0.1, 0.1)
         PushMatrix()
-        Translate(0, 0, 0)
-        self.lr_translate = Translate(-3, 0, 0)
-        Translate(0, 0, -3)
+        self.translate = Translate(0, 0, 0)
+        Translate(0, 0, self.gl_depth)
         Rotate(90, 1, 0, 0)
         self.rot = Rotate(1, 0, 0, 1)
         UpdateNormalMatrix()
@@ -188,7 +180,7 @@ class ObjectRenderer(BoxLayout):
                 fmt=self.mesh_data.vertex_format,
                 mode='points',
             )
-        self.show_axis()
+        # self.show_axis()
         PopMatrix()
 
     def show_axis(self):
