@@ -70,7 +70,6 @@ class PointConverterTest(unittest.TestCase):
 
         self.assertTrue((expected_result == result).all(), str(result))
 
-
     def test_get_points_returns_offset_points_when_centered_and_missing(self):
         data = np.array([[0, 0, 1, 0, 0, 0, 0],
                          [0, 0, 0, 0, 0, 0, 0],
@@ -104,7 +103,6 @@ class PointConverterTest(unittest.TestCase):
         self.assertTrue((expected_result == result).all(), str(result))
 
 
-
 @patch('infrastructure.data_capture.PointConverter')
 class PointCaptureTest(unittest.TestCase):
     def test_handle_give_region_containing_no_data_returns_no_points(self, mock_PointConverter):
@@ -113,7 +111,7 @@ class PointCaptureTest(unittest.TestCase):
         mock_point_converter.get_points.return_value = return_array
         sections = 200
         detected = np.zeros((100, 130, 1), dtype='uint8')
-        expected = np.zeros((sections,100), dtype='uint8')
+        expected = np.zeros((sections, 100), dtype='uint8')
         expected[0] = return_array
 
         point_capture = PointCapture(sections)
@@ -198,6 +196,19 @@ class PointCaptureTest(unittest.TestCase):
 
         self.assertTrue(point_capture.complete)
 
+    def test_status_should_return_amount_complete(self, mock_PointConverter):
+        mock_point_converter = mock_PointConverter.return_value
+        mock_point_converter.get_points.return_value = np.ones((1), dtype='uint32')
+        sections = 10
+        detected = np.zeros((1, 10, 1), dtype='uint8')
+        detected[:][0] = 255
+
+        point_capture = PointCapture(sections)
+        for idx in range(sections):
+            self.assertEquals(idx / float(sections), point_capture.status)
+            point_capture.handle(laser_detection=detected, section=idx, roi_center_y=50)
+        self.assertEquals(1.0, point_capture.status)
+
 
 class ImageCaptureTest(unittest.TestCase):
     def show_it(self, image):
@@ -259,28 +270,37 @@ class ImageCaptureTest(unittest.TestCase):
         sections = 5
         frame = np.ones((100, 130, 3), dtype='uint8') * 128
         image_capture = ImageCapture(sections)
-        results = [image_capture.handle(frame=frame, section=section) for section in range(4)]
-        
+        [image_capture.handle(frame=frame, section=section) for section in range(4)]
+
         self.assertFalse(image_capture.complete)
 
     def test_complete_should_be_true_when_all_sections_have_been_captured(self):
         sections = 5
         frame = np.ones((100, 130, 3), dtype='uint8') * 128
         image_capture = ImageCapture(sections)
-        
-        results = [image_capture.handle(frame=frame, section=section) for section in range(5)]
-        
+
+        [image_capture.handle(frame=frame, section=section) for section in range(5)]
+
         self.assertTrue(image_capture.complete)
 
     def test_handle_can_handle_erronous_keywords(self):
         sections = 5
         frame = np.ones((100, 130, 3), dtype='uint8') * 128
         image_capture = ImageCapture(sections)
-        
-        results = [image_capture.handle(frame=frame, section=section, kitten='bohahaha') for section in range(5)]
-        
+
+        [image_capture.handle(frame=frame, section=section, kitten='bohahaha') for section in range(5)]
+
         self.assertTrue(image_capture.complete)
 
+    def test_status_should_return_amount_complete(self):
+        sections = 10
+        frame = np.ones((100, 130, 3), dtype='uint8') * 128
+        image_capture = ImageCapture(sections)
+
+        for idx in range(sections):
+            self.assertEquals(idx / float(sections), image_capture.status)
+            image_capture.handle(frame=frame, section=idx, kitten='bohahaha')
+        self.assertEquals(1.0, image_capture.status)
 
 
    # def test_camera_displays_image(self):

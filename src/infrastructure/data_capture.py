@@ -5,7 +5,6 @@ logger = logging.getLogger('peachy')
 
 
 class ImageCapture(object):
-
     def __init__(self, sections):
         self.sections = sections
         self._section_count = 0
@@ -25,9 +24,12 @@ class ImageCapture(object):
             self.image = np.zeros((y_axis_dimension, self.sections, 3), dtype='uint8')
         return self.image
 
+    @property
+    def status(self):
+        return self._section_count / float(self.sections)
+
 
 class PointCapture(object):
-
     def __init__(self, sections):
         self.sections = sections
         self._section_count = 0
@@ -48,6 +50,10 @@ class PointCapture(object):
         if self.points_tyr is None:
             self.points_tyr = np.zeros((self.sections, height), dtype='int32')
         return self.points_tyr
+
+    @property
+    def status(self):
+        return self._section_count / float(self.sections)
 
 
 class PointConverter(object):
