@@ -91,6 +91,7 @@ class PointsCapture(Screen):
 
     def _capture_points_callback(self, handler):
         self.raw_points_tyr = handler.points_tyr
+        self.progress.value = int(handler.status * 100)
         if handler.complete:
             self._enable_all()
             # Logger.info('Done: {}'.format(self.raw_points_tyr))
@@ -146,7 +147,7 @@ class ObjectRenderer(BoxLayout):
         # self.canvas.shader.source = resource_find('simple.glsl')
         asp = Window.width / float(Window.height)
         x_offset = (-float(self.width) / float(Window.width)) + 1.0
-        y_offset = ((2.0 * (self.y - self.height)) / Window.height) + 1.0
+        y_offset = ((2.0 * (self.y - self.height)) / Window.height) - 0.0
 
         self.translate.x = asp * (self.gl_depth * x_offset)
         self.translate.y = (1 / asp) * (self.gl_depth * y_offset)
@@ -196,7 +197,7 @@ class ObjectRenderer(BoxLayout):
                 fmt=self.mesh_data.vertex_format,
                 mode=self.mesh_data.mode,
             )
-        # self.show_axis()
+        # self.show_axis()   #Help with GL alignments
         PopMatrix()
 
     def show_axis(self):

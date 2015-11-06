@@ -24,6 +24,7 @@
     name: 'points_capture_ui'
     render: render
     go_button: go_button
+    progress: progress
     GridLayout:
         cols: 1
         Button:
@@ -32,12 +33,12 @@
             height: app.button_height
             text: "Start Points Capture"
             on_release: root.start_points_capture()
-#        ProgressBar:
-#            id: progress
-#            size_hint_y: None
-#            height: app.button_height
-#            max: 1.0
-#            value: 0.0
+        ProgressBar:
+            id: progress
+            size_hint_y: None
+            height: app.button_height
+            max: 100
+            value: 0
         ObjectRenderer:
             id:render
             mesh_mode: False
