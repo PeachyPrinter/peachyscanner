@@ -7,7 +7,7 @@ import logging
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
-from infrastructure.laser_detector import LaserDetector
+from infrastructure.laser_detector import LaserDetector, LaserDetector2
 
 
 class LaserDetectorTest(unittest.TestCase):
@@ -51,6 +51,63 @@ class LaserDetectorTest(unittest.TestCase):
         expected = np.ones((10, 10, 1), dtype='uint8') * 255
 
         laser_detector = LaserDetector((128, 128, 128), (130, 130, 130))
+        result = laser_detector.detect(test)
+
+        self.assertTrue((expected == result).all(), "{} != {}".format(expected, result))
+        self.assertEquals(expected.dtype, result.dtype)
+
+
+class LaserDetector2Test(unittest.TestCase):
+
+    def test_raises_exception_if_values_out_of_range_for_threshold(self):
+        with self.assertRaises(Exception):
+            LaserDetector2(threshold=256)
+        with self.assertRaises(Exception):
+            LaserDetector2(threshold=-1)
+
+    def test_raises_exception_if_values_out_of_range_for_filter_size_yx(self):
+        with self.assertRaises(Exception):
+            LaserDetector2(filter_size_yx=(0, 0))
+        with self.assertRaises(Exception):
+            LaserDetector2(filter_size_yx=(1, 1, 1))
+
+    def test_raises_exception_if_unsupported_color(self):
+        with self.assertRaises(Exception):
+            LaserDetector2(color='yellow')
+
+    def test_init_can_init_with_reasonsable_values(self):
+        LaserDetector2(threshold=225, filter_size_yx=(5, 5), color='red')
+
+    def test_when_color_is_set_it_is_assigned(self):
+        ld = LaserDetector2(threshold=225, filter_size_yx=(5, 5), color='red')
+        ld.color = 'blue'
+
+    def test_when_threshold_is_set_it_is_assigned(self):
+        ld = LaserDetector2(threshold=225, filter_size_yx=(5, 5), color='red')
+        ld.threshold = 125
+
+    def test_when_filter_size_yx_is_set_it_is_assigned(self):
+        ld = LaserDetector2(threshold=225, filter_size_yx=(5, 5), color='red')
+        ld.filter_size_yx = (3, 3)
+
+    def test_detect_returns_an_empty_matrix_with_nothing_in_range(self):
+        test = np.ones((100, 100, 3), dtype='uint8') * 7
+        expected = np.zeros((100, 100, 1), dtype='uint8')
+
+        laser_detector = LaserDetector2()
+        result = laser_detector.detect(test)
+
+        self.assertTrue((expected == result).all())
+
+    def test_detect_returns_matrix_of_matched_points_if_in_range(self):
+        test = np.ones((10, 10, 3), dtype='uint8') * 250
+        expected = np.ones((10, 10), dtype='uint8') * 255
+        expected[0 ,  :] = 0
+        expected[-1,  :] = 0
+        expected[: ,  0] = 0
+        expected[: , -1] = 0
+
+        laser_detector = LaserDetector2()
         result = laser_detector.detect(test)
 
         self.assertTrue((expected == result).all(), "{} != {}".format(expected, result))

@@ -5,6 +5,7 @@ from kivy.properties import ObjectProperty, ListProperty, BooleanProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.lang import Builder
 from kivy.logger import Logger
+from kivy.core.window import Window
 from kivy.graphics import Color, Line
 
 import cv2
@@ -26,6 +27,7 @@ class ImageDisplay(BoxLayout):
     show_center = BooleanProperty(True)
     laser_detector_color_bgr = ListProperty([255, 0, 0])
 
+
     def __init__(self, **kwargs):
         super(ImageDisplay, self).__init__(**kwargs)
         with self.canvas.after:
@@ -33,6 +35,7 @@ class ImageDisplay(BoxLayout):
             self.ret = Line(rectangle=(0, 0, 0, 0))
             Color(1, 1, 1)
             self.center_line = Line(points=[0, 0, 0, 0], width=1)
+            Window.bind(on_motion=self.on_motion)
 
         Clock.schedule_interval(self.update_image, 1 / 30.)
 
@@ -60,6 +63,7 @@ class ImageDisplay(BoxLayout):
 
     def update_image(self, largs):
         image_data = self.scanner.get_feed_image(self.size)
+        self.last_image = image_data['frame']
         if self.show_roi:
             image = image_data['roi_frame']
         else:
@@ -75,6 +79,17 @@ class ImageDisplay(BoxLayout):
 
         image = self._add_overlays_to_image(image, overlays)
         self.texture = self._image_to_texture(image)
+
+    def on_motion(self, instance, etype, motion_event):
+        frame_x = motion_event.pos[0] - self.video_pos[0]
+        frame_y = motion_event.pos[1] - self.video_pos[1]
+        if frame_x > 0 and frame_y > 0 and frame_x < self.width and frame_y < self.height:
+            try:
+                color = self.last_image[self.last_image.shape[0] - frame_y][frame_x]
+            except:
+                color = "FAIL"
+            Logger.info(str(color[::-1]))
+
 
 
     def selection(self, x, y, w, h):

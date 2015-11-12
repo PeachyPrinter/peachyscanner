@@ -1,9 +1,10 @@
 <NumpyImage>:
-    canvas.before:
-        Rectangle:
-            pos: self.tex_pos
-            texture: self.texture
-            size: self.tex_size
+    Label:
+        canvas:
+            Rectangle:
+                pos: root.tex_pos
+                texture: root.texture
+                size: root.tex_size
 
 <ImageCapture>:
     name: 'image_capture_ui'
@@ -13,7 +14,7 @@
         Button:
             size_hint_y: None
             height: app.button_height
-            id: image_capture_button
+            id: capture_button
             text: "Start Image Capture"
             on_release: root.start_image_capture()
         NumpyImage:

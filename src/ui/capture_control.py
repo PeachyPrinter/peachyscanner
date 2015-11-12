@@ -69,12 +69,10 @@ class ImageCapture(Screen):
         self.image_box.set_image(self._image)
 
     def _enable_all(self):
-        for child in self.children:
-            child.disabled = False
+        self.ids['capture_button'].disabled = False
 
     def _disable_all(self):
-        for child in self.children:
-            child.disabled = True
+        self.ids['capture_button'].disabled = True
 
 
 class PointsCapture(Screen):
