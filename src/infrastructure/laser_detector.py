@@ -22,7 +22,7 @@ class LaserDetector(object):
 
 
 class LaserDetector2(object):
-    color_map = {'red' : 2, 'green': 1, 'blue': 0}
+    color_map = {'red': 2, 'green': 1, 'blue': 0}
 
     def __init__(self, threshold=225, filter_size_yx=(3, 3), color='red'):
         self.filter_size_yx = filter_size_yx
@@ -32,7 +32,7 @@ class LaserDetector2(object):
 
     @property
     def color(self):
-        return self._color
+        return [key for (key, value) in self.color_map.items() if value == self._color][0]
 
     @color.setter
     def color(self, value):

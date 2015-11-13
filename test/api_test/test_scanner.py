@@ -115,6 +115,34 @@ class ScannerAPITest(TestHelpers):
         self.assertNotEquals(api._default_laser_detector, api.video_processor.laser_detector)
         self.assertEquals(api.laser_detector, api.video_processor.laser_detector)
 
+    @patch('api.scanner.Camera')
+    def test_configure_laser_detector_should_create_an_laser_detector_with_the_given_config(self, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+        api = ScannerAPI()
+        api.configure_laser_detector2(255, (3, 3), 'red')
+        self.assertEquals(255, api.laser_detector.threshold)
+        self.assertEquals((3, 3), api.laser_detector.filter_size_yx)
+        self.assertEquals('red', api.laser_detector.color)
+
+    @patch('api.scanner.Camera')
+    def test_configure_laser_detector2_should_replace_the_existing_laser_detector_with_new_laser_detector(self, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+        api = ScannerAPI()
+        api.configure_laser_detector2(255, (3, 3), 'red')
+        initial = api.laser_detector
+        api.configure_laser_detector2(225, (5, 5), 'blue')
+        self.assertNotEquals(api.laser_detector, initial)
+
+    @patch('api.scanner.Camera')
+    def test_configure_laser_detector2_should_replace_the_laser_detector_on_the_video_processor_with_new_laser_detector(self, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+        api = ScannerAPI()
+        api.configure_laser_detector2(255, (3, 3), 'red')
+        self.assertNotEquals(api._default_laser_detector, api.video_processor.laser_detector)
+        self.assertEquals(api.laser_detector, api.video_processor.laser_detector)
 
     @patch('api.scanner.Camera')
     def test_init_should_construct_a_video_processor(self, mock_camera):

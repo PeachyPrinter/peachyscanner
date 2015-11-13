@@ -9,7 +9,7 @@ from infrastructure.encoder import Encoder
 from infrastructure.camera import Camera
 from infrastructure.video_processor import VideoProcessor
 from infrastructure.data_capture import ImageCapture, PointCapture
-from infrastructure.laser_detector import LaserDetector
+from infrastructure.laser_detector import LaserDetector, LaserDetector2
 
 
 logger = logging.getLogger('peachy')
@@ -58,6 +58,10 @@ class ScannerAPI(object):
 
     def configure_laser_detector(self, low_rbg_float, high_rgb_float):
         self.laser_detector = LaserDetector.from_rgb_float(low_rbg_float, high_rgb_float)
+        self.video_processor.laser_detector = self.laser_detector
+
+    def configure_laser_detector2(self, threshold, filter_size_yx, color):
+        self.laser_detector = LaserDetector2(threshold, filter_size_yx, color)
         self.video_processor.laser_detector = self.laser_detector
 
     def start(self):
