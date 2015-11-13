@@ -62,26 +62,92 @@
 
 <LaserDetection>:
     name: 'color_control_ui'
-    dark_color: dark_color
-    light_color: light_color
     GridLayout:
         cols: 1
+        Label:
+            size_hint_y: None
+            height: app.label_height
+            text: "LaserColor"
         BoxLayout:
-            orientation: 'vertical'
-            Label:
-                size_hint_y: None
-                height: app.label_height
-                text: "Color Dark"
-            SimpleColorPicker:
-                id: dark_color
+            size_hint_y: None
+            height: app.button_height
+            ToggleButton:
+                id: red
+                group: 'laser_color'
+                text: 'Red'
+                on_release: root.color = 'red'
+            ToggleButton:
+                id: blue
+                group: 'laser_color'
+                text: 'Blue'
+                on_release: root.color = 'blue'
+            ToggleButton:
+                id: green
+                group: 'laser_color'
+                text: 'Green'
+                on_release: root.color = 'green'
+        Label:
+            size_hint_y: None
+            height: app.label_height
+            text: "Threshold"
         BoxLayout:
-            orientation: 'vertical'
+            size_hint_y: None
+            height: app.button_height
             Label:
-                size_hint_y: None
-                height: app.label_height
-                text: "Color Light"
-            SimpleColorPicker:
-                id: light_color
+                size_hint_x: None
+                width: '20dp'
+                text: ''
+            Slider:
+                id: threshold
+                min: 0
+                max: 255
+                value: root.threshold
+                on_value: root.threshold = self.value
+            Label:
+                size_hint_x: None
+                width: '30dp'
+                text: "{:.0f}".format(threshold.value)
+        Label:
+            size_hint_y: None
+            height: app.label_height
+            text: "Errosion"
+        BoxLayout:
+            size_hint_y: None
+            height: app.button_height
+            Label:
+                size_hint_x: None
+                width: '20dp'
+                text: 'x'
+            Slider:
+                id: errosion_x
+                min: 1
+                max: 20
+                step: 1
+                value: root.errosion_x
+                on_value: root.errosion_x = self.value
+            Label:
+                size_hint_x: None
+                width: '30dp'
+                text: "{:.0f}".format(errosion_x.value)
+        BoxLayout:
+            size_hint_y: None
+            height: app.button_height
+            Label:
+                size_hint_x: None
+                width: '20dp'
+                text: 'y'
+            Slider:
+                id: errosion_y
+                min: 1
+                max: 20
+                step: 1
+                value: root.errosion_y
+                on_value: root.errosion_y = self.value
+            Label:
+                size_hint_x: None
+                width: '30dp'
+                text: "{:.0f}".format(errosion_y.value)
+        Label:
         Button:
             size_hint_y: None
             height: app.button_height

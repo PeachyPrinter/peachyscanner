@@ -64,7 +64,9 @@ class VideoProcessor(threading.Thread):
 
     def stop(self):
         self.running = False
-        while self.is_alive():
+        retry_count = 0
+        while self.is_alive() and retry_count < 5:
+            retry_count += 1
             logger.info("Joining main thread")
             self.join(1)
 

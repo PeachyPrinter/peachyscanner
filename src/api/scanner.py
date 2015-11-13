@@ -22,7 +22,7 @@ class ScannerAPI(object):
         self.camera.start()
         self._default_roi = ROI(0.0, 0.0, 1.0, 1.0)
         self._default_encoder = Encoder((0.2, 0.2), 382, 100, 20, 200)
-        self._default_laser_detector = LaserDetector.from_rgb_float((0.8, 0.0, 0.0), (1.0, 0.2, 0.2))
+        self._default_laser_detector = LaserDetector2(225, (3, 3), 'red')
 
         self.encoder = self._default_encoder
         self.roi = self._default_roi

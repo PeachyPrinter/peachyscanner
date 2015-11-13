@@ -39,7 +39,7 @@ class LaserDetector2(object):
         if value in self.color_map:
             self._color = self.color_map[value]
         else:
-            raise Exception("Colors must be one of: {}".format(str(self.color_map.keys())))
+            raise Exception("Colors must be one of: {} was {}".format(str(self.color_map.keys()), value))
 
     @property
     def threshold(self):
@@ -60,7 +60,7 @@ class LaserDetector2(object):
         if len(value) != 2:
             raise Exception('Filter size is a tuple')
         if value[0] < 1 or value[1] < 1:
-            raise Exception('Filter must be at least (1,1)')
+            raise Exception('Filter must be at least (1,1) was {}'.format(str(value)))
         self._structure = np.ones(value)
 
     def detect(self, frame):

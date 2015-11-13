@@ -60,6 +60,9 @@ if __name__ == "__main__":
     try:
         from gui import PeachyScannerApp
         PeachyScannerApp(scanner).run()
+    except Exception as ex:
+        print ex
     finally:
         print("Shutting Down Api")
         scanner.stop()
+        exit()
