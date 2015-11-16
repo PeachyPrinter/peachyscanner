@@ -7,7 +7,7 @@ from kivy.core.window import Window
 from kivy.resources import resource_find
 from kivy.graphics.opengl import GL_DEPTH_TEST, glEnable, glDisable
 from kivy.graphics.transformation import Matrix
-from kivy.graphics import RenderContext, Callback, PushMatrix, PopMatrix, Color, Translate, Rotate, UpdateNormalMatrix, Mesh, Line
+from kivy.graphics import Scale, Fbo, Rectangle, Canvas, Callback, ClearColor, RenderContext, Callback, ClearBuffers, PushMatrix, PopMatrix, Color, Translate, Rotate, UpdateNormalMatrix, Mesh, Line
 from kivy.clock import Clock
 from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.graphics.texture import Texture
@@ -115,25 +115,34 @@ class PointsCapture(Screen):
 
 
 class ObjectRenderer(BoxLayout):
+    texture = ObjectProperty(None, allownone=True)
     mesh_mode = BooleanProperty(False)
+
     def __init__(self, **kwargs):
         self.lock = Lock()
         self.gl_depth = -3
-        self.canvas = RenderContext(compute_normal_mat=True)
-        self.canvas.shader.source = resource_find('simple.glsl')
         self.mesh_data = MeshData()
         self.mesh_data.vertices = np.array([0, 0, 0, 0, 0, 0, 0, 0])
         self.mesh_data.indices = np.array([0])
         self.points = None
-        super(ObjectRenderer, self).__init__(**kwargs)
+
+        self.canvas = Canvas()
         with self.canvas:
-            self.cb = Callback(self.setup_gl_context)
-            PushMatrix()
-            self.setup_scene()
-            PopMatrix()
-            self.cb = Callback(self.reset_gl_context)
+            self.fbo = Fbo(size=(10, 10), compute_normal_mat=True)
+            self.fbo.add_reload_observer(self.populate_fbo)
+        with self.fbo:
+            ClearColor(0, 0, 0, 0)
+            ClearBuffers()
+
+        self.populate_fbo(self.fbo)
+
+        super(ObjectRenderer, self).__init__(**kwargs)
         Clock.schedule_interval(self.update_glsl, 1 / 10.)
-        
+
+    def on_size(self, instance, value):
+        Logger.info('resize')
+        self.fbo.size = value
+        self.texture = self.fbo.texture
 
     def setup_gl_context(self, *args):
         glEnable(GL_DEPTH_TEST)
@@ -143,15 +152,13 @@ class ObjectRenderer(BoxLayout):
 
     def update_glsl(self, *largs):
         # self.canvas.shader.source = resource_find('simple.glsl')
-        asp = Window.width / float(Window.height)
-        x_offset = (-float(self.width) / float(Window.width)) + 1.0
-        y_offset = ((2.0 * (self.y - self.height)) / Window.height) - 0.0
-
-        self.translate.x = asp * (self.gl_depth * x_offset)
-        self.translate.y = (1 / asp) * (self.gl_depth * y_offset)
-
+        asp = max(10,self.size[0]) / max(10, float(self.size[1]))
         proj = Matrix().view_clip(-asp, asp, -1, 1, 1, 100, 1)
-        self.canvas['projection_mat'] = proj
+        model = Matrix().look_at(   0.0, 0.0, 0.0,   0.0, 0.0, -3.0,   0.0, 1.0, 0.0)
+        proj = Matrix().view_clip(-asp, asp, -1, 1, 1, 100, 1)
+        with self.canvas:
+            self.fbo['projection_mat'] = proj
+            self.fbo['modelview_mat'] = model
         with self.lock:
             self.mesh.vertices = self.mesh_data.vertices
             self.mesh.indices = self.mesh_data.indices
@@ -179,24 +186,35 @@ class ObjectRenderer(BoxLayout):
                 self.mesh_data.indices = indicies
                 self.mesh.mode = 'points'
 
-    def setup_scene(self):
-        self.canvas['diffuse_light'] = (1.0, 1.0, 0.8)
-        self.canvas['ambient_light'] = (0.1, 0.1, 0.1)
-        PushMatrix()
-        self.translate = Translate(0, 0, 0)
-        Translate(0, 0, self.gl_depth)
-        Rotate(90, 1, 0, 0)
-        self.rot = Rotate(1, 0, 0, 1)
-        UpdateNormalMatrix()
-        Color(1, 0, 0, 1)
-        self.mesh = Mesh(
-                vertices=self.mesh_data.vertices,
-                indices=self.mesh_data.indices,
-                fmt=self.mesh_data.vertex_format,
-                mode=self.mesh_data.mode,
-            )
-        # self.show_axis()   #Help with GL alignments
-        PopMatrix()
+    def populate_fbo(self, fbo):
+        with self.canvas:
+            fbo.shader.source = resource_find('simple.glsl')
+            fbo['diffuse_light'] = (1.0, 1.0, 0.8)
+            fbo['ambient_light'] = (0.5, 0.5, 0.5)
+        
+        with fbo:
+            self.cb = Callback(self.setup_gl_context)
+            PushMatrix()
+            Translate(0, 1, self.gl_depth  + 1)
+            Rotate(90, 1, 0, 0)
+            self.rot = Rotate(1, 0, 0, 1)
+            UpdateNormalMatrix()
+            Color(1, 0, 0, 1)
+            self.mesh = Mesh(
+                    vertices=self.mesh_data.vertices,
+                    indices=self.mesh_data.indices,
+                    fmt=self.mesh_data.vertex_format,
+                    mode=self.mesh_data.mode,
+                )
+            PopMatrix()
+            # PushMatrix()
+            # Translate(0, 0, self.gl_depth)
+            # Rotate(90, 1, 0, 0)
+            # self.rot
+            # UpdateNormalMatrix()
+            # self.show_axis()   #Help with GL alignments
+            # PopMatrix()
+            self.cb = Callback(self.reset_gl_context)
 
     def show_axis(self):
         Color(1, 1, 0, 1) #Yellow

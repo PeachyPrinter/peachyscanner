@@ -48,3 +48,12 @@
             height: app.button_height
             text: "Mesh / Points"
             on_release: render.mesh_mode = True if self.state == 'down' else False
+
+<ObjectRenderer>:
+    canvas.before:
+        Color:
+            rgba: [1,1,1,1]
+        Rectangle:
+            size: self.size
+            pos: self.pos
+            texture: self.texture

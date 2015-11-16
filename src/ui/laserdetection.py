@@ -56,7 +56,7 @@ class LaserDetection(Screen):
         self._update_detector()
 
     def _update_detector(self):
-        Logger.info("Laser Detector Updated: {} , ({},{}), {}".format(self.threshold, int(self.errosion_x), int(self.errosion_y), self.color))
+        # Logger.info("Laser Detector Updated: {} , ({},{}), {}".format(self.threshold, int(self.errosion_x), int(self.errosion_y), self.color))
         self.scanner.configure_laser_detector2(int(self.threshold), (int(self.errosion_x), int(self.errosion_y)), self.color)
 
     def save(self):
