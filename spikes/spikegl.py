@@ -13,6 +13,7 @@ from kivy.graphics import Fbo, Rectangle, Canvas, Callback, ClearColor, ClearBuf
 from kivy.clock import Clock
 from kivy.properties import ObjectProperty
 import time
+import numpy as np
 
 class MeshData(object):
     def __init__(self, **kwargs):
@@ -53,7 +54,7 @@ class GLWindow(BoxLayout):
         with self.canvas:
             fbo.shader.source = resource_find('simple.glsl')
             fbo['diffuse_light'] = (1.0, 1.0, 0.8)
-            fbo['ambient_light'] = (0.1, 0.1, 0.1)
+            fbo['ambient_light'] = (0.8, 0.8, 0.8)
 
         with fbo:
             self.cb = Callback(self.setup_gl_context)
@@ -61,7 +62,8 @@ class GLWindow(BoxLayout):
             UpdateNormalMatrix()
             Translate(0,0,-3)
             self.rot = Rotate(1,0,1,0)
-            self.show_axis()
+            # self.show_axis()
+            self.make_pretty_dots()
             PopMatrix()
             self.cb = Callback(self.reset_gl_context)
 
@@ -134,6 +136,38 @@ class GLWindow(BoxLayout):
                 indices=[0, 1, 2, 3, 4, 5, 6, 7],
                 fmt=self.mesh_data.vertex_format,
                 mode='line_strip',
+            )
+
+    def make_pretty_dots(self):
+        points_per_side = 50
+
+        points = []
+        for idx in range(points_per_side):
+            v = -1.0 + ((2.0 / points_per_side) * float(idx))
+            tex = idx / float(points_per_side)
+            points.append(
+                [
+                [ v,  -1.0,  -1.0,    v,  -1.0,  -1.0,     tex,  0.0],
+                [ v,  -1.0,   1.0,    v,  -1.0,   1.0,     tex,  0.0],
+                [ v,   1.0,  -1.0,    v,   1.0,  -1.0,     tex,  1.0],
+                [ v,   1.0,   1.0,    v,   1.0,   1.0,     tex,  1.0],
+                [ -1.0,  v,  -1.0,    -1.0,  v,  -1.0,     0.0,  tex],
+                [ -1.0,  v,   1.0,    -1.0,  v,   1.0,     0.0,  tex],
+                [  1.0,  v,  -1.0,     1.0,  v,  -1.0,     1.0,  tex],
+                [  1.0,  v,   1.0,     1.0,  v,   1.0,     1.0,  tex],
+                [ -1.0,  -1.0,  v,    -1.0,  -1.0,  v,     tex,  tex],
+                [ -1.0,   1.0,  v,    -1.0,   1.0,  v,     tex,  tex],
+                [  1.0,  -1.0,  v,     1.0,  -1.0,  v,     tex,  tex],
+                [  1.0,   1.0,  v,     1.0,   1.0,  v,     tex,  tex]],
+                )
+
+        points = np.array(points).flatten()
+        Color(1,1,1,1)
+        Mesh(
+                vertices=points,
+                indices=[i for i in range(len(points) / 8)],
+                fmt=self.mesh_data.vertex_format,
+                mode='points',
             )
 
 class SpikeGlApp(App):

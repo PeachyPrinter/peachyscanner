@@ -47,5 +47,5 @@ void main (void){
     vec4 v_light = normalize( vec4(0,0,0,1) - vertex_pos );
     //reflectance based on lamberts law of cosine
     float theta = clamp(dot(v_normal, v_light), 0.3, 1.0);
-    gl_FragColor = vec4(1, 1, 1, 1.0) * frag_color;
+    gl_FragColor = vec4(1, theta, theta, 1.0) * frag_color;
 }
