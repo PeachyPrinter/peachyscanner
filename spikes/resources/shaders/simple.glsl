@@ -11,6 +11,7 @@ simple diffuse lighting based on laberts cosine law; see e.g.:
 
 attribute vec3  v_pos;
 attribute vec3  v_normal;
+attribute vec2  v_tc0;
 
 uniform mat4 modelview_mat;
 uniform mat4 projection_mat;
@@ -19,6 +20,7 @@ uniform vec4 color;
 varying vec4 normal_vec;
 varying vec4 vertex_pos;
 varying vec4 frag_color;
+varying vec2 tex_coord;
 
 void main (void) {
     //compute vertex position in eye_sapce and normalize normal vector
@@ -26,7 +28,9 @@ void main (void) {
     vertex_pos = pos;
     normal_vec = vec4(v_normal,0.0);
     frag_color = color;
+    tex_coord = v_tc0;
     gl_Position = projection_mat * pos;
+
 }
 
 
@@ -38,6 +42,8 @@ void main (void) {
 varying vec4 normal_vec;
 varying vec4 vertex_pos;
 varying vec4 frag_color;
+varying vec2 tex_coord;
+uniform sampler2D texture1;
 
 uniform mat4 normal_mat;
 
@@ -46,6 +52,6 @@ void main (void){
     vec4 v_normal = normalize( normal_mat * normal_vec ) ;
     vec4 v_light = normalize( vec4(0,0,0,1) - vertex_pos );
     //reflectance based on lamberts law of cosine
-    float theta = clamp(dot(v_normal, v_light), 0.3, 1.0);
-    gl_FragColor = vec4(1, theta, theta, 1.0) * frag_color;
+    float theta = clamp(dot(v_normal, v_light), 0.8, 1.0);
+    gl_FragColor = texture2D(texture1, tex_coord) * vec4(theta,theta,theta, 1.0);
 }

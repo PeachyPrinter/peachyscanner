@@ -9,7 +9,7 @@ from kivy.resources import resource_add_path, resource_find
 from kivy.logger import Logger
 from kivy.graphics.opengl import GL_DEPTH_TEST, glEnable, glDisable
 from kivy.graphics.transformation import Matrix
-from kivy.graphics import Fbo, Rectangle, Canvas, Callback, ClearColor, ClearBuffers, PushMatrix, PopMatrix, Color, Translate, Rotate, UpdateNormalMatrix, Mesh, Line
+from kivy.graphics import BindTexture, Fbo, Rectangle, Canvas, Callback, ClearColor, ClearBuffers, PushMatrix, PopMatrix, Color, Translate, Rotate, UpdateNormalMatrix, Mesh, Line
 from kivy.clock import Clock
 from kivy.properties import ObjectProperty
 import time
@@ -59,6 +59,7 @@ class GLWindow(BoxLayout):
         with fbo:
             self.cb = Callback(self.setup_gl_context)
             PushMatrix()
+            BindTexture(source='testure.jpg', index=1)
             UpdateNormalMatrix()
             Translate(0,0,-3)
             self.rot = Rotate(1,0,1,0)
@@ -66,16 +67,20 @@ class GLWindow(BoxLayout):
             self.make_pretty_dots()
             PopMatrix()
             self.cb = Callback(self.reset_gl_context)
+        fbo['texture1'] = 1
 
     def update_glsl(self, *largs):
         asp = self.size[0] / float(self.size[1])
         proj = Matrix().view_clip(-asp, asp, -1, 1, 1, 100, 1)
         model = Matrix().look_at(   0.0, 0.0, 0.25,   0.0, 0.0, 0.0,   0.0, 1.0, 0.0)
         with self.canvas:
+            self.fbo.shader.source = resource_find('simple.glsl')
             self.fbo['projection_mat'] = proj
             self.fbo['modelview_mat'] = model
             self.rot.angle += -1
             self.texture = self.fbo.texture
+        with self.fbo:
+            BindTexture(source='testure.jpg', index=1)
 
     def setup_gl_context(self, *args):
         glEnable(GL_DEPTH_TEST)
@@ -145,6 +150,7 @@ class GLWindow(BoxLayout):
         for idx in range(points_per_side):
             v = -1.0 + ((2.0 / points_per_side) * float(idx))
             tex = idx / float(points_per_side)
+            print ("TEX: {}".format(str(tex)) )
             points.append(
                 [
                 [ v,  -1.0,  -1.0,    v,  -1.0,  -1.0,     tex,  0.0],

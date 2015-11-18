@@ -20,8 +20,8 @@ class GLConverter(object):
         a = np.ones(point_array_tyr.shape) * xi
         b = np.ones(point_array_tyr.shape) * yi
         c = np.zeros(x.shape)
-        u = np.ones(point_array_tyr.shape) * np.reshape(np.arange(0, sections), (sections, -1))
-        v = z.copy()
+        u = np.ones(point_array_tyr.shape) * np.reshape(np.arange(0, sections), (sections, -1)) / sections
+        v = np.ones(z.shape) - (z.copy() / np.amax(z))
         xyz = np.dstack((x, y, z, a, b, c, u, v))
         xyz = xyz.reshape(xyz.size / 8, 8)
         xyz = xyz[np.logical_not(np.logical_and(np.isclose(xyz[:, 0], 0.0), np.isclose(xyz[:, 1], 0.0), np.isclose(xyz[:, 2], 0.0),))]

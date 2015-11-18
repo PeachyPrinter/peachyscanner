@@ -43,6 +43,12 @@
         ObjectRenderer:
             id:render
             mesh_mode: False
+        Label:
+            canvas:
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+                    texture: root.model_texture
         ToggleButton:
             size_hint_y: None
             height: app.button_height

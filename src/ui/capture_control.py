@@ -7,7 +7,7 @@ from kivy.core.window import Window
 from kivy.resources import resource_find
 from kivy.graphics.opengl import GL_DEPTH_TEST, glEnable, glDisable
 from kivy.graphics.transformation import Matrix
-from kivy.graphics import Scale, Fbo, Rectangle, Canvas, Callback, ClearColor, RenderContext, Callback, ClearBuffers, PushMatrix, PopMatrix, Color, Translate, Rotate, UpdateNormalMatrix, Mesh, Line
+from kivy.graphics import BindTexture, Scale, Fbo, Rectangle, Canvas, Callback, ClearColor, RenderContext, Callback, ClearBuffers, PushMatrix, PopMatrix, Color, Translate, Rotate, UpdateNormalMatrix, Mesh, Line
 from kivy.clock import Clock
 from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.graphics.texture import Texture
@@ -76,6 +76,7 @@ class ImageCapture(Screen):
 
 
 class PointsCapture(Screen):
+    model_texture = ObjectProperty(None, allownone=True)
 
     def __init__(self, scanner, **kwargs):
         super(PointsCapture, self).__init__(**kwargs)
@@ -86,6 +87,10 @@ class PointsCapture(Screen):
     def start_points_capture(self):
         self._disable_all()
         self.scanner.capture_points(self._capture_points_callback)
+        self.scanner.capture_image(self._capture_image_callback)
+
+    def _capture_image_callback(self, handler):
+        self._image = handler.image
 
     def _capture_points_callback(self, handler):
         self.raw_points_tyr = handler.points_tyr
@@ -112,6 +117,11 @@ class PointsCapture(Screen):
             # Logger.info('Scale: {}'.format(scale))
             points = self._converter.convert(self.raw_points_tyr, scale=scale)
             self.render.update_mesh(points)
+            if hasattr(self, '_image'):
+                self.model_texture = self.render.update_texture(self._image)
+                # self.tex_size = self._get_new_size(texture.size[0], texture.size[1])
+                # self.tex_pos = (self.x + (self.width - self.tex_size[0]) / 2, self.y + (self.height - self.tex_size[1]) / 2)
+                # self.texture = texture
 
 
 class ObjectRenderer(BoxLayout):
@@ -131,7 +141,7 @@ class ObjectRenderer(BoxLayout):
             self.fbo = Fbo(size=(10, 10), compute_normal_mat=True)
             self.fbo.add_reload_observer(self.populate_fbo)
         with self.fbo:
-            ClearColor(0, 0, 0, 0)
+            ClearColor(1, 1, 1, 1)
             ClearBuffers()
 
         self.populate_fbo(self.fbo)
@@ -140,8 +150,8 @@ class ObjectRenderer(BoxLayout):
         Clock.schedule_interval(self.update_glsl, 1 / 10.)
 
     def on_size(self, instance, value):
-        Logger.info('resize')
-        self.fbo.size = value
+        size = (max(1, value[0]), max(1, value[1]))
+        self.fbo.size = size
         self.texture = self.fbo.texture
 
     def setup_gl_context(self, *args):
@@ -150,8 +160,17 @@ class ObjectRenderer(BoxLayout):
     def reset_gl_context(self, *args):
         glDisable(GL_DEPTH_TEST)
 
+    def update_texture(self, image):
+        image = np.rot90(np.swapaxes(image, 0, 1))
+        if not hasattr(self, 'model_texture'):
+            self.model_texture = Texture.create(size=(image.shape[1], image.shape[0]), colorfmt='bgr')
+            self.populate_fbo(self.fbo)
+        self.model_texture.blit_buffer(image.tostring(), bufferfmt="ubyte", colorfmt="bgr")
+        return self.model_texture
+        
+
     def update_glsl(self, *largs):
-        # self.canvas.shader.source = resource_find('simple.glsl')
+        self.fbo.shader.source = resource_find('simple.glsl')
         asp = max(10,self.size[0]) / max(10, float(self.size[1]))
         proj = Matrix().view_clip(-asp, asp, -1, 1, 1, 100, 1)
         model = Matrix().look_at(   0.0, 0.0, 0.0,   0.0, 0.0, -3.0,   0.0, 1.0, 0.0)
@@ -167,7 +186,8 @@ class ObjectRenderer(BoxLayout):
     def update_mesh(self, points):
         self.points = points
         #TODO make this dynamic or something
-        points = np.array(np.hsplit(points, points.shape[0] // 8))[::4].flatten()
+        points = np.array(np.hsplit(points, points.shape[0] // 8)).flatten()
+        # Logger.info("uv: \n{}\n{} ".format(points[7::8][:10],points[8::8][:10]))
         with self.lock:
             self.mesh_data.vertices = points
             indicies = np.arange(len(points) // 8)
@@ -195,6 +215,8 @@ class ObjectRenderer(BoxLayout):
         with fbo:
             self.cb = Callback(self.setup_gl_context)
             PushMatrix()
+            if hasattr(self, 'model_texture'):
+                BindTexture(texture=self.model_texture, index=1)
             Translate(0, 1, self.gl_depth  + 1)
             Rotate(90, 1, 0, 0)
             self.rot = Rotate(1, 0, 0, 1)
@@ -215,6 +237,7 @@ class ObjectRenderer(BoxLayout):
             # self.show_axis()   #Help with GL alignments
             # PopMatrix()
             self.cb = Callback(self.reset_gl_context)
+        fbo['texture1'] = 1
 
     def show_axis(self):
         Color(1, 1, 0, 1) #Yellow
