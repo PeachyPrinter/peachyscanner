@@ -24,13 +24,16 @@ Builder.load_file('ui/capture_control.kv')
 
 
 class NumpyImage(BoxLayout):
-    texture = ObjectProperty(Texture.create(size=(1, 1), colorfmt='rgb'))
+    texture = ObjectProperty(None, allownone=True)
     tex_pos = ObjectProperty([0, 0])
     tex_size = ObjectProperty([1, 1])
 
     def _get_new_size(self, source_x, source_y):
         source_ratio = source_x / float(source_y)
-        dest_ratio = self.width / float(self.height)
+        if self.width > 0 and self.height > 0:
+            dest_ratio = self.width / float(self.height)
+        else:
+            dest_ratio = 1
         if dest_ratio > source_ratio:
             return (int(source_x * self.height / source_y), int(self.height))
         else:
@@ -38,15 +41,16 @@ class NumpyImage(BoxLayout):
 
     def set_image(self, value):
         image = np.rot90(np.swapaxes(value, 0, 1))
-        texture = Texture.create(size=(image.shape[1], image.shape[0]), colorfmt='rgb')
-        texture.blit_buffer(image.tostring(), colorfmt='bgr', bufferfmt='ubyte')
-        self.tex_size = self._get_new_size(texture.size[0], texture.size[1])
-        self.tex_pos = (self.x + (self.width - self.tex_size[0]) / 2, self.y + (self.height - self.tex_size[1]) / 2)
-        self.texture = texture
-
-    def on_size(self, instance, value):
+        if self.texture is None:
+            self.texture = Texture.create(size=(image.shape[1], image.shape[0]), colorfmt='rgb')
+        self.texture.blit_buffer(image.tostring(), colorfmt='bgr', bufferfmt='ubyte')
         self.tex_size = self._get_new_size(self.texture.size[0], self.texture.size[1])
         self.tex_pos = (self.x + (self.width - self.tex_size[0]) / 2, self.y + (self.height - self.tex_size[1]) / 2)
+
+    def on_size(self, instance, value):
+        if self.texture is not None:
+            self.tex_size = self._get_new_size(self.texture.size[0], self.texture.size[1])
+            self.tex_pos = (self.x + (self.width - self.tex_size[0]) / 2, self.y + (self.height - self.tex_size[1]) / 2)
 
 
 class ImageCapture(Screen):
@@ -76,8 +80,6 @@ class ImageCapture(Screen):
 
 
 class PointsCapture(Screen):
-    model_texture = ObjectProperty(None, allownone=True)
-
     def __init__(self, scanner, **kwargs):
         super(PointsCapture, self).__init__(**kwargs)
         self.scanner = scanner
@@ -91,6 +93,7 @@ class PointsCapture(Screen):
 
     def _capture_image_callback(self, handler):
         self._image = handler.image
+        Clock.schedule_once(self._update_image)
 
     def _capture_points_callback(self, handler):
         self.raw_points_tyr = handler.points_tyr
@@ -110,18 +113,17 @@ class PointsCapture(Screen):
     def _disable_all(self):
         self.go_button.disabled = True
 
+    def _update_image(self, *args):
+        if hasattr(self, '_image'):
+            self.image_box.set_image(self._image)
+            self.render.update_texture(self.image_box.texture)
+
     def update_model(self, *largs):
         amax = np.amax(self.raw_points_tyr)
         if amax > 0:
             scale = min(0.05, 1.0 / np.amax(self.raw_points_tyr))
-            # Logger.info('Scale: {}'.format(scale))
             points = self._converter.convert(self.raw_points_tyr, scale=scale)
             self.render.update_mesh(points)
-            if hasattr(self, '_image'):
-                self.model_texture = self.render.update_texture(self._image)
-                # self.tex_size = self._get_new_size(texture.size[0], texture.size[1])
-                # self.tex_pos = (self.x + (self.width - self.tex_size[0]) / 2, self.y + (self.height - self.tex_size[1]) / 2)
-                # self.texture = texture
 
 
 class ObjectRenderer(BoxLayout):
@@ -160,14 +162,10 @@ class ObjectRenderer(BoxLayout):
     def reset_gl_context(self, *args):
         glDisable(GL_DEPTH_TEST)
 
-    def update_texture(self, image):
-        image = np.rot90(np.swapaxes(image, 0, 1))
+    def update_texture(self, texture):
         if not hasattr(self, 'model_texture'):
-            self.model_texture = Texture.create(size=(image.shape[1], image.shape[0]), colorfmt='bgr')
+            self.model_texture = texture
             self.populate_fbo(self.fbo)
-        self.model_texture.blit_buffer(image.tostring(), bufferfmt="ubyte", colorfmt="bgr")
-        return self.model_texture
-        
 
     def update_glsl(self, *largs):
         # self.fbo.shader.source = resource_find('simple.glsl')
@@ -220,7 +218,7 @@ class ObjectRenderer(BoxLayout):
             PushMatrix()
             if hasattr(self, 'model_texture'):
                 BindTexture(texture=self.model_texture, index=1)
-            Translate(0, 1, self.gl_depth  + 1)
+            Translate(0, 0, self.gl_depth  + 1)
             Rotate(90, 1, 0, 0)
             self.rot = Rotate(1, 0, 0, 1)
             UpdateNormalMatrix()

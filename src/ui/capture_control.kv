@@ -22,6 +22,7 @@
 
 
 <PointsCapture>:
+    image_box: image_box
     name: 'points_capture_ui'
     render: render
     go_button: go_button
@@ -43,12 +44,9 @@
         ObjectRenderer:
             id:render
             mesh_mode: False
-        Label:
-            canvas:
-                Rectangle:
-                    size: self.size
-                    pos: self.pos
-                    texture: root.model_texture
+        NumpyImage:
+            id:image_box
+            size_hint_y: 0.5
         ToggleButton:
             size_hint_y: None
             height: app.button_height
