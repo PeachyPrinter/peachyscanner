@@ -17,6 +17,7 @@ from math import tan, atan
 
 import numpy as np
 import time
+from math import floor
 
 from infrastructure.gl_point_converter import GLConverter
 
@@ -35,9 +36,9 @@ class NumpyImage(BoxLayout):
         else:
             dest_ratio = 1
         if dest_ratio > source_ratio:
-            return (int(source_x * self.height / source_y), int(self.height))
+            return (floor(source_x * self.height / source_y), floor(self.height))
         else:
-            return (int(self.width), int(source_y * self.width / source_x))
+            return (floor(self.width), floor(source_y * self.width / source_x))
 
     def set_image(self, value):
         image = np.rot90(np.swapaxes(value, 0, 1))
@@ -52,31 +53,9 @@ class NumpyImage(BoxLayout):
             self.tex_size = self._get_new_size(self.texture.size[0], self.texture.size[1])
             self.tex_pos = (self.x + (self.width - self.tex_size[0]) / 2, self.y + (self.height - self.tex_size[1]) / 2)
 
+    def clear(self):
+        self.texture = None
 
-class ImageCapture(Screen):
-
-    def __init__(self, scanner, **kwargs):
-        super(ImageCapture, self).__init__(**kwargs)
-        self.scanner = scanner
-
-    def start_image_capture(self):
-        self._disable_all()
-        self.scanner.capture_image(self._capture_image_callback)
-
-    def _capture_image_callback(self, handler):
-        self._image = handler.image
-        if handler.complete:
-            self._enable_all()
-        Clock.schedule_once(self._update_image)
-
-    def _update_image(self, *args):
-        self.image_box.set_image(self._image)
-
-    def _enable_all(self):
-        self.ids['capture_button'].disabled = False
-
-    def _disable_all(self):
-        self.ids['capture_button'].disabled = True
 
 
 class PointsCapture(Screen):
@@ -88,6 +67,8 @@ class PointsCapture(Screen):
 
     def start_points_capture(self):
         self._disable_all()
+        self.image_box.clear()
+        self.render.clear()
         self.scanner.capture_points(self._capture_points_callback)
         self.scanner.capture_image(self._capture_image_callback, 200 - 31 )
 
@@ -162,6 +143,13 @@ class ObjectRenderer(BoxLayout):
     def reset_gl_context(self, *args):
         glDisable(GL_DEPTH_TEST)
 
+
+    def clear(self):
+        if hasattr(self, 'model_texture'):
+            self.mesh_data.vertices = np.array([0, 0, 0, 0, 0, 0, 0, 0])
+            self.mesh_data.indices = np.array([0])
+            del self.model_texture
+
     def update_texture(self, texture):
         if not hasattr(self, 'model_texture'):
             self.model_texture = texture
@@ -218,7 +206,7 @@ class ObjectRenderer(BoxLayout):
             PushMatrix()
             if hasattr(self, 'model_texture'):
                 BindTexture(texture=self.model_texture, index=1)
-            Translate(0, 0, self.gl_depth  + 1)
+            Translate(0, 1, self.gl_depth  + 1)
             Rotate(90, 1, 0, 0)
             self.rot = Rotate(1, 0, 0, 1)
             UpdateNormalMatrix()

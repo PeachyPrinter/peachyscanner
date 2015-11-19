@@ -15,7 +15,7 @@ from kivy.logger import Logger
 from ui.camera import CameraControls
 from ui.posisition import PositionControl
 from ui.laserdetection import LaserDetection
-from ui.capture_control import ImageCapture, PointsCapture
+from ui.capture_control import PointsCapture
 from ui.video import ImageDisplay
 
 kivy.require('1.9.0')
@@ -28,12 +28,10 @@ class MyScreenManager(ScreenManager):
         self.camera_control_ui = CameraControls(scanner.camera)
         self.posisition_control_ui = PositionControl(scanner, video_widget)
         self.laser_detection_ui = LaserDetection(scanner)
-        self.image_capture_ui = ImageCapture(scanner)
         self.points_capture_ui = PointsCapture(scanner)
         self.add_widget(self.camera_control_ui)
         self.add_widget(self.posisition_control_ui)
         self.add_widget(self.laser_detection_ui)
-        self.add_widget(self.image_capture_ui)
         self.add_widget(self.points_capture_ui)
         self.current = 'camera_control_ui'
 
