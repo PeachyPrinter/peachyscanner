@@ -60,6 +60,43 @@ class PointConverterTest(unittest.TestCase):
 
         self.assertTrue((expected_result == result).all(), str(result))
 
+    def test_get_points_returns_average_for_missing_points_expected_array_when_none(self):
+        data = np.array([[0, 0, 0, 0, 0, 1, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 1, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [1, 0, 0, 0, 0, 0, 0, 0]])
+        expected_result = np.array([2, 3, 4, 5, 6 ,7])
+
+        result = self.test_converter.get_points(data, 2)
+
+        self.assertTrue((expected_result == result).all(), str(result))
+
+    def test_get_points_returns_average_for_missing_points_expected_array_when_none_at_end(self):
+        data = np.array([[0, 0, 0, 0, 0, 1, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 1, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0]])
+        expected_result = np.array([2, 3, 4, 0, 0 ,0])
+
+        result = self.test_converter.get_points(data, 2)
+
+        self.assertTrue((expected_result == result).all(), str(result))
+
+
+    def test_get_points_returns_average_for_missing_points_expected_array_when_none_at_start(self):
+        data = np.array([[0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 1, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [1, 0, 0, 0, 0, 0, 0, 0]])
+        expected_result = np.array([0, 0, 4, 5, 6 ,7])
+
+
     def test_get_points_returns_offset_points_when_centered(self):
         data = np.array([[0, 0, 1, 0, 0, 0, 0],
                          [0, 0, 0, 1, 0, 0, 0],
@@ -74,7 +111,7 @@ class PointConverterTest(unittest.TestCase):
         data = np.array([[0, 0, 1, 0, 0, 0, 0],
                          [0, 0, 0, 0, 0, 0, 0],
                          [0, 0, 0, 0, 1, 0, 0]])
-        expected_result = np.array([4, 0, 2])
+        expected_result = np.array([4, 3, 2])
 
         result = self.test_converter.get_points(data, 4)
 

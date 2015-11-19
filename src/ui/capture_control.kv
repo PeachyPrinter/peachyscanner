@@ -6,21 +6,6 @@
                 texture: root.texture
                 size: root.tex_size
 
-<ImageCapture>:
-    name: 'image_capture_ui'
-    image_box: image_box
-    GridLayout:
-        cols: 1
-        Button:
-            size_hint_y: None
-            height: app.button_height
-            id: capture_button
-            text: "Start Image Capture"
-            on_release: root.start_image_capture()
-        NumpyImage:
-            id:image_box
-
-
 <PointsCapture>:
     image_box: image_box
     name: 'points_capture_ui'

@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from scipy import ndimage
+import time
 
 
 class LaserDetector(object):

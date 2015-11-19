@@ -164,36 +164,36 @@ class ObjectRenderer(BoxLayout):
         with self.canvas:
             self.fbo['projection_mat'] = proj
             self.fbo['modelview_mat'] = model
-        with self.lock:
-            self.mesh.vertices = self.mesh_data.vertices
-            self.mesh.indices = self.mesh_data.indices
+        # with a = 1:
+        self.mesh.vertices = self.mesh_data.vertices
+        self.mesh.indices = self.mesh_data.indices
         self.rot.angle += -3
 
     def update_mesh(self, points):
         self.points = points
-        #TODO make this dynamic or something
-        points = np.array(np.hsplit(points, points.shape[0] // 8)).flatten()
+        points = np.array(points)[::2]
+        points = points.flatten()
 
-        with self.lock:
-            self.mesh_data.vertices = points
-            indicies = np.arange(len(points) // 8)
-            if self.mesh_mode:
-                idx = []
-                y = 0
-                x = 0
-                z = 0
-                for pos in range(1, len(indicies)):
-                    if points[(indicies[pos] * 8) + 2] > z:
-                        A = indicies[pos - 1]
-                        B = indicies[pos]
-                        idx.extend([A, B])
-                    (x,y,z) = points[(indicies[pos] * 8) : (indicies[pos] * 8 ) + 3]
+        # with a = 1:
+        self.mesh_data.vertices = points
+        indicies = np.arange(len(points) // 8)
+        if self.mesh_mode:
+            idx = []
+            y = 0
+            x = 0
+            z = 0
+            for pos in range(1, len(indicies)):
+                if points[(indicies[pos] * 8) + 2] > z:
+                    A = indicies[pos - 1]
+                    B = indicies[pos]
+                    idx.extend([A, B])
+                (x,y,z) = points[(indicies[pos] * 8) : (indicies[pos] * 8 ) + 3]
 
-                self.mesh_data.indices = idx
-                self.mesh.mode = 'lines'
-            else:
-                self.mesh_data.indices = indicies
-                self.mesh.mode = 'points'
+            self.mesh_data.indices = idx
+            self.mesh.mode = 'lines'
+        else:
+            self.mesh_data.indices = indicies
+            self.mesh.mode = 'points'
 
     def populate_fbo(self, fbo):
         with self.canvas:
