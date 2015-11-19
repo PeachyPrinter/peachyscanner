@@ -175,6 +175,21 @@ class ScannerAPITest(TestHelpers):
         self.assertEquals(ImageCapture, type(api.video_processor.handlers[0][0]))
         self.assertEqual(api.video_processor.handlers[0][1], callback)
 
+
+    @patch('api.scanner.Camera')
+    def test_capture_image_should_subscribe_with_expected_offset(self, mock_camera):
+        cam = mock_camera.return_value
+        expected_offset = 10
+        cam.shape = [300, 100]
+        api = ScannerAPI()
+        callback = Mock()
+        api.capture_image(callback, expected_offset)
+        self.assertTrue(len(api.video_processor.handlers) > 0)
+        self.assertEquals(ImageCapture, type(api.video_processor.handlers[0][0]))
+        self.assertEqual(api.video_processor.handlers[0][1], callback)
+        self.assertEqual(api.video_processor.handlers[0][0].section_offset, expected_offset)
+
+
     @patch('api.scanner.Camera')
     def test_capture_points_should_create_an_image_handler_and_subscribe_it_to_video_processor(self, mock_camera):
         cam = mock_camera.return_value

@@ -87,7 +87,7 @@ class PointsCapture(Screen):
     def start_points_capture(self):
         self._disable_all()
         self.scanner.capture_points(self._capture_points_callback)
-        self.scanner.capture_image(self._capture_image_callback)
+        self.scanner.capture_image(self._capture_image_callback, 200 - 31 )
 
     def _capture_image_callback(self, handler):
         self._image = handler.image
@@ -170,7 +170,7 @@ class ObjectRenderer(BoxLayout):
         
 
     def update_glsl(self, *largs):
-        self.fbo.shader.source = resource_find('simple.glsl')
+        # self.fbo.shader.source = resource_find('simple.glsl')
         asp = max(10,self.size[0]) / max(10, float(self.size[1]))
         proj = Matrix().view_clip(-asp, asp, -1, 1, 1, 100, 1)
         model = Matrix().look_at(   0.0, 0.0, 0.0,   0.0, 0.0, -3.0,   0.0, 1.0, 0.0)
@@ -187,21 +187,24 @@ class ObjectRenderer(BoxLayout):
         self.points = points
         #TODO make this dynamic or something
         points = np.array(np.hsplit(points, points.shape[0] // 8)).flatten()
-        # Logger.info("uv: \n{}\n{} ".format(points[7::8][:10],points[8::8][:10]))
+
         with self.lock:
             self.mesh_data.vertices = points
             indicies = np.arange(len(points) // 8)
             if self.mesh_mode:
                 idx = []
-                rows = len(indicies) / 200
-                for pos in range(len(indicies) - (rows +1)):
-                    A = indicies[pos]
-                    B = indicies[pos + 1]
-                    C = indicies[pos + rows]
-                    D = indicies[pos + rows + 1]
-                    idx.extend([A, C, D, A, D, B])
+                y = 0
+                x = 0
+                z = 0
+                for pos in range(1, len(indicies)):
+                    if points[(indicies[pos] * 8) + 2] > z:
+                        A = indicies[pos - 1]
+                        B = indicies[pos]
+                        idx.extend([A, B])
+                    (x,y,z) = points[(indicies[pos] * 8) : (indicies[pos] * 8 ) + 3]
+
                 self.mesh_data.indices = idx
-                self.mesh.mode = 'triangles'
+                self.mesh.mode = 'lines'
             else:
                 self.mesh_data.indices = indicies
                 self.mesh.mode = 'points'
@@ -221,7 +224,7 @@ class ObjectRenderer(BoxLayout):
             Rotate(90, 1, 0, 0)
             self.rot = Rotate(1, 0, 0, 1)
             UpdateNormalMatrix()
-            Color(1, 0, 0, 1)
+            Color(1, 1, 1, 1)
             self.mesh = Mesh(
                     vertices=self.mesh_data.vertices,
                     indices=self.mesh_data.indices,

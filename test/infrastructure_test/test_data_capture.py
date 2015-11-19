@@ -102,7 +102,6 @@ class PointConverterTest(unittest.TestCase):
 
         self.assertTrue((expected_result == result).all(), str(result))
 
-
 @patch('infrastructure.data_capture.PointConverter')
 class PointCaptureTest(unittest.TestCase):
     def test_handle_give_region_containing_no_data_returns_no_points(self, mock_PointConverter):
@@ -251,6 +250,38 @@ class ImageCaptureTest(unittest.TestCase):
         expected[:, 0] = (255, 0, 0)
         expected[:, 1] = (0, 0, 255)
         image_capture = ImageCapture(sections)
+
+        image_capture.handle(frame=frame, section=0)
+        image_capture.handle(frame=frame2, section=1)
+
+        self.assertTrue((image_capture.image == expected).all())
+
+    def test_handle_should_return_expected_image_when_offset_provided(self):
+        sections = 200
+        frame = np.ones((100, 130, 3), dtype='uint8') * 128
+        frame2 = frame.copy()
+        frame[:, -1] = (255, 0, 0)
+        frame2[:, -1] = (0, 0, 255)
+        expected = np.zeros((100, sections, 3), dtype='uint8')
+        expected[:, 100] = (255, 0, 0)
+        expected[:, 101] = (0, 0, 255)
+        image_capture = ImageCapture(sections, section_offset = 100)
+
+        image_capture.handle(frame=frame, section=0)
+        image_capture.handle(frame=frame2, section=1)
+
+        self.assertTrue((image_capture.image == expected).all())
+
+    def test_handle_should_return_expected_image_when_offset_provided_and_would_be_out_of_bounds(self):
+        sections = 200
+        frame = np.ones((100, 130, 3), dtype='uint8') * 128
+        frame2 = frame.copy()
+        frame[:, -1] = (255, 0, 0)
+        frame2[:, -1] = (0, 0, 255)
+        expected = np.zeros((100, sections, 3), dtype='uint8')
+        expected[:, 199] = (255, 0, 0)
+        expected[:, 0] = (0, 0, 255)
+        image_capture = ImageCapture(sections, section_offset = 199)
 
         image_capture.handle(frame=frame, section=0)
         image_capture.handle(frame=frame2, section=1)

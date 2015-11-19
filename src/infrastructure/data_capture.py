@@ -5,8 +5,9 @@ logger = logging.getLogger('peachy')
 
 
 class ImageCapture(object):
-    def __init__(self, sections):
+    def __init__(self, sections, section_offset = 0):
         self.sections = sections
+        self.section_offset = section_offset
         self._section_count = 0
         self.image = None
 
@@ -16,7 +17,8 @@ class ImageCapture(object):
 
     def handle(self, frame=None, section=0, **kwargs):
         self._section_count += 1
-        self._image(frame.shape[0])[:, section] = frame[:, -1]
+        current_section  = (section + self.section_offset) % self.sections
+        self._image(frame.shape[0])[:, current_section] = frame[:, -1]
         return self._section_count < self.sections
 
     def _image(self, y_axis_dimension):

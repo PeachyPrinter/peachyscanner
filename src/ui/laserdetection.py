@@ -38,7 +38,6 @@ class LaserDetection(Screen):
         self.errosion_y = Config.getdefaultint(self.section, 'errosion_y', 3)
 
     def on_color(self, instance, value):
-        Logger.info("HERE {}".format(self.color))
         self.ids[self.color].state = 'down'
         Config.set(self.section, 'laser_color', self.color)
         self._update_detector()

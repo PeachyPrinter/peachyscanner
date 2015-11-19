@@ -37,11 +37,11 @@ class ScannerAPI(object):
         self.roi = ROI(x_rel, y_rel, w_rel, h_rel)
         self.video_processor.roi = self.roi
 
-    def capture_image(self, call_back=None):
+    def capture_image(self, call_back=None, section_offset = 0):
         if call_back:
-            self.video_processor.subscribe(ImageCapture(self.encoder.sections), call_back)
+            self.video_processor.subscribe(ImageCapture(self.encoder.sections, section_offset), call_back)
         else:
-            self.video_processor.subscribe(ImageCapture(self.encoder.sections))
+            self.video_processor.subscribe(ImageCapture(self.encoder.sections, section_offset))
 
     def capture_points(self, call_back=None):
         if call_back:
