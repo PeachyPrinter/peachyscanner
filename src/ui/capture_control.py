@@ -44,7 +44,7 @@ class NumpyImage(BoxLayout):
         image = np.rot90(np.swapaxes(value, 0, 1))
         if self.texture is None:
             self.texture = Texture.create(size=(image.shape[1], image.shape[0]), colorfmt='rgb')
-        self.texture.blit_buffer(image.tostring(), colorfmt='bgr', bufferfmt='ubyte')
+        self.texture.blit_buffer(image.flatten(), colorfmt='bgr', bufferfmt='ubyte')
         self.tex_size = self._get_new_size(self.texture.size[0], self.texture.size[1])
         self.tex_pos = (self.x + (self.width - self.tex_size[0]) / 2, self.y + (self.height - self.tex_size[1]) / 2)
 

@@ -51,7 +51,7 @@ class ImageDisplay(BoxLayout):
         image = np.rot90(np.swapaxes(image, 0, 1))
         if image.shape[:2] != self.texture.size:
             self.texture = Texture.create(size=(image.shape[1], image.shape[0]), colorfmt='rgb')
-        self.texture.blit_buffer(image.tostring(), colorfmt='bgr', bufferfmt='ubyte')
+        self.texture.blit_buffer(image.flatten(), colorfmt='bgr', bufferfmt='ubyte')
 
     def on_texture(self, instance, value):
         self.video_size = self.texture.size
