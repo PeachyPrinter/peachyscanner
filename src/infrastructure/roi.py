@@ -1,4 +1,6 @@
 import logging
+import time
+import numpy as np
 
 logger = logging.getLogger('peachy')
 
@@ -32,10 +34,11 @@ class ROI(object):
 
         return ROI(x_rel, y_rel, w_rel, h_rel)
 
-    def overlay(self, frame, amount=0.5):
-        gray = frame / int(1 / amount)
+    def overlay(self, frame):
+        gray = np.right_shift(frame, 1) #Quick magic to half values in frame
         roi = self.get(frame)
-        return self.replace(gray, roi)
+        new_frame = self.replace(gray, roi)
+        return new_frame
 
     def replace(self, full_frame, new_part):
         x_abs, y_abs, w_abs, h_abs = self._get_absolute(full_frame.shape)
