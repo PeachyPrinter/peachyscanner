@@ -100,14 +100,14 @@ class LaserDetector2Test(unittest.TestCase):
         self.assertTrue((expected == result).all())
 
     def test_detect_returns_matrix_of_matched_points_if_in_range(self):
-        test = np.ones((10, 10, 3), dtype='uint8') * 250
-        expected = np.ones((10, 10), dtype='uint8') * 255
-        expected[0 ,  :] = 0
-        expected[-1,  :] = 0
-        expected[: ,  0] = 0
-        expected[: , -1] = 0
+        test = np.ones((10, 10, 3), dtype='uint8')
+        test[:,:,2] = 200
+        test[4:7,:,2] = 255
+        expected = np.zeros((10, 10), dtype='uint8') 
+        expected[5,1:9:] = 255
 
-        laser_detector = LaserDetector2()
+
+        laser_detector = LaserDetector2(threshold = 10)
         result = laser_detector.detect(test)
 
         self.assertTrue((expected == result).all(), "{} != {}".format(expected, result))

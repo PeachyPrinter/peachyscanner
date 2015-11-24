@@ -186,9 +186,9 @@ class VideoProcessorTest(unittest.TestCase):
         video_processor.stop()
         self.assertEquals(subscriber, callback.call_args[0][0])
 
-    def test_image_is_a_one_pixel_frame_when_called_before_started(self):
+    def test_image_is_a_10x10_pixel_frame_when_called_before_started(self):
         video_processor = self.create_video_processor()
-        self.assertEqual((1, 1, 3), video_processor.image['frame'].shape)
+        self.assertEqual((10, 10, 3), video_processor.image['frame'].shape)
 
     def test_get_bounded_image_gets_a_scaled_version_of_the_lastest_frame(self):
         video_processor = self.create_video_processor()

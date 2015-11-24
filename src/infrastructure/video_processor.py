@@ -17,7 +17,7 @@ class VideoProcessor(threading.Thread):
         self.encoder = encoder
         self.roi = roi
         self.laser_detector = laser_detector
-        self.image = {'frame': np.ones((10,10,3)) * 255, 'laser_detection': np.zeros((10,10,3))}
+        self.image = {'frame': np.ones((10, 10, 3), dtype='uint8') * 255, 'laser_detection': np.zeros((10, 10, 3), dtype='uint8')}
 
     def run(self):
         logger.info("Starting video capture")

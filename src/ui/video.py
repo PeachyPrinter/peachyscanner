@@ -73,8 +73,11 @@ class ImageDisplay(BoxLayout):
         overlays = np.zeros(image.shape, dtype=image.dtype)
         if self.show_laser_detector:
             #This next line is the fastest way of populating an array with an array
-            colormask = np.tile(self.laser_detector_color_bgr, reduce(mul,overlays.shape[:2])).reshape(overlays.shape)
-            overlays = cv2.bitwise_and(colormask, colormask, mask=image_data['laser_detection'])
+            try:
+                colormask = np.tile(self.laser_detector_color_bgr, reduce(mul,overlays.shape[:2])).reshape(overlays.shape)
+                overlays = cv2.bitwise_and(colormask, colormask, mask=image_data['laser_detection'])
+            except:
+                pass
         if self.show_encoder:
             overlays = cv2.add(overlays, image_data['encoder'])
         if self.show_encoder_history:
@@ -91,8 +94,6 @@ class ImageDisplay(BoxLayout):
             except:
                 color = "FAIL"
             Logger.info(str(color[::-1]))
-
-
 
     def selection(self, x, y, w, h):
         with self.canvas.after:

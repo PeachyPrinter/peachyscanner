@@ -57,7 +57,6 @@ class PointCapture(object):
     def status(self):
         return self._section_count / float(self.sections)
 
-
 class PointConverter(object):
     def get_points(self, mask, center_y):
         roi = np.fliplr(mask)

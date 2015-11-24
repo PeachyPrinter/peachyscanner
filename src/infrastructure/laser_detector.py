@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 from scipy import ndimage
-import time
 
 
 class LaserDetector(object):
@@ -65,7 +64,18 @@ class LaserDetector2(object):
         self._structure = np.ones(value)
 
     def detect(self, frame):
-        channel = cv2.split(frame)[2]
-        ranged_image = cv2.inRange(channel, self._threshold, 255)
+        b, g, r = cv2.split(frame)
+        ab, ag, ar = np.average(b), np.average(g), np.average(r)
+        b = self.sub(b, ab)
+        g = self.sub(g, ag)
+        r = self.sub(r, ar)
+        rel = self.sub(r, g)
+        ranged_image = cv2.inRange(rel, self._threshold, 255)
         noise_reduction = ndimage.binary_erosion(ranged_image, structure=self._structure).astype(ranged_image.dtype) * 255
         return noise_reduction
+
+    def sub(self, a, b):
+        sub1 = a - b
+        mask = a < b
+        sub1[mask] = 0
+        return sub1.astype('uint8')
