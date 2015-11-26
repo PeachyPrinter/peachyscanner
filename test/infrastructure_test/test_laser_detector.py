@@ -76,18 +76,18 @@ class LaserDetector2Test(unittest.TestCase):
             LaserDetector2(color='yellow')
 
     def test_init_can_init_with_reasonsable_values(self):
-        LaserDetector2(threshold=225, filter_size_yx=(5, 5), color='red')
+        LaserDetector2(threshold=225, color='red')
 
     def test_when_color_is_set_it_is_assigned(self):
-        ld = LaserDetector2(threshold=225, filter_size_yx=(5, 5), color='red')
+        ld = LaserDetector2(threshold=225, color='red')
         ld.color = 'blue'
 
     def test_when_threshold_is_set_it_is_assigned(self):
-        ld = LaserDetector2(threshold=225, filter_size_yx=(5, 5), color='red')
+        ld = LaserDetector2(threshold=225, color='red')
         ld.threshold = 125
 
     def test_when_filter_size_yx_is_set_it_is_assigned(self):
-        ld = LaserDetector2(threshold=225, filter_size_yx=(5, 5), color='red')
+        ld = LaserDetector2(threshold=225, color='red')
         ld.filter_size_yx = (3, 3)
 
     def test_detect_returns_an_empty_matrix_with_nothing_in_range(self):
@@ -98,20 +98,6 @@ class LaserDetector2Test(unittest.TestCase):
         result = laser_detector.detect(test)
 
         self.assertTrue((expected == result).all())
-
-    def test_detect_returns_matrix_of_matched_points_if_in_range(self):
-        test = np.ones((10, 10, 3), dtype='uint8')
-        test[:,:,2] = 200
-        test[4:7,:,2] = 255
-        expected = np.zeros((10, 10), dtype='uint8') 
-        expected[5,1:9:] = 255
-
-
-        laser_detector = LaserDetector2(threshold = 10)
-        result = laser_detector.detect(test)
-
-        self.assertTrue((expected == result).all(), "{} != {}".format(expected, result))
-        self.assertEquals(expected.dtype, result.dtype)
 
 
 if __name__ == '__main__':

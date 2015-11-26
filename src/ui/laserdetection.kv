@@ -108,46 +108,6 @@
                 width: '30dp'
                 text: "{:.0f}".format(threshold.value)
         Label:
-            size_hint_y: None
-            height: app.label_height
-            text: "Errosion"
-        BoxLayout:
-            size_hint_y: None
-            height: app.button_height
-            Label:
-                size_hint_x: None
-                width: '20dp'
-                text: 'x'
-            Slider:
-                id: errosion_x
-                min: 1
-                max: 20
-                step: 1
-                value: root.errosion_x
-                on_value: root.errosion_x = self.value
-            Label:
-                size_hint_x: None
-                width: '30dp'
-                text: "{:.0f}".format(errosion_x.value)
-        BoxLayout:
-            size_hint_y: None
-            height: app.button_height
-            Label:
-                size_hint_x: None
-                width: '20dp'
-                text: 'y'
-            Slider:
-                id: errosion_y
-                min: 1
-                max: 20
-                step: 1
-                value: root.errosion_y
-                on_value: root.errosion_y = self.value
-            Label:
-                size_hint_x: None
-                width: '30dp'
-                text: "{:.0f}".format(errosion_y.value)
-        Label:
         Button:
             size_hint_y: None
             height: app.button_height

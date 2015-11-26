@@ -11,7 +11,7 @@ setup(name='PeachyScanner',
       url='www.peachyprinter.com',
       packages=[],
       py_modules=['VERSION'],
-      install_requires=['numpy', 'kivy', 'scipy'],
+      install_requires=['numpy', 'kivy',],
       data_files=[],
       include_package_data=True
      )

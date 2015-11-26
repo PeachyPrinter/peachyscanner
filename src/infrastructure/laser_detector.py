@@ -1,7 +1,5 @@
 import cv2
 import numpy as np
-from scipy import ndimage
-
 
 class LaserDetector(object):
     def __init__(self, low_bgr, high_bgr):
@@ -24,11 +22,9 @@ class LaserDetector(object):
 class LaserDetector2(object):
     color_map = {'red': 2, 'green': 1, 'blue': 0}
 
-    def __init__(self, threshold=225, filter_size_yx=(3, 3), color='red'):
-        self.filter_size_yx = filter_size_yx
+    def __init__(self, threshold=225, color='red'):
         self.color = color
         self.threshold = threshold
-        self._structure = np.ones(filter_size_yx)
 
     @property
     def color(self):
@@ -51,18 +47,6 @@ class LaserDetector2(object):
             raise Exception('Threshold value must be uint8 type')
         self._threshold = value
 
-    @property
-    def filter_size_yx(self):
-        return self._structure.shape
-
-    @filter_size_yx.setter
-    def filter_size_yx(self, value):
-        if len(value) != 2:
-            raise Exception('Filter size is a tuple')
-        if value[0] < 1 or value[1] < 1:
-            raise Exception('Filter must be at least (1,1) was {}'.format(str(value)))
-        self._structure = np.ones(value)
-
     def detect(self, frame):
         b, g, r = cv2.split(frame)
         ab, ag, ar = np.average(b), np.average(g), np.average(r)
@@ -70,9 +54,9 @@ class LaserDetector2(object):
         g = self.sub(g, ag)
         r = self.sub(r, ar)
         rel = self.sub(r, g)
-        ranged_image = cv2.inRange(rel, self._threshold, 255)
-        noise_reduction = ndimage.binary_erosion(ranged_image, structure=self._structure).astype(ranged_image.dtype) * 255
-        return noise_reduction
+        img = (rel == rel.max(axis=1)[:, None]).astype('uint8') * rel
+        ranged_image = cv2.inRange(img, self._threshold, 255)
+        return ranged_image
 
     def sub(self, a, b):
         sub1 = a - b

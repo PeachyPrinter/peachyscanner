@@ -120,9 +120,8 @@ class ScannerAPITest(TestHelpers):
         cam = mock_camera.return_value
         cam.shape = [300, 100]
         api = ScannerAPI()
-        api.configure_laser_detector2(255, (3, 3), 'red')
+        api.configure_laser_detector2(255, 'red')
         self.assertEquals(255, api.laser_detector.threshold)
-        self.assertEquals((3, 3), api.laser_detector.filter_size_yx)
         self.assertEquals('red', api.laser_detector.color)
 
     @patch('api.scanner.Camera')
@@ -130,9 +129,9 @@ class ScannerAPITest(TestHelpers):
         cam = mock_camera.return_value
         cam.shape = [300, 100]
         api = ScannerAPI()
-        api.configure_laser_detector2(255, (3, 3), 'red')
+        api.configure_laser_detector2(255, 'red')
         initial = api.laser_detector
-        api.configure_laser_detector2(225, (5, 5), 'blue')
+        api.configure_laser_detector2(225, 'blue')
         self.assertNotEquals(api.laser_detector, initial)
 
     @patch('api.scanner.Camera')
@@ -140,7 +139,7 @@ class ScannerAPITest(TestHelpers):
         cam = mock_camera.return_value
         cam.shape = [300, 100]
         api = ScannerAPI()
-        api.configure_laser_detector2(255, (3, 3), 'red')
+        api.configure_laser_detector2(255, 'red')
         self.assertNotEquals(api._default_laser_detector, api.video_processor.laser_detector)
         self.assertEquals(api.laser_detector, api.video_processor.laser_detector)
 
