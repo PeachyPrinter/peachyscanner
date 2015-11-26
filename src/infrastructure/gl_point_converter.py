@@ -23,5 +23,5 @@ class GLConverter(object):
         v = np.ones(z.shape) - (z.copy() / np.amax(z))
         xyz = np.dstack((x, y, z, a, b, c, u, v))
         xyz = xyz.reshape(xyz.size / 8, 8)
-        xyz = xyz[np.logical_not(np.logical_and(np.isclose(xyz[:, 0], 0.0), np.isclose(xyz[:, 1], 0.0), np.isclose(xyz[:, 2], 0.0),))]
+        # xyz = xyz[np.logical_not(np.logical_and(np.isclose(xyz[:, 0], 0.0), np.isclose(xyz[:, 1], 0.0), np.isclose(xyz[:, 2], 0.0),))]
         return xyz

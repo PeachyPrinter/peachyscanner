@@ -20,6 +20,7 @@ class PLYWriter(Writer):
         start = time.time()
         points = self.converter.convert(polar_array)
         verticies = points.shape[0] / 8
+        
 
         header = "ply\nformat ascii 1.0\ncomment made by Peachy Scanner\ncomment Date Should Go Here\nelement vertex {}\nproperty float x\nproperty float y\nproperty float z\nend_header\n".format(str(verticies))
 

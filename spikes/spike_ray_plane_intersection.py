@@ -42,6 +42,7 @@ class SpikeRayPlaneIntersection(object):
                     L2 = np.array([x_pos, y_pos, z_pos])
                     final[x_camera, y_camera] = (np.dot(n_plane, p_1) / np.dot(n_plane, L2)) * L2
 
+
         final[final == np.inf] = 0
         final[final == -np.inf] = 0
         final = np.nan_to_num(final)
