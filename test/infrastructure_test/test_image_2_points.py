@@ -72,7 +72,7 @@ class PointConverterTest(unittest.TestCase):
 
     def test_get_points_should_roi(self):
         camera_pixels_shape_xy = (4, 4)
-        i2p = self.setup_i2p(camera_pixels_shape_xy=camera_pixels_shape_xy, camera_sensor_size_mm=(18,18))
+        i2p = self.setup_i2p(camera_pixels_shape_xy=camera_pixels_shape_xy, camera_sensor_size_mm=(18, 18))
         image = np.ones((2, 2)).astype('bool')
         expected = np.array([
             [-3.0, -3.0,   3.0],  # -1, -1
@@ -88,7 +88,13 @@ class PointConverterTest(unittest.TestCase):
         self.assert_array(expected, result)
 
     def test_get_points_should_return_nothing_when_ray_and_plane_dont_intersect(self):
-        pass
+        camera_pixels_shape_xy = (4, 4)
+        i2p = self.setup_i2p(camera_pixels_shape_xy=camera_pixels_shape_xy, camera_sensor_size_mm=(20, 20))
+        image = np.ones((4, 4)).astype('bool')
+
+        result = i2p.get_points(image, 0, ROI(0, 0, 1, 1))
+
+        self.assertTrue(3, len(result))
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level='INFO')
