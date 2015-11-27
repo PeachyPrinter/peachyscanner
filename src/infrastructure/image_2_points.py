@@ -67,4 +67,5 @@ class Image2Points(object):
         return np.dot(rotation_matrix, points_xyz.T).T
 
     def get_points(self, image, rotation_rad, roi):
-        return self._rotate_points(self._posisition_mask[image], rotation_rad)
+        posisition_mask = roi.get(self._posisition_mask)
+        return self._rotate_points(posisition_mask[image], rotation_rad)
