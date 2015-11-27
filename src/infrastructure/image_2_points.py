@@ -3,15 +3,12 @@ import numpy as np
 class Image2Points(object):
     def __init__(
         self,
-        camera_focal_length_mm,
-        camera_sensor_size_mm,
+        hardware,
         camera_pixels_shape_xy,
-        laser_center_intersection_rad,
-        center_intersection_xyz,
     ):
-        self._mm_per_pixel = self._mm_per_pixel(camera_pixels_shape_xy, camera_sensor_size_mm)
-        self._laser_plane_normal = self._get_laser_plane_normal(center_intersection_xyz, laser_center_intersection_rad)
-        self._posisition_mask = self._get_laser_intersections_mask(camera_pixels_shape_xy, camera_focal_length_mm, self._mm_per_pixel, center_intersection_xyz, center_intersection_xyz, self._laser_plane_normal)
+        self._mm_per_pixel = self._mm_per_pixel(camera_pixels_shape_xy, hardware.sensor_size_xy_mm)
+        self._laser_plane_normal = self._get_laser_plane_normal(hardware.center_intersection_xyz, hardware.laser_center_intersection_rad)
+        self._posisition_mask = self._get_laser_intersections_mask(camera_pixels_shape_xy, hardware.focal_length_mm, self._mm_per_pixel, hardware.center_intersection_xyz, hardware.center_intersection_xyz, self._laser_plane_normal)
 
     def _get_laser_intersections_mask(
         self,

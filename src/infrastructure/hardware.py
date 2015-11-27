@@ -1,3 +1,4 @@
+import numpy as np
 
 class HardwareConfiguration(object):
     def __init__(
@@ -12,3 +13,7 @@ class HardwareConfiguration(object):
         self.sensor_size_xy_mm = sensor_size_xy_mm
         self.focal_point_to_center_mm = focal_point_to_center_mm
         self.laser_center_intersection_rad = laser_center_intersection_rad
+
+    @property
+    def center_intersection_xyz(self):
+        return np.array([0, 0, -self.focal_point_to_center_mm])

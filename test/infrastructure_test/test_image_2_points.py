@@ -10,18 +10,22 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
 from infrastructure.image_2_points import Image2Points
+from infrastructure.hardware import HardwareConfiguration
 from infrastructure.roi import ROI
 
 
 class PointConverterTest(unittest.TestCase):
 
     def setup_i2p(self, camera_pixels_shape_xy=(3, 3), camera_sensor_size_mm=(13.5, 13.5),):
-        return Image2Points(
-            camera_focal_length_mm=9,
-            camera_sensor_size_mm=camera_sensor_size_mm,
-            camera_pixels_shape_xy=camera_pixels_shape_xy,
+        hardware = HardwareConfiguration(
+            focal_length_mm=9,
+            sensor_size_xy_mm=camera_sensor_size_mm,
+            focal_point_to_center_mm=9,
             laser_center_intersection_rad=np.pi / 4,
-            center_intersection_xyz=(0, 0, -9),
+            )
+        return Image2Points(
+            hardware,
+            camera_pixels_shape_xy,
             )
 
     def assert_array(self, array1, array2, rtol=1e-05):
