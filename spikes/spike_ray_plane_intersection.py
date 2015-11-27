@@ -33,6 +33,7 @@ class SpikeRayPlaneIntersection(object):
         p_1 = np.array(self.center_intersection_point_xyz)
         n_plane = self.n_laser_plane
         with np.errstate(divide='ignore', invalid='ignore'):
+            pdot = np.dot(n_plane, p_1)
             for x_camera in range(self.camera_shape_xy[0]):
                 for y_camera in range(self.camera_shape_xy[1]):
                     x_pos = (x_camera - (self.camera_shape_xy[0] / 2)) * float(self.mm_per_pixel)
@@ -40,7 +41,7 @@ class SpikeRayPlaneIntersection(object):
                     z_pos = -self.camera_focal_length_mm
 
                     L2 = np.array([x_pos, y_pos, z_pos])
-                    final[x_camera, y_camera] = (np.dot(n_plane, p_1) / np.dot(n_plane, L2)) * L2
+                    final[x_camera, y_camera] = (pdot / np.dot(n_plane, L2)) * L2
 
 
         final[final == np.inf] = 0
