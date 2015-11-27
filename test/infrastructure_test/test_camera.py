@@ -13,25 +13,12 @@ from infrastructure.camera import Camera
 
 @patch('infrastructure.camera.VideoCapture')
 class CameraTest(unittest.TestCase):
-    def test_camera_should_raise_exception_if_sensor_size_is_not_a_tuple(self, mock_VideoCapture):
-        with self.assertRaises(Exception):
-            Camera(10, 10)
-
-    def test_camera_has_focal_length(self, mock_VideoCapture):
-        focal_length = 10
-        camera = Camera(focal_length, (10, 7.5))
-        self.assertEquals(focal_length, camera.focal_length_mm)
-
-    def test_camera_has_sensor_size(self, mock_VideoCapture):
-        sensor_size = (10, 7.5)
-        camera = Camera(10, sensor_size)
-        self.assertEquals(sensor_size, camera.sensor_size_xy_mm)
 
     def test_read_should_raise_exception_when_camera_not_started(self, mock_VideoCapture):
-        camera = Camera(10, (10, 7.5))
+        camera = Camera()
         expected_image = Mock()
         expected_image.shape = (10, 20, 3)
-        camera = Camera(10, (10, 7.5))
+        camera = Camera()
         mock_video_capture = mock_VideoCapture.return_value
         mock_video_capture.read.return_value = (True, expected_image)
         with self.assertRaises(Exception):
@@ -40,7 +27,7 @@ class CameraTest(unittest.TestCase):
     def test_start_should_start_cv_videoCapture(self, mock_VideoCapture):
         expected_image = Mock()
         expected_image.shape = (10, 20, 3)
-        camera = Camera(10, (10, 7.5))
+        camera = Camera()
         mock_video_capture = mock_VideoCapture.return_value
         mock_video_capture.read.return_value = (True, expected_image)
         camera.start()
@@ -49,7 +36,7 @@ class CameraTest(unittest.TestCase):
     def test_stop_should_stop_cv_videoCapture(self, mock_VideoCapture):
         expected_image = Mock()
         expected_image.shape = (10, 20, 3)
-        camera = Camera(10, (10, 7.5))
+        camera = Camera()
         mock_video_capture = mock_VideoCapture.return_value
         mock_video_capture.read.return_value = (True, expected_image)
         camera.start()
@@ -60,7 +47,7 @@ class CameraTest(unittest.TestCase):
     def test_read_should_return_image_when_camera_running(self, mock_VideoCapture):
         expected_image = Mock()
         expected_image.shape = (10, 20, 3)
-        camera = Camera(10, (10, 7.5))
+        camera = Camera()
         mock_video_capture = mock_VideoCapture.return_value
         mock_video_capture.read.return_value = (True, expected_image)
 
@@ -73,7 +60,7 @@ class CameraTest(unittest.TestCase):
     def test_shape_returns_frame_shape_when_camera_running(self, mock_VideoCapture):
         expected_image = Mock()
         expected_image.shape = (10, 20, 3)
-        camera = Camera(10, (10, 7.5))
+        camera = Camera()
         mock_video_capture = mock_VideoCapture.return_value
         mock_video_capture.read.return_value = (True, expected_image)
 
@@ -86,14 +73,14 @@ class CameraTest(unittest.TestCase):
     def test_shape_raises_exception_if_camera_not_started(self, mock_VideoCapture):
         expected_image = Mock()
         expected_image.shape = (10, 20, 3)
-        camera = Camera(10, (10, 7.5))
+        camera = Camera()
         mock_video_capture = mock_VideoCapture.return_value
         mock_video_capture.read.return_value = (True, expected_image)
         with self.assertRaises(Exception):
             camera.shape
 
     def test_get_settings_raises_exception_if_camera_not_started(self, mock_VideoCapture):
-        camera = Camera(10, (10, 7.5))
+        camera = Camera()
         with self.assertRaises(Exception):
             camera.get_settings()
 
@@ -112,7 +99,7 @@ class CameraTest(unittest.TestCase):
                 {'name': 'Exposure',        'value': 1.0, },
             ]
 
-        camera = Camera(10, (10, 7.5))
+        camera = Camera()
         camera.start()
         results = camera.get_settings()
 
@@ -126,14 +113,14 @@ class CameraTest(unittest.TestCase):
         mock_video_capture.read.return_value = (True, expected_image)
         expected = []
 
-        camera = Camera(10, (10, 7.5))
+        camera = Camera()
         camera.start()
         results = camera.get_settings()
 
         self.assertListEqual(expected, results)
 
     def test_set_setting_should_raise_exception_if_camera_not_started(self, mock_VideoCapture):
-        camera = Camera(10, (10, 7.5))
+        camera = Camera()
         with self.assertRaises(Exception):
             camera.set_setting('Hue', '1.0')
 
@@ -144,7 +131,7 @@ class CameraTest(unittest.TestCase):
         expected_image.shape = (10, 20, 3)
         mock_video_capture.read.return_value = (True, expected_image)
 
-        camera = Camera(10, (10, 7.5))
+        camera = Camera()
         camera.start()
         camera.set_setting('Hue', 1.0)
 
@@ -157,7 +144,7 @@ class CameraTest(unittest.TestCase):
         expected_image.shape = (10, 20, 3)
         mock_video_capture.read.return_value = (True, expected_image)
 
-        camera = Camera(10, (10, 7.5))
+        camera = Camera()
         camera.start()
         with self.assertRaises(Exception):
             camera.set_setting('Pizza', 1.0)
