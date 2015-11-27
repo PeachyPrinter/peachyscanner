@@ -16,6 +16,11 @@ global_camera_properties = [
 
 class Camera(object):
 
+    def __init__(self, focal_length_mm, sensor_size_xy_mm):
+        assert(len(sensor_size_xy_mm) == 2)
+        self.focal_length_mm = focal_length_mm
+        self.sensor_size_xy_mm = sensor_size_xy_mm
+
     def get_settings(self):
         if not hasattr(self, '_video_capture'):
             raise Exception("Start video capture before getting settings")
