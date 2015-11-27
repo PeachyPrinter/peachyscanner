@@ -298,6 +298,19 @@ class ScannerAPITest(TestHelpers):
         result = api.get_feed_image((200, 100))
         self.assertEqual('Expected Image', result)
 
+    @patch('api.scanner.Camera')
+    @patch('api.scanner.Image2Points')
+    def test_configure_configures_point_collection_and_calls_back(self, mock_Image2Points, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+
+        callback = Mock()
+        api = ScannerAPI()
+        api.configure("bla", callback)
+
+        mock_Image2Points.assert_called_once_with("bla", cam.shape)
+        callback.assert_called_with()
+
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level='INFO')
     unittest.main()

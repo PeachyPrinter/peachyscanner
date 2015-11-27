@@ -10,6 +10,7 @@ from infrastructure.camera import Camera
 from infrastructure.video_processor import VideoProcessor
 from infrastructure.data_capture import ImageCapture, PointCapture
 from infrastructure.laser_detector import LaserDetector, LaserDetector2
+from infrastructure.image_2_points import Image2Points
 
 
 logger = logging.getLogger('peachy')
@@ -63,6 +64,10 @@ class ScannerAPI(object):
     def configure_laser_detector2(self, threshold, color):
         self.laser_detector = LaserDetector2(threshold, color)
         self.video_processor.laser_detector = self.laser_detector
+
+    def configure(self, hardware, callback):
+        self.img2points = Image2Points(hardware, self.camera.shape)
+        callback()
 
     def start(self):
         self.video_processor.start()
