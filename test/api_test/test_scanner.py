@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 from mock import patch, Mock
 from api.scanner import ScannerAPI
 from infrastructure.roi import ROI
-from infrastructure.data_capture import ImageCapture, PointCapture
+from infrastructure.data_capture import ImageCapture, PointCapture, PointCaptureXYZ
 from helpers import TestHelpers
 
 
@@ -209,6 +209,40 @@ class ScannerAPITest(TestHelpers):
         self.assertTrue(len(api.video_processor.handlers) > 0)
         self.assertEquals(PointCapture, type(api.video_processor.handlers[0][0]))
         self.assertEqual(api.video_processor.handlers[0][1], callback)
+
+
+    @patch('api.scanner.Camera')
+    def test_capture_points_xyz_should_raise_exception_if_img2points_not_configured(self, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+        api = ScannerAPI()
+        with self.assertRaises(Exception):
+            api.capture_points_xyz()
+
+    @patch('api.scanner.Camera')
+    def test_capture_points_xyz_should_create_an_image_handler_and_subscribe_it_to_video_processor(self, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+        api = ScannerAPI()
+        api.img2points = True
+        api.capture_points_xyz()
+        self.assertTrue(len(api.video_processor.handlers) > 0)
+        self.assertEquals(PointCaptureXYZ, type(api.video_processor.handlers[0][0]))
+        self.assertTrue(hasattr(api.video_processor.handlers[0][0], 'handle'))
+
+    @patch('api.scanner.Camera')
+    def test_capture_points_xyz_should_subscribe_with_expected_callback(self, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+        api = ScannerAPI()
+        api.img2points = True
+        callback = Mock()
+        api.capture_points_xyz(callback)
+        self.assertTrue(len(api.video_processor.handlers) > 0)
+        self.assertEquals(PointCaptureXYZ, type(api.video_processor.handlers[0][0]))
+        self.assertEqual(api.video_processor.handlers[0][1], callback)
+
+
 
     @patch('api.scanner.Camera')
     @patch('api.scanner.VideoProcessor')
