@@ -26,6 +26,8 @@ class TestHandler(object):
             'section': kwargs['section'],
             'roi_center_y': kwargs['roi_center_y'],
             'partial_laser_detection': kwargs['partial_laser_detection'],
+            'laser_detection': kwargs['laser_detection'],
+            'roi': kwargs['roi'],
             })
         self.unsubscribe_after -= 1
         return self.unsubscribe_after != 0
@@ -151,7 +153,7 @@ class VideoProcessorTest(unittest.TestCase):
         self.assertEquals(roi_y_center, subscriber.calls[0]['roi_center_y'])
 
 
-    def test_handler_should_be_given_the_detected_laser(self):
+    def test_handler_should_be_given_the_partial_detected_laser(self):
         video_processor = self.create_video_processor()
         self.encoder.should_capture_frame_for_section.return_value = (True, 44)
         expected = self.roi.get_left_of_center(self.detected_image)
@@ -163,6 +165,31 @@ class VideoProcessorTest(unittest.TestCase):
         video_processor.stop()
         self.assertTrue(len(subscriber.calls) > 0)
         self.assertTrue((expected == subscriber.calls[0]['partial_laser_detection']).all())
+
+    def test_handler_should_be_given_the_detected_laser(self):
+        video_processor = self.create_video_processor()
+        self.encoder.should_capture_frame_for_section.return_value = (True, 44)
+        expected = self.detected_image
+
+        subscriber = TestHandler()
+        video_processor.subscribe(subscriber)
+        video_processor.start()
+        time.sleep(self.start_up_delay)
+        video_processor.stop()
+        self.assertTrue(len(subscriber.calls) > 0)
+        self.assertTrue((expected == subscriber.calls[0]['laser_detection']).all())
+
+    def test_handler_should_be_given_the_roi(self):
+        video_processor = self.create_video_processor()
+        self.encoder.should_capture_frame_for_section.return_value = (True, 44)
+
+        subscriber = TestHandler()
+        video_processor.subscribe(subscriber)
+        video_processor.start()
+        time.sleep(self.start_up_delay)
+        video_processor.stop()
+        self.assertTrue(len(subscriber.calls) > 0)
+        self.assertEqual(video_processor.roi, subscriber.calls[0]['roi'])
 
     def test_when_handler_returns_false_unsubscribe_them(self):
         video_processor = self.create_video_processor()
