@@ -4,16 +4,29 @@ import logging
 logger = logging.getLogger('peachy')
 
 
-class ImageCapture(object):
-    def __init__(self, sections, section_offset = 0):
+class Handler(object):
+
+    def __init__(self, sections):
         self.sections = sections
-        self.section_offset = section_offset
         self._section_count = 0
-        self.image = None
+
+    def handle():
+        raise NotImplementedError()
 
     @property
     def complete(self):
         return self._section_count >= self.sections
+
+    @property
+    def status(self):
+        return self._section_count / float(self.sections)
+
+
+class ImageCapture(Handler):
+    def __init__(self, sections, section_offset=0):
+        super(ImageCapture, self).__init__(sections)
+        self.section_offset = section_offset
+        self.image = None
 
     def handle(self, frame=None, section=0, **kwargs):
         self._section_count += 1
@@ -26,21 +39,12 @@ class ImageCapture(object):
             self.image = np.zeros((y_axis_dimension, self.sections, 3), dtype='uint8')
         return self.image
 
-    @property
-    def status(self):
-        return self._section_count / float(self.sections)
 
-
-class PointCapture(object):
+class PointCapture(Handler):
     def __init__(self, sections):
-        self.sections = sections
-        self._section_count = 0
+        super(PointCapture, self).__init__(sections)
         self.point_converter = PointConverter()
         self.points_tyr = None  #(theta, height, radius)
-
-    @property
-    def complete(self):
-        return self._section_count >= self.sections
 
     def handle(self, partial_laser_detection=None, section=0, roi_center_y=0, **kwargs):
         self._section_count += 1
@@ -53,9 +57,6 @@ class PointCapture(object):
             self.points_tyr = np.zeros((self.sections, height), dtype='int32')
         return self.points_tyr
 
-    @property
-    def status(self):
-        return self._section_count / float(self.sections)
 
 class PointConverter(object):
     def get_points(self, mask, center_y):
@@ -76,3 +77,15 @@ class PointConverter(object):
                     maxindex[last_valid_index + 1 :index + 1] = samples
                     last_valid_index = index + 1
         return maxindex
+
+
+class PointCaptureXYZ(Handler):
+    def __init__(self, sections, img2points):
+        super(PointCaptureXYZ, self).__init__(sections)
+        self.img2points = img2points
+        self.sections = sections
+        self._section_count = 0
+
+    def handle(self, laser_detection=None, section=0, roi=None):
+        self._section_count += 1
+        return self._section_count < self.sections

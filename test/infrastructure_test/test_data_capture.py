@@ -11,7 +11,8 @@ import cv2
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
-from infrastructure.data_capture import PointCapture, ImageCapture, PointConverter
+from infrastructure.data_capture import PointCapture, ImageCapture, PointConverter, PointCaptureXYZ
+from infrastructure.roi import ROI
 from helpers import FakeCamera
 
 
@@ -378,6 +379,49 @@ class ImageCaptureTest(unittest.TestCase):
    #         key = chr(cv2.waitKey(1) & 0xFF)
    #         if key == 'q':
    #             break
+
+class PointCaptureXYZTest(unittest.TestCase):
+
+    def setUp(self):
+        self.img2point = Mock()
+        self.img2point.get_points.return_value = np.array([1.0, 1.0, 1.0])
+        self.roi = ROI(0, 0, 1, 1)
+
+    def test_should_handle_all_sections_if_starting_at_not_0_index(self):
+        sections = 200
+        point_capture = PointCaptureXYZ(sections, self.img2point)
+        for idx in range(sections):
+            index = (idx + 50) % 200
+            result = point_capture.handle(laser_detection="BLA", section=idx, roi=self.roi)
+
+        self.assertFalse(result)
+
+    def test_complete_should_be_false_if_all_sections_unhandled(self):
+        sections = 200
+        point_capture = PointCaptureXYZ(sections, self.img2point)
+        for idx in range(sections - 2):
+            point_capture.handle(laser_detection="BLA", section=idx, roi=self.roi)
+
+        self.assertFalse(point_capture.complete)
+
+    def test_complete_should_be_true_if_all_sections_handled(self):
+        sections = 200
+
+        point_capture = PointCaptureXYZ(sections, self.img2point)
+        for idx in range(sections):
+            point_capture.handle(laser_detection="BLA", section=idx, roi=self.roi)
+
+        self.assertTrue(point_capture.complete)
+
+    def test_status_should_return_amount_complete(self):
+        sections = 10
+
+        point_capture = PointCaptureXYZ(sections, self.img2point)
+        for idx in range(sections):
+            self.assertEquals(idx / float(sections), point_capture.status)
+            point_capture.handle(laser_detection="BLA", section=idx, roi=self.roi)
+        self.assertEquals(1.0, point_capture.status)
+
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level='INFO')
