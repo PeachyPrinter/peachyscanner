@@ -42,10 +42,10 @@ class PointCapture(object):
     def complete(self):
         return self._section_count >= self.sections
 
-    def handle(self, laser_detection=None, section=0, roi_center_y=0, **kwargs):
+    def handle(self, partial_laser_detection=None, section=0, roi_center_y=0, **kwargs):
         self._section_count += 1
-        points = self._points(laser_detection.shape[0])
-        points[section] = self.point_converter.get_points(laser_detection, laser_detection.shape[0])
+        points = self._points(partial_laser_detection.shape[0])
+        points[section] = self.point_converter.get_points(partial_laser_detection, partial_laser_detection.shape[0])
         return self._section_count < self.sections
 
     def _points(self, height):

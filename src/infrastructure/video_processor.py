@@ -31,7 +31,7 @@ class VideoProcessor(threading.Thread):
                     roi = self.roi.get_left_of_center(frame)
                     roi_center_y = (frame.shape[0] // 2) - (self.roi.y_rel * frame.shape[0])
                     roi_detected = self.roi.get_left_of_center(detected)
-                    result = handler.handle(frame=roi, section=section, roi_center_y=roi_center_y, laser_detection=roi_detected)
+                    result = handler.handle(frame=roi, section=section, roi_center_y=roi_center_y, partial_laser_detection=roi_detected)
                     callback(handler)
                     if not result:
                         self.unsubscribe((handler, callback))

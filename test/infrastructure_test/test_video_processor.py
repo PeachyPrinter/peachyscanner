@@ -25,7 +25,7 @@ class TestHandler(object):
             'frame': kwargs['frame'].copy(),
             'section': kwargs['section'],
             'roi_center_y': kwargs['roi_center_y'],
-            'laser_detection': kwargs['laser_detection'],
+            'partial_laser_detection': kwargs['partial_laser_detection'],
             })
         self.unsubscribe_after -= 1
         return self.unsubscribe_after != 0
@@ -162,7 +162,7 @@ class VideoProcessorTest(unittest.TestCase):
         time.sleep(self.start_up_delay)
         video_processor.stop()
         self.assertTrue(len(subscriber.calls) > 0)
-        self.assertTrue((expected == subscriber.calls[0]['laser_detection']).all())
+        self.assertTrue((expected == subscriber.calls[0]['partial_laser_detection']).all())
 
     def test_when_handler_returns_false_unsubscribe_them(self):
         video_processor = self.create_video_processor()

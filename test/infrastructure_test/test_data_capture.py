@@ -151,7 +151,7 @@ class PointCaptureTest(unittest.TestCase):
         expected[0] = return_array
 
         point_capture = PointCapture(sections)
-        result = point_capture.handle(laser_detection=detected, section=0, roi_center_y=50)
+        result = point_capture.handle(partial_laser_detection=detected, section=0, roi_center_y=50)
 
         self.assertTrue(result)
         self.assertTrue((expected == point_capture.points_tyr).all())
@@ -166,7 +166,7 @@ class PointCaptureTest(unittest.TestCase):
         expected[0] = np.array([1])
 
         point_capture = PointCapture(sections)
-        result = point_capture.handle(laser_detection=detected, section=0, roi_center_y=50)
+        result = point_capture.handle(partial_laser_detection=detected, section=0, roi_center_y=50)
 
         self.assertTrue(result)
         self.assertTrue((expected == point_capture.points_tyr).all())
@@ -182,7 +182,7 @@ class PointCaptureTest(unittest.TestCase):
 
         point_capture = PointCapture(sections)
         for idx in range(sections):
-            result = point_capture.handle(laser_detection=detected, section=idx, roi_center_y=50)
+            result = point_capture.handle(partial_laser_detection=detected, section=idx, roi_center_y=50)
 
         self.assertFalse(result)
 
@@ -198,7 +198,7 @@ class PointCaptureTest(unittest.TestCase):
         point_capture = PointCapture(sections)
         for idx in range(sections):
             index = (idx + 50) % 200
-            result = point_capture.handle(laser_detection=detected, section=index, roi_center_y=50)
+            result = point_capture.handle(partial_laser_detection=detected, section=index, roi_center_y=50)
 
         self.assertFalse(result)
 
@@ -213,7 +213,7 @@ class PointCaptureTest(unittest.TestCase):
 
         point_capture = PointCapture(sections)
         for idx in range(sections - 2):
-            point_capture.handle(laser_detection=detected, section=idx, roi_center_y=50)
+            point_capture.handle(partial_laser_detection=detected, section=idx, roi_center_y=50)
 
         self.assertFalse(point_capture.complete)
 
@@ -228,7 +228,7 @@ class PointCaptureTest(unittest.TestCase):
 
         point_capture = PointCapture(sections)
         for idx in range(sections):
-            point_capture.handle(laser_detection=detected, section=idx, roi_center_y=50)
+            point_capture.handle(partial_laser_detection=detected, section=idx, roi_center_y=50)
 
         self.assertTrue(point_capture.complete)
 
@@ -242,7 +242,7 @@ class PointCaptureTest(unittest.TestCase):
         point_capture = PointCapture(sections)
         for idx in range(sections):
             self.assertEquals(idx / float(sections), point_capture.status)
-            point_capture.handle(laser_detection=detected, section=idx, roi_center_y=50)
+            point_capture.handle(partial_laser_detection=detected, section=idx, roi_center_y=50)
         self.assertEquals(1.0, point_capture.status)
 
 
