@@ -25,3 +25,19 @@ class GLConverter(object):
         xyz = xyz.reshape(xyz.size / 8, 8)
         # xyz = xyz[np.logical_not(np.logical_and(np.isclose(xyz[:, 0], 0.0), np.isclose(xyz[:, 1], 0.0), np.isclose(xyz[:, 2], 0.0),))]
         return xyz
+
+    def convert_xyz(self, point_array_xyz, scale=1.0):
+        if len(point_array_xyz) == 0:
+            return point_array_xyz
+        xyz = point_array_xyz * scale
+        abc = xyz / np.linalg.norm(xyz)
+        rad = np.arctan(xyz[:, 0] / xyz[:, 2])
+        rad = np.nan_to_num(rad)
+        r_mask = (xyz[:, 2] < 0)
+        r_value = r_mask.astype('float16') * (np.pi)
+        rad = rad + r_value
+        deg = np.mod((180 / np.pi) * rad, 360)
+        per_deg = deg / 360
+        h = (abc[:, 1] / 2.0) + 0.5
+        uv = np.vstack((per_deg, h)).T
+        return np.hstack((xyz, abc, uv))

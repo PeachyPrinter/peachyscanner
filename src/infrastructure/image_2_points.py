@@ -64,5 +64,66 @@ class Image2Points(object):
         return np.dot(rotation_matrix, points_xyz.T).T
 
     def get_points(self, image, rotation_rad, roi):
-        posisition_mask = roi.get(self._posisition_mask)
-        return self._rotate_points(posisition_mask[image], rotation_rad)
+        roi_pos = roi.get(self._posisition_mask)
+        roi_image = roi.get(image)
+        masked_result = roi_pos[roi_image.astype('bool')].reshape((-1, 3))
+        # masked_result = self.cube()
+        return self._rotate_points(masked_result, rotation_rad)
+
+    def cube(self):
+        if hasattr(self, '_cube'):
+            return self._cube
+        dots = 50
+        x = np.linspace(-1, 1, dots)
+        edge = np.ones((dots, 3))
+
+        edge1 = edge.copy()
+        edge1[:, 0] = x
+
+        edge2 = edge.copy()
+        edge2[:, 1] = x
+
+        edge3 = edge.copy()
+        edge3[:, 2] = x
+
+        edge4 = edge.copy()
+        edge4[:, 1] = x
+        edge4[:, 0] = -1
+
+        edge5 = edge.copy()
+        edge5[:, 2] = x
+        edge5[:, 0] = -1
+
+        edge7 = edge.copy()
+        edge7[:, 0] = x
+        edge7[:, 1] = -1
+
+        edge9 = edge.copy()
+        edge9[:, 2] = x
+        edge9[:, 1] = -1
+
+        edgeA = edge.copy()
+        edgeA[:, 0] = x
+        edgeA[:, 2] = -1
+
+        edgeB = edge.copy()
+        edgeB[:, 1] = x
+        edgeB[:, 2] = -1
+
+        edge6 = edge.copy()
+        edge6[:, 0] = x
+        edge6[:, 1] = -1
+        edge6[:, 2] = -1
+
+        edge8 = edge.copy()
+        edge8[:, 1] = x
+        edge8[:, 0] = -1
+        edge8[:, 2] = -1
+
+        edgeC = edge.copy()
+        edgeC[:, 2] = x
+        edgeC[:, 0] = -1
+        edgeC[:, 1] = -1
+
+        self._cube = np.vstack((edge1, edge2, edge3, edge4, edge5, edge6, edge7, edge8, edge9, edgeA, edgeB, edgeC))
+        return self._cube

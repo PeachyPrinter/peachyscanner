@@ -63,13 +63,14 @@ class PointsCapture(Screen):
         super(PointsCapture, self).__init__(**kwargs)
         self.scanner = scanner
         self._converter = GLConverter()
-        self.raw_points_tyr = np.array([])
+        self.raw_points_xyz = np.array([])
 
     def start_points_capture(self):
         self._disable_all()
         self.image_box.clear()
         self.render.clear()
-        self.scanner.capture_points(self._capture_points_callback)
+        self.scanner.capture_points_xyz(self._capture_points_callback)
+        # TODO make this number a better one.
         self.scanner.capture_image(self._capture_image_callback, 200 - 31 )
 
     def _capture_image_callback(self, handler):
@@ -77,14 +78,14 @@ class PointsCapture(Screen):
         Clock.schedule_once(self._update_image)
 
     def _capture_points_callback(self, handler):
-        self.raw_points_tyr = handler.points_tyr
+        self.raw_points_xyz = handler.points_xyz
         self.progress.value = int(handler.status * 100)
         if handler.complete:
             self._enable_all()
             # Logger.info('Done: {}'.format(self.raw_points_tyr))
             from infrastructure.writer import PLYWriter
             with open('out.ply', 'w') as afile:
-                PLYWriter().write_polar_points(afile, self.raw_points_tyr)
+                PLYWriter().write_cartisien_points(afile, self.raw_points_xyz)
         Clock.unschedule(self.update_model)
         Clock.schedule_once(self.update_model)
 
@@ -100,10 +101,11 @@ class PointsCapture(Screen):
             self.render.update_texture(self.image_box.texture)
 
     def update_model(self, *largs):
-        amax = np.amax(self.raw_points_tyr)
+        amax = np.amax(self.raw_points_xyz)
         if amax > 0:
-            scale = min(0.05, 1.0 / np.amax(self.raw_points_tyr))
-            points = self._converter.convert(self.raw_points_tyr, scale=scale)
+            scale = max(0.05, 1.0 / np.amax(self.raw_points_xyz))
+
+            points = self._converter.convert_xyz(self.raw_points_xyz, scale=scale)
             self.render.update_mesh(points)
 
 
@@ -207,8 +209,8 @@ class ObjectRenderer(BoxLayout):
             if hasattr(self, 'model_texture'):
                 BindTexture(texture=self.model_texture, index=1)
             Translate(0, 1, self.gl_depth  + 1)
-            Rotate(90, 1, 0, 0)
-            self.rot = Rotate(1, 0, 0, 1)
+            # Rotate(90, 1, 0, 0)
+            self.rot = Rotate(0, 0, 1, 0)
             UpdateNormalMatrix()
             Color(1, 1, 1, 1)
             self.mesh = Mesh(

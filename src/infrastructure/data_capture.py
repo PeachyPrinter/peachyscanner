@@ -87,7 +87,7 @@ class PointCaptureXYZ(Handler):
         self._section_count = 0
         self.points_xyz = None
 
-    def handle(self, laser_detection=None, section=0, roi=None):
+    def handle(self, laser_detection=None, section=0, roi=None, **kwargs):
         rad = (section / float(self.sections)) * 2.0 * np.pi
         points = self.img2points.get_points(laser_detection, rad, roi)
         if self.points_xyz is None:

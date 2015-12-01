@@ -421,6 +421,10 @@ class PointCaptureXYZTest(unittest.TestCase):
             point_capture.handle(laser_detection="BLA", section=idx, roi=self.roi)
         self.assertEquals(1.0, point_capture.status)
 
+    def test_handle_ignores_extra_keywords(self):
+        point_capture = PointCaptureXYZ(10, self.img2point)
+        point_capture.handle(frame='pizza', laser_detection="BLA", section=0, roi=self.roi)
+
     def test_handle_calls_img2points(self):
         sections = 200
         frame = np.ones((200,200), dtype='uint8')

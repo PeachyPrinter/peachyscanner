@@ -1,7 +1,7 @@
 import kivy
 from kivy.config import Config
 from kivy.uix.popup import Popup
-from kivy.properties import BoundedNumericProperty, ListProperty
+from kivy.properties import BoundedNumericProperty
 from kivy.lang import Builder
 from kivy.logger import Logger
 from kivy.clock import Clock
