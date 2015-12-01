@@ -15,13 +15,14 @@ from kivy.resources import resource_add_path
 from kivy.logger import Logger
 from kivy.clock import Clock
 
+from infrastructure.hardware import HardwareConfiguration
 
 from ui.camera import CameraControls
 from ui.posisition import PositionControl
 from ui.laserdetection import LaserDetection
 from ui.capture_control import PointsCapture
 from ui.video import ImageDisplay
-from infrastructure.hardware import HardwareConfiguration
+from ui.hardware import HardwareConfig
 
 kivy.require('1.9.0')
 
@@ -43,9 +44,15 @@ class MyScreenManager(ScreenManager):
 
 class ScannerGUI(BoxLayout):
     def __init__(self, scanner, **kwargs):
+        self.scanner = scanner
         super(ScannerGUI, self).__init__(**kwargs)
         self.manager = MyScreenManager(scanner, self.video)
         self.ids.screen_manager.add_widget(self.manager)
+
+    def start_config(self):
+        self.pop = HardwareConfig(self.scanner)
+        self.pop.open()
+
 
 class MasterGUI(BoxLayout):
     def __init__(self, scanner, **kwargs):

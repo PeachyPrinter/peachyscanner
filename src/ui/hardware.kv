@@ -1,0 +1,195 @@
+
+<HardwareConfig>:
+    size_hint: (0.9, 0.9)
+    title: "Hardware Setup"
+    BoxLayout:
+        orientation: 'horizontal'
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: "3dp"
+            BoxLayout:
+                orientation: 'vertical'
+                padding: [3, 3, 3, 3]
+                canvas:
+                    Color:
+                        rgba: [1, 1, 1, 0.2]
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                Label:
+                    halign: 'left'
+                    size_hint_y: None
+                    size_hint_x: None
+                    width: self.texture_size[0]
+                    height: app.label_height
+                    text: "Camera Focal Length"
+                BoxLayout:
+                    orientation: 'horizontal'
+                    TextInput:
+                        on_text: root.camera_focal_length_mm = float(self.text)
+                        input_filter: 'float'
+                        size_hint_x: None
+                        width: "70dp"
+                        size_hint_y: None
+                        height: app.label_height
+                        multiline: False
+                        text: str(root.camera_focal_length_mm)
+                    Label:
+                        size_hint_x: None
+                        width: "55dp"
+                        size_hint_y: None
+                        height: app.label_height
+                        text: "mm"
+
+            BoxLayout:
+                orientation: 'vertical'
+                padding: [3, 3, 3, 3]
+                canvas:
+                    Color:
+                        rgba: [1, 1, 1, 0.2]
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                Label:
+                    halign: 'left'
+                    size_hint_y: None
+                    size_hint_x: None
+                    width: self.texture_size[0]
+                    height: app.label_height
+                    text: "Sensor Size X, Y"
+                BoxLayout:
+                    orientation: 'horizontal'
+                    TextInput:
+                        on_text: root.sensor_size_x_mm = float(self.text)
+                        input_filter: 'float'
+                        size_hint_x: None
+                        width: "70dp"
+                        size_hint_y: None
+                        height: app.label_height
+                        multiline: False
+                        text: str(root.sensor_size_x_mm)
+                    Label:
+                        size_hint_x: None
+                        width: "55dp"
+                        size_hint_y: None
+                        height: app.label_height
+                        text: "X"
+                    TextInput:
+                        on_text: root.sensor_size_y_mm = float(self.text)
+                        input_filter: 'float'
+                        size_hint_x: None
+                        width: "70dp"
+                        size_hint_y: None
+                        height: app.label_height
+                        multiline: False
+                        text: str(root.sensor_size_y_mm)
+                    Label:
+                        size_hint_x: None
+                        width: "55dp"
+                        size_hint_y: None
+                        height: app.label_height
+                        text: "mm"
+
+            BoxLayout:
+                orientation: 'vertical'
+                padding: [3, 3, 3, 3]
+                canvas:
+                    Color:
+                        rgba: [1, 1, 1, 0.2]
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                Label:
+                    halign: 'left'
+                    size_hint_y: None
+                    size_hint_x: None
+                    width: self.texture_size[0]
+                    height: app.label_height
+                    text: "Focal Point to Center"
+                BoxLayout:
+                    orientation: 'horizontal'
+                    TextInput:
+                        on_text: root.focal_point_to_center = float(self.text)
+                        input_filter: 'float'
+                        size_hint_x: None
+                        width: "70dp"
+                        size_hint_y: None
+                        height: app.label_height
+                        multiline: False
+                        text: str(root.focal_point_to_center)
+                    Label:
+                        size_hint_x: None
+                        width: "55dp"
+                        size_hint_y: None
+                        height: app.label_height
+                        text: "mm"
+
+            BoxLayout:
+                orientation: 'vertical'
+                padding: [3, 3, 3, 3]
+                canvas:
+                    Color:
+                        rgba: [1, 1, 1, 0.2]
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                Label:
+                    halign: 'left'
+                    size_hint_y: None
+                    size_hint_x: None
+                    width: self.texture_size[0]
+                    height: app.label_height
+                    text: "Laser Intersection Degrees"
+                BoxLayout:
+                    orientation: 'horizontal'
+                    TextInput:
+                        on_text: root.laser_intersection_degree = float(self.text)
+                        input_filter: 'float'
+                        size_hint_x: None
+                        width: "70dp"
+                        size_hint_y: None
+                        height: app.label_height
+                        multiline: False
+                        text: str(root.laser_intersection_degree)
+                    Label:
+                        size_hint_x: None
+                        width: "55dp"
+                        size_hint_y: None
+                        height: app.label_height
+                        text: "mm"
+            Label:
+            Button:
+                size_hint_y: None
+                height: app.button_height
+                text: "Done"
+                on_release: root.dismiss()
+
+        Label:
+            text: "Helpful Image Here"
+            canvas.before:
+                Color:
+                    rgba: [1,0,0,1]
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+
+<LoadingBox>:
+    BoxLayout:
+        size_hint: (None,None)
+        pos: root.pos
+        size: root.size
+        canvas:
+            Color: 
+                rgba: [0,0,0,1]
+            Rectangle: 
+                pos: root.pos
+                size: root.size
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+            Image:
+                source: 'loading.gif'
+                anim_delay: 1 / 30.0
+            Label:
+                text: "Loading..."

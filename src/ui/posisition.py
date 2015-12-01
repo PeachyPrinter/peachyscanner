@@ -20,12 +20,13 @@ class PositionControl(Screen):
     video = ObjectProperty()
     def __init__(self, scanner, video_widget, **kwargs):
         self.scanner = scanner
+        self.section = 'peachyscanner.posisition'
         self._selecting_encoder = False
         self._selecting_roi = False
         self.video_widget = video_widget
 
         self._encoder_segments = 200
-        Config.adddefaultsection('posisition')
+        Config.adddefaultsection(self.section)
         self._load_saved_settings()
         super(PositionControl, self).__init__(**kwargs)
         Window.bind(on_motion=self.on_motion)
@@ -37,12 +38,12 @@ class PositionControl(Screen):
         self._configure_encoder()
 
     def _load_saved_settings(self):
-        roi = json.loads((Config.getdefault('posisition', 'roi', "[0.0, 0.0, 1.0, 1.0]")))
+        roi = json.loads((Config.getdefault(self.section, 'roi', "[0.0, 0.0, 1.0, 1.0]")))
         self.scanner.set_region_of_interest_from_rel_points(*roi)
-        self._encoder_threshold = int(Config.getdefault('posisition', 'encoder_threshold', 200))
-        self._encoder_null_zone = int(Config.getdefault('posisition', 'encoder_null_zone', 50))
-        encoder_point = Config.getdefault('posisition', 'encoder_point', [0.5, 0.5])
-        self._encoder_point = tuple([float(p) for p in json.loads(encoder_point)])
+        self._encoder_threshold = int(Config.getdefault(self.section, 'encoder_threshold', 200))
+        self._encoder_null_zone = int(Config.getdefault(self.section, 'encoder_null_zone', 50))
+        encoder_point = json.loads(Config.getdefault(self.section, 'encoder_point', '[0.5, 0.5]'))
+        self._encoder_point = tuple([float(p) for p in encoder_point])
         if self._encoder_point[0] > 1.0 or self._encoder_point[1] > 1.0:
             self._encoder_point[0] == 0.5
             self._encoder_point[1] == 0.5
@@ -54,7 +55,7 @@ class PositionControl(Screen):
     def _encoder_selected(self, encoder_pos):
         self._encoder_point = encoder_pos
         Logger.info('Encoder point set at: {}'.format(str(encoder_pos)))
-        Config.set('posisition', 'encoder_point', json.dumps(self._encoder_point))
+        Config.set(self.section, 'encoder_point', json.dumps(self._encoder_point))
         self._configure_encoder()
         self._selecting_encoder = False
         self._enable_all()
@@ -70,7 +71,7 @@ class PositionControl(Screen):
         self._selecting_roi = False
         try:
             self.scanner.set_region_of_interest_from_abs_points(point1, point2, video_size)
-            Config.set('posisition', 'roi', json.dumps(self.scanner.roi.get_points()))
+            Config.set(self.section, 'roi', json.dumps(self.scanner.roi.get_points()))
         except:
             pass
         self._enable_all()
@@ -79,18 +80,18 @@ class PositionControl(Screen):
     # def _roi_call_back(self, roi):
     #     self._enable_all()
     #     Logger.info('Found ROI (x,y,w,h: {}'.format(roi))
-    #     Config.set('posisition', 'roi', json.dumps(roi))
+    #     Config.set(self.section, 'roi', json.dumps(roi))
 
     def encoder_threshold(self, value):
         self._encoder_threshold = int(value)
         Logger.info('Encoder Threshold Set at : {}'.format(self._encoder_threshold))
-        Config.set('posisition', 'encoder_threshold', self._encoder_threshold)
+        Config.set(self.section, 'encoder_threshold', self._encoder_threshold)
         self._configure_encoder()
 
     def encoder_null_zone(self, value):
         self._encoder_null_zone = int(value)
         Logger.info('Encoder Null Zone Set at : {}'.format(self._encoder_null_zone))
-        Config.set('posisition', 'encoder_null_zone', self._encoder_null_zone)
+        Config.set(self.section, 'encoder_null_zone', self._encoder_null_zone)
         self._configure_encoder()
 
     def save_settings(self):
