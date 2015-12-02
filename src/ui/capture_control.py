@@ -71,7 +71,7 @@ class PointsCapture(Screen):
         self.render.clear()
         self.scanner.capture_points_xyz(self._capture_points_callback)
         # TODO make this number a better one.
-        self.scanner.capture_image(self._capture_image_callback, 200 - 31 )
+        self.scanner.capture_image(self._capture_image_callback, 200 - 25)
 
     def _capture_image_callback(self, handler):
         self._image = handler.image
@@ -103,7 +103,7 @@ class PointsCapture(Screen):
     def update_model(self, *largs):
         amax = np.amax(self.raw_points_xyz)
         if amax > 0:
-            scale = max(0.05, 1.0 / np.amax(self.raw_points_xyz))
+            scale = min(0.05, 1.0 / np.amax(self.raw_points_xyz))
 
             points = self._converter.convert_xyz(self.raw_points_xyz, scale=scale)
             self.render.update_mesh(points)
@@ -209,7 +209,7 @@ class ObjectRenderer(BoxLayout):
             if hasattr(self, 'model_texture'):
                 BindTexture(texture=self.model_texture, index=1)
             Translate(0, 1, self.gl_depth  + 1)
-            # Rotate(90, 1, 0, 0)
+            Rotate(180, 1, 0, 0)
             self.rot = Rotate(0, 0, 1, 0)
             UpdateNormalMatrix()
             Color(1, 1, 1, 1)
