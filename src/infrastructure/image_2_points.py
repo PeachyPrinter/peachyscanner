@@ -4,41 +4,54 @@ class Image2Points(object):
     def __init__(
         self,
         hardware,
-        camera_pixels_shape_xy,
+        camera_pixels_shape_yx,
     ):
-        self._mm_per_pixel = self._mm_per_pixel(camera_pixels_shape_xy, hardware.sensor_size_xy_mm)
-        self._laser_plane_normal = self._get_laser_plane_normal(hardware.center_intersection_xyz, hardware.laser_center_intersection_rad)
-        self._posisition_mask = self._get_laser_intersections_mask(camera_pixels_shape_xy, hardware.focal_length_mm, self._mm_per_pixel, hardware.center_intersection_xyz, hardware.center_intersection_xyz, self._laser_plane_normal)
+        self._mm_per_pixel_yx = self._calculate_mm_per_pixel_yx(camera_pixels_shape_yx, hardware.sensor_size_xy_mm)
+        self._laser_plane_normal_xyz = self._get_laser_plane_normal_xyz(hardware.center_intersection_xyz, hardware.laser_center_intersection_rad)
+        self._posisition_mask_yx = self._get_laser_intersections_mask_yx(camera_pixels_shape_yx, hardware.focal_length_mm, self._mm_per_pixel_yx, hardware.center_intersection_xyz, hardware.center_intersection_xyz, self._laser_plane_normal_xyz)
+        # self._posisition_mask_yx = self.one_to_one(camera_pixels_shape_yx)
 
-    def _get_laser_intersections_mask(
+    # def one_to_one(self, size):
+    #     print "$" * 50
+    #     print size
+    #     a = np.ones((size[1], size[0], 3))
+    #     for x in range(size[1]):
+    #         for y in range(size[0]):
+    #             f_x = ((float(x) / size[1]) * 2.0) - 1.0
+    #             f_y = ((float(size[0]-y) / size[0]) * 2.0) - 1.0
+    #             a[x, y] = [f_x, f_y, f_x]
+    #     return a
+
+
+    def _get_laser_intersections_mask_yx(
         self,
-        camera_pixels_shape_xy,
+        camera_pixels_shape_yx,
         camera_focal_length_mm,
-        mm_per_pixel,
+        mm_per_pixel_yx,
         center_intersection_xyz,
         laser_intersection_point,
         laser_plane_normal):
 
-        final = np.zeros((camera_pixels_shape_xy[0], camera_pixels_shape_xy[1], 3), dtype='float16')
+        final = np.zeros((camera_pixels_shape_yx[0], camera_pixels_shape_yx[1], 3), dtype='float16')
         laser_intersection_point = np.array(laser_intersection_point)
         with np.errstate(divide='ignore', invalid='ignore'):
             p_dot = np.dot(laser_plane_normal, laser_intersection_point)
-            for x_camera in range(camera_pixels_shape_xy[0]):
-                for y_camera in range(camera_pixels_shape_xy[1]):
-                    x_pos = (x_camera - (camera_pixels_shape_xy[0] / 2)) * mm_per_pixel[0]
-                    y_pos = (y_camera - (camera_pixels_shape_xy[1] / 2)) * mm_per_pixel[1]
+            for y_camera in range(camera_pixels_shape_yx[0]):
+                for x_camera in range(camera_pixels_shape_yx[1]):
+                    x_pos = (x_camera - (camera_pixels_shape_yx[1] / 2)) * mm_per_pixel_yx[1]
+                    y_pos = (y_camera - (camera_pixels_shape_yx[0] / 2)) * mm_per_pixel_yx[0]
                     z_pos = -camera_focal_length_mm
 
                     L2 = np.array([x_pos, y_pos, z_pos])
-                    final[x_camera, y_camera] = (p_dot / np.dot(laser_plane_normal, L2)) * L2
+                    final[y_camera, x_camera] = (p_dot / np.dot(laser_plane_normal, L2)) * L2
         return final - center_intersection_xyz
 
-    def _mm_per_pixel(self, camera_pixels_shape_xy, camera_sensor_size_mm):
-        x_mm_per_pixel = camera_sensor_size_mm[0] / float(camera_pixels_shape_xy[0])
-        y_mm_per_pixel = camera_sensor_size_mm[1] / float(camera_pixels_shape_xy[1])
-        return (x_mm_per_pixel, y_mm_per_pixel)
+    def _calculate_mm_per_pixel_yx(self, camera_pixels_shape_yx, camera_sensor_size_mm):
+        x_mm_per_pixel = camera_sensor_size_mm[0] / float(camera_pixels_shape_yx[1])
+        y_mm_per_pixel = camera_sensor_size_mm[1] / float(camera_pixels_shape_yx[0])
+        return (y_mm_per_pixel, x_mm_per_pixel)
 
-    def _get_laser_plane_normal(self, laser_intersection_point, laser_center_intersection_rad):
+    def _get_laser_plane_normal_xyz(self, laser_intersection_point, laser_center_intersection_rad):
         i_x, i_y, i_z = laser_intersection_point
         p_1 = np.array([i_x, i_y, i_z])
         p_2 = np.array([i_x, i_y + 1.0, i_z])
@@ -63,67 +76,88 @@ class Image2Points(object):
         rotation_matrix = self._rotation_matrix(rotation_rad)
         return np.dot(rotation_matrix, points_xyz.T).T
 
-    def get_points(self, image, rotation_rad, roi):
-        roi_pos = roi.get(self._posisition_mask)
-        roi_image = roi.get(image)
-        masked_result = roi_pos[roi_image.astype('bool')].reshape((-1, 3))
-        # masked_result = self.cube()
+    def get_points(self, image_yx, rotation_rad, roi):
+        roi_pos = roi.get(self._posisition_mask_yx)
+        roi_image_yx = roi.get(image_yx).astype('bool')
+        masked_result = roi_pos[roi_image_yx]
         return self._rotate_points(masked_result, rotation_rad)
 
-    def cube(self):
-        if hasattr(self, '_cube'):
-            return self._cube
-        dots = 50
-        x = np.linspace(-1, 1, dots)
-        edge = np.ones((dots, 3))
+    # def triangle(self):
+    #     if hasattr(self, '_triangle'):
+    #         return self._triangle
+    #     dots = 50
+    #     bottom = np.ones((dots, 3))
+    #     bottom[:, 0] = np.linspace(-1, 1, dots)
+    #     bottom[:, 1] = -1
+    #     bottom[:, 2] = 0
 
-        edge1 = edge.copy()
-        edge1[:, 0] = x
+    #     left = np.ones((dots, 3))
+    #     left[:, 0] = np.linspace(-1, 0, dots)
+    #     left[:, 1] = np.linspace(-1, 1, dots)
+    #     left[:, 2] = 0
 
-        edge2 = edge.copy()
-        edge2[:, 1] = x
+    #     right = np.ones((dots, 3))
+    #     right[:, 0] = np.linspace(1, 0, dots)
+    #     right[:, 1] = np.linspace(-1, 1, dots)
+    #     right[:, 2] = 0
 
-        edge3 = edge.copy()
-        edge3[:, 2] = x
+    #     self._triangle = np.vstack((bottom, left, right))
+    #     return self._triangle
 
-        edge4 = edge.copy()
-        edge4[:, 1] = x
-        edge4[:, 0] = -1
+    # def cube(self):
+    #     if hasattr(self, '_cube'):
+    #         return self._cube
+    #     dots = 50
+    #     x = np.linspace(-1, 1, dots)
+    #     edge = np.ones((dots, 3))
 
-        edge5 = edge.copy()
-        edge5[:, 2] = x
-        edge5[:, 0] = -1
+    #     edge1 = edge.copy()
+    #     edge1[:, 0] = x
 
-        edge7 = edge.copy()
-        edge7[:, 0] = x
-        edge7[:, 1] = -1
+    #     edge2 = edge.copy()
+    #     edge2[:, 1] = x
 
-        edge9 = edge.copy()
-        edge9[:, 2] = x
-        edge9[:, 1] = -1
+    #     edge3 = edge.copy()
+    #     edge3[:, 2] = x
 
-        edgeA = edge.copy()
-        edgeA[:, 0] = x
-        edgeA[:, 2] = -1
+    #     edge4 = edge.copy()
+    #     edge4[:, 1] = x
+    #     edge4[:, 0] = -1
 
-        edgeB = edge.copy()
-        edgeB[:, 1] = x
-        edgeB[:, 2] = -1
+    #     edge5 = edge.copy()
+    #     edge5[:, 2] = x
+    #     edge5[:, 0] = -1
 
-        edge6 = edge.copy()
-        edge6[:, 0] = x
-        edge6[:, 1] = -1
-        edge6[:, 2] = -1
+    #     edge7 = edge.copy()
+    #     edge7[:, 0] = x
+    #     edge7[:, 1] = -1
 
-        edge8 = edge.copy()
-        edge8[:, 1] = x
-        edge8[:, 0] = -1
-        edge8[:, 2] = -1
+    #     edge9 = edge.copy()
+    #     edge9[:, 2] = x
+    #     edge9[:, 1] = -1
 
-        edgeC = edge.copy()
-        edgeC[:, 2] = x
-        edgeC[:, 0] = -1
-        edgeC[:, 1] = -1
+    #     edgeA = edge.copy()
+    #     edgeA[:, 0] = x
+    #     edgeA[:, 2] = -1
 
-        self._cube = np.vstack((edge1, edge2, edge3, edge4, edge5, edge6, edge7, edge8, edge9, edgeA, edgeB, edgeC))
-        return self._cube
+    #     edgeB = edge.copy()
+    #     edgeB[:, 1] = x
+    #     edgeB[:, 2] = -1
+
+    #     edge6 = edge.copy()
+    #     edge6[:, 0] = x
+    #     edge6[:, 1] = -1
+    #     edge6[:, 2] = -1
+
+    #     edge8 = edge.copy()
+    #     edge8[:, 1] = x
+    #     edge8[:, 0] = -1
+    #     edge8[:, 2] = -1
+
+    #     edgeC = edge.copy()
+    #     edgeC[:, 2] = x
+    #     edgeC[:, 0] = -1
+    #     edgeC[:, 1] = -1
+
+    #     self._cube = np.vstack((edge1, edge2, edge3, edge4, edge5, edge6, edge7, edge8, edge9, edgeA, edgeB, edgeC))
+    #     return self._cube

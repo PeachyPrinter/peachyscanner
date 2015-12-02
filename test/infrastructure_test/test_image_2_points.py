@@ -16,7 +16,7 @@ from infrastructure.roi import ROI
 
 class PointConverterTest(unittest.TestCase):
 
-    def setup_i2p(self, camera_pixels_shape_xy=(3, 3), camera_sensor_size_mm=(13.5, 13.5),):
+    def setup_i2p(self, camera_pixels_shape_yx=(3, 3), camera_sensor_size_mm=(13.5, 13.5),):
         hardware = HardwareConfiguration(
             focal_length_mm=9,
             sensor_size_xy_mm=camera_sensor_size_mm,
@@ -25,7 +25,7 @@ class PointConverterTest(unittest.TestCase):
             )
         return Image2Points(
             hardware,
-            camera_pixels_shape_xy,
+            camera_pixels_shape_yx,
             )
 
     def assert_array(self, array1, array2, rtol=1e-05):
@@ -34,18 +34,18 @@ class PointConverterTest(unittest.TestCase):
             self.assertTrue(np.allclose(array1[idx], array2[idx], rtol=rtol), "TEST:{}:  {} == {}".format(idx, array1[idx], array2[idx]))
 
     def test_get_points_returns_expected_points_give_simple_camera_and_image(self):
-        camera_pixels_shape_xy = (3, 3)
-        i2p = self.setup_i2p(camera_pixels_shape_xy=camera_pixels_shape_xy)
-        image = np.ones(camera_pixels_shape_xy).astype('bool')
+        camera_pixels_shape_yx = (3, 3)
+        i2p = self.setup_i2p(camera_pixels_shape_yx=camera_pixels_shape_yx)
+        image = np.ones(camera_pixels_shape_yx).astype('bool')
         expected = np.array([
             [-3.0, -3.0,  3.0],  # -1, -1
-            [-3.0,  0.0,  3.0],  # -1,  0 
-            [-3.0,  3.0,  3.0],  # -1,  1 
             [ 0,   -4.5,  0.0],  #  0, -1
-            [ 0,    0.0,  0.0],  #  0,  0 
-            [ 0,    4.5,  0.0],  #  0,  1 
             [ 9.0, -9.0, -9.0],  #  1, -1
-            [ 9.0,    0, -9.0],  #  1,  0 
+            [-3.0,  0.0,  3.0],  # -1,  0 
+            [ 0,    0.0,  0.0],  #  0,  0 
+            [ 9.0,  0.0, -9.0],  #  1,  0 
+            [-3.0,  3.0,  3.0],  # -1,  1 
+            [ 0,    4.5,  0.0],  #  0,  1 
             [ 9.0,  9.0, -9.0],  #  1,  1 
             ], dtype='float16')
 
@@ -55,10 +55,10 @@ class PointConverterTest(unittest.TestCase):
 
 
     def test_get_points_returns_expected_points_give_simple_camera_and_1_column(self):
-        camera_pixels_shape_xy = (3, 3)
-        i2p = self.setup_i2p(camera_pixels_shape_xy=camera_pixels_shape_xy)
-        image = np.zeros(camera_pixels_shape_xy).astype('bool')
-        image[0, :] = True
+        camera_pixels_shape_yx = (3, 3)
+        i2p = self.setup_i2p(camera_pixels_shape_yx=camera_pixels_shape_yx)
+        image = np.zeros(camera_pixels_shape_yx).astype('bool')
+        image[:, 0] = True
 
         expected = np.array([
             [-3.0, -3.0,  3.0],  # -1, -1
@@ -71,19 +71,19 @@ class PointConverterTest(unittest.TestCase):
         self.assert_array(expected, result)
 
     def test_get_points_should_rotate(self):
-        camera_pixels_shape_xy = (3, 3)
+        camera_pixels_shape_yx = (3, 3)
         rotation = np.pi / 2.0
-        i2p = self.setup_i2p(camera_pixels_shape_xy=camera_pixels_shape_xy)
-        image = np.ones(camera_pixels_shape_xy).astype('bool')
+        i2p = self.setup_i2p(camera_pixels_shape_yx=camera_pixels_shape_yx)
+        image = np.ones(camera_pixels_shape_yx).astype('bool')
         expected = np.array([
-            [3.0, -3.0,   3.0],  # -1, -1
-            [3.0,  0.0,   3.0],  # -1,  0 
-            [3.0,  3.0,   3.0],  # -1,  1 
-            [ 0,   -4.5,  0.0],  #  0, -1
-            [ 0,    0.0,  0.0],  #  0,  0 
-            [ 0,    4.5,  0.0],  #  0,  1 
+            [ 3.0, -3.0,  3.0],  # -1, -1
+            [ 0.0, -4.5,  0.0],  #  0, -1
             [-9.0, -9.0, -9.0],  #  1, -1
-            [-9.0,    0, -9.0],  #  1,  0 
+            [ 3.0,  0.0,  3.0],  # -1,  0 
+            [ 0.0,  0.0,  0.0],  #  0,  0 
+            [-9.0,  0.0, -9.0],  #  1,  0 
+            [ 3.0,  3.0,  3.0],  # -1,  1 
+            [ 0.0,  4.5,  0.0],  #  0,  1 
             [-9.0,  9.0, -9.0],  #  1,  1 
             ], dtype='float16')
 
@@ -92,13 +92,13 @@ class PointConverterTest(unittest.TestCase):
         self.assert_array(expected, result, rtol=1e-03)
 
     def test_get_points_should_roi(self):
-        camera_pixels_shape_xy = (4, 4)
-        i2p = self.setup_i2p(camera_pixels_shape_xy=camera_pixels_shape_xy, camera_sensor_size_mm=(18, 18))
+        camera_pixels_shape_yx = (4, 4)
+        i2p = self.setup_i2p(camera_pixels_shape_yx=camera_pixels_shape_yx, camera_sensor_size_mm=(18, 18))
         image = np.ones((4, 4)).astype('bool')
         expected = np.array([
             [-3.0, -3.0,   3.0],  # -1, -1
-            [-3.0,  0.0,   3.0],  # -1,  0 
             [ 0,   -4.5,  0.0],  #  0, -1
+            [-3.0,  0.0,   3.0],  # -1,  0 
             [ 0,    0.0,  0.0],  #  0,  0 
             ], dtype='float16')
 
@@ -109,8 +109,8 @@ class PointConverterTest(unittest.TestCase):
         self.assert_array(expected, result)
 
     def test_get_points_should_return_nothing_when_ray_and_plane_dont_intersect(self):
-        camera_pixels_shape_xy = (4, 4)
-        i2p = self.setup_i2p(camera_pixels_shape_xy=camera_pixels_shape_xy, camera_sensor_size_mm=(20, 20))
+        camera_pixels_shape_yx = (4, 4)
+        i2p = self.setup_i2p(camera_pixels_shape_yx=camera_pixels_shape_yx, camera_sensor_size_mm=(20, 20))
         image = np.ones((4, 4)).astype('bool')
 
         result = i2p.get_points(image, 0, ROI(0, 0, 1, 1))
@@ -118,11 +118,11 @@ class PointConverterTest(unittest.TestCase):
         self.assertTrue(3, len(result))
 
     def test_get_points_should_work_on_real_sizes(self):
-        camera_pixels_shape_xy = (640, 480)
+        camera_pixels_shape_yx = (480, 640)
         rotation = np.pi / 2.0
-        i2p = self.setup_i2p(camera_pixels_shape_xy=camera_pixels_shape_xy)
-        image = np.zeros(camera_pixels_shape_xy).astype('uint8')
-        image[40, :] = 255
+        i2p = self.setup_i2p(camera_pixels_shape_yx=camera_pixels_shape_yx)
+        image = np.zeros(camera_pixels_shape_yx).astype('uint8')
+        image[:, 40] = 255
 
         result = i2p.get_points(image, rotation, ROI(0, 0, 1, 1))
 
