@@ -2,8 +2,7 @@ from kivy.app import App
 from kivy.uix.screenmanager import Screen
 from kivy.logger import Logger
 from kivy.lang import Builder
-from kivy.uix.widget import Widget
-from kivy.core.window import Window
+from kivy.uix.popup import Popup
 from kivy.resources import resource_find
 from kivy.graphics.opengl import GL_DEPTH_TEST, glEnable, glDisable
 from kivy.graphics.transformation import Matrix
@@ -12,14 +11,16 @@ from kivy.clock import Clock
 from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.graphics.texture import Texture
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
 from threading import Lock
-from math import tan, atan
 
 import numpy as np
 import time
+import os
 from math import floor
 
 from infrastructure.gl_point_converter import GLConverter
+from infrastructure.writer import PLYWriter
 
 Builder.load_file('ui/capture_control.kv')
 
@@ -57,6 +58,11 @@ class NumpyImage(BoxLayout):
         self.texture = None
 
 
+class SaveDialog(FloatLayout):
+    save = ObjectProperty(None)
+    text_input = ObjectProperty(None)
+    cancel = ObjectProperty(None)
+
 
 class PointsCapture(Screen):
     def __init__(self, scanner, **kwargs):
@@ -83,11 +89,23 @@ class PointsCapture(Screen):
         if handler.complete:
             self._enable_all()
             # Logger.info('Done: {}'.format(self.raw_points_tyr))
-            from infrastructure.writer import PLYWriter
-            with open('out.ply', 'w') as afile:
-                PLYWriter().write_cartisien_points(afile, self.raw_points_xyz)
+            self.save_button.disabled = False
         Clock.unschedule(self.update_model)
         Clock.schedule_once(self.update_model)
+
+    def dismiss_popup(self):
+        self._popup.dismiss()
+
+    def show_save(self):
+        content = SaveDialog(save=self.save_points, cancel=self.dismiss_popup)
+        self._popup = Popup(title="Save file", content=content,
+                            size_hint=(0.9, 0.9))
+        self._popup.open()
+
+    def save_points(self, path, filename):
+        with open(os.path.join(path, filename), 'w') as afile:
+            PLYWriter().write_cartisien_points(afile, self.raw_points_xyz)
+        self.dismiss_popup()
 
     def _enable_all(self):
         self.go_button.disabled = False
