@@ -19,13 +19,12 @@ class PLYWriter(Writer):
     def write_polar_points(self, outfile, polar_array):
         start = time.time()
         points = self.converter.convert(polar_array)
-        verticies = points.shape[0] / 8
-
+        verticies = points.shape[0]
         header = "ply\nformat ascii 1.0\ncomment made by Peachy Scanner\ncomment Date Should Go Here\nelement vertex {}\nproperty float x\nproperty float y\nproperty float z\nend_header\n".format(str(verticies))
 
         outfile.write(header)
 
-        for (x, y, z, a, b, c, u, v) in np.hsplit(points, points.shape[0] // 8):
+        for (x, y, z, a, b, c, u, v) in points:
             outfile.write('{} {} {}\n'.format(x, y, z))
 
         total = time.time() - start

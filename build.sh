@@ -11,6 +11,51 @@ echo "------------------------------------"
 
 function trim() { echo $1; }
 
+function debian_dependancies() {
+  echo ""
+  echo "------------------------------------"
+  echo "Building Dependent Packages for Debian"
+  echo "------------------------------------"
+  echo "Installing basics"
+  sudo apt-get install python-pip python-dev build-essential 
+  echo "Installing numpy dependancies"
+  sudo apt-get install gfortran libatlas-base-dev 
+  echo "Installing kivy dependancies"
+  sudo apt-get install libsmpeg-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev libfreetype6-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev
+  echo "Installing opencv 3 dependancies"
+  sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+  sudo apt-get install python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev libdc1394-22
+  sudo apt-get install libopencv-dev libpng12-dev libtiff4-dev libxine-dev libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev libv4l-dev libqt4-dev 
+  sudo apt-get install libfaac-dev libmp3lame-dev libopencore-amrnb-dev libopencore-amrwb-dev libtheora-dev libvorbis-dev libxvidcore-dev x264 v4l-utils unzip  
+}
+
+function install_opencv3() {
+  python -c 'import cv2'
+  if [ $? != 0 ]
+    then
+      mkdir tmp
+      pushd .
+      cd tmp
+      wget https://github.com/Itseez/opencv/archive/3.0.0.zip
+      unzip 3.0.0.zip -d opencv
+      cd opencv
+      cd opencv-3.0.0
+      mkdir release
+      cd release
+      cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_TBB=ON -D WITH_V4L=ON -D WITH_OPENGL=ON ..
+      make -j $(nproc)
+      sudo make install
+      popd
+      rm -rf tmp
+    else
+      echo "Opencv already installed"
+  fi
+}
+
+debian_dependancies
+install_opencv3
+
+
 if [ -z $GIT_HOME ]; then
   if [ -f "/usr/local/bin/git" ]; then
     export GIT_HOME=/usr/local/bin/git
@@ -42,8 +87,15 @@ echo "------------------------------------"
 
 cd src
 virtualenv venv
+if [ $? != 0 ]
+then
+  cd ..
+  exit 777
+fi
+cp /usr/local/lib/python2.7/dist-packages/cv2.so venv/lib/python2.7/site-packages/
 source venv/bin/activate
-pip install --upgrade 
+cat requirements.txt | xargs -n 1 pip install
+
 
 echo "------------------------------------"
 echo "Building"
@@ -60,7 +112,7 @@ echo "------------------------------------"
 echo "Installing Package"
 echo "------------------------------------"
 echo `pwd`
-pip install --upgrade  src/dist/PeachyScanner*.tar.gz
+pip install --upgrade src/dist/PeachyScanner*.tar.gz
 
 echo "------------------------------------"
 echo "Starting Tests"
@@ -68,7 +120,7 @@ echo "------------------------------------"
 
 cd test
 
-python tests.py
+python run_all_tests.py
 
 if [ $? == 0 ]
 then

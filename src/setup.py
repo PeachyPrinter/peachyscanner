@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 from setuptools import setup
 import glob
@@ -11,7 +12,6 @@ setup(name='PeachyScanner',
       url='www.peachyprinter.com',
       packages=[],
       py_modules=['VERSION'],
-      install_requires=['numpy', 'kivy',],
-      data_files=[],
+      install_requires=['cython==0.21.1', 'numpy==1.10.1', 'kivy==1.9.0',],      data_files=[],
       include_package_data=True
      )
