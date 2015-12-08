@@ -56,7 +56,7 @@ cv2.createTrackbar('cmode', 'frame1', 0, 3, new_var_b)
 cv2.createTrackbar('rmode', 'frame1', 0, 4, new_var_b)
 itera = 0
 while True:
-    itera = itera + 0.3
+    # itera = itera + 0.3
     img = source.copy()
     b, g, r = cv2.split( img)
     ab, ag, ar = np.average(b), np.average(g), np.average(r)
@@ -65,15 +65,17 @@ while True:
     r = sub(r, ar)
     rel = sub(r, g)
     rel = (rel * (255.0 / np.max(rel))).astype('uint8')
-    ret, thresh = cv2.threshold(rel, a_val, b_val, 0)
-    im2, contours, hierarchy = cv2.findContours(thresh, r_mode[d_val], c_mode[c_val])
-    thresh = (thresh > a_val).astype('uint8') * 255
-    notthresh = np.invert(thresh)
-    img = cv2.bitwise_and(img, img, mask=notthresh)
-    blue = np.zeros(img.shape, dtype='uint8')
-    blue[:, :, 0] = 255
-    blues = cv2.bitwise_and(blue, blue, mask=thresh)
-    img = img + blues
+    thresh = np.zeros(rel.shape, dtype='uint8')
+    thresh[rel > a_val] = rel[rel > a_val]
+    rel = thresh.copy()
+    # im2, contours, hierarchy = cv2.findContours(thresh, r_mode[d_val], c_mode[c_val])
+    # thresh = (thresh > a_val).astype('uint8') * 255
+    # notthresh = np.invert(thresh)
+    # img = cv2.bitwise_and(img, img, mask=notthresh)
+    # blue = np.zeros(img.shape, dtype='uint8')
+    # blue[:, :, 0] = 255
+    # blues = cv2.bitwise_and(blue, blue, mask=thresh)
+    # img = img + blues
 
     pos = int(itera) % img.shape[0]
     cv2.imshow('frame4', show_line(rel, pos))
@@ -82,9 +84,13 @@ while True:
     cv2.imshow('frame2', rel)
     cv2.imshow('frame1', img)
     # cv2.imshow('frame2', curves)
-    
+
     key = cv2.waitKey(1) & 255
     if key == ord('q'):
         break
+    if key == ord('w'):
+        itera = itera - 1
+    if key == ord('s'):
+        itera = itera + 1
 
 cv2.destroyAllWindows()
