@@ -42,8 +42,7 @@ end_header\n"""
     def stringIO2float(self, text):
         string = text.getvalue()
         lines = string.split('\n')[9:-1]
-        return [[int(float(number)) for number in line.split(' ')] for line in lines]
-        
+        return [[int(float(number)) for number in line.split(' ')] for line in lines]  
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level='INFO')
