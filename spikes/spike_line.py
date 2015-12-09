@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from scipy import signal
 
 a_val = int(30)
 b_val = int(255)
@@ -43,7 +44,7 @@ def show_line(a, line_number=100):
         val = line[pos]
         color = (int(val), int(0), int(255 - val))
         out = cv2.line(out, (pos, 255), (pos, 255 - val), color)
-
+    print np.r_[True, line[1:] < line[:-1]] & np.r_[line[:-1] < line[1:], True]
     return out
 
 
@@ -55,7 +56,7 @@ cv2.createTrackbar('min', 'frame1', 30, 255, new_var_a)
 # cv2.createTrackbar('max', 'frame1', 126, 255, new_var_b)
 # cv2.createTrackbar('cmode', 'frame1', 0, 3, new_var_b)
 # cv2.createTrackbar('rmode', 'frame1', 0, 4, new_var_b)
-itera = 0
+itera = 350
 while True:
     # itera = itera + 0.3
     img = source.copy()
@@ -69,6 +70,7 @@ while True:
     thresh = np.zeros(rel.shape, dtype='uint8')
     thresh[rel > a_val] = rel[rel > a_val]
     rel = thresh.copy()
+
 
 
     pos = int(itera) % img.shape[0]
