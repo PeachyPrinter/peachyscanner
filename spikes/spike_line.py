@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-a_val = int(20)
+a_val = int(30)
 b_val = int(255)
 c_val = int(0)
 d_val = int(0)
@@ -51,10 +51,10 @@ def show_line(a, line_number=100):
 
 source = cv2.imread('g.png')
 cv2.imshow('frame1', source)
-cv2.createTrackbar('min', 'frame1', 20, 255, new_var_a)
-cv2.createTrackbar('max', 'frame1', 126, 255, new_var_b)
-cv2.createTrackbar('cmode', 'frame1', 0, 3, new_var_b)
-cv2.createTrackbar('rmode', 'frame1', 0, 4, new_var_b)
+cv2.createTrackbar('min', 'frame1', 30, 255, new_var_a)
+# cv2.createTrackbar('max', 'frame1', 126, 255, new_var_b)
+# cv2.createTrackbar('cmode', 'frame1', 0, 3, new_var_b)
+# cv2.createTrackbar('rmode', 'frame1', 0, 4, new_var_b)
 itera = 0
 while True:
     # itera = itera + 0.3
