@@ -43,8 +43,9 @@ def show_line(a, line_number=100):
         val = line[pos]
         color = (int(val), int(0), int(255 - val))
         out = cv2.line(out, (pos, 255), (pos, 255 - val), color)
-        # out[255 - val, pos] = [val, 0, 255 - val]
+
     return out
+
 
 
 
@@ -68,22 +69,13 @@ while True:
     thresh = np.zeros(rel.shape, dtype='uint8')
     thresh[rel > a_val] = rel[rel > a_val]
     rel = thresh.copy()
-    # im2, contours, hierarchy = cv2.findContours(thresh, r_mode[d_val], c_mode[c_val])
-    # thresh = (thresh > a_val).astype('uint8') * 255
-    # notthresh = np.invert(thresh)
-    # img = cv2.bitwise_and(img, img, mask=notthresh)
-    # blue = np.zeros(img.shape, dtype='uint8')
-    # blue[:, :, 0] = 255
-    # blues = cv2.bitwise_and(blue, blue, mask=thresh)
-    # img = img + blues
+
 
     pos = int(itera) % img.shape[0]
     cv2.imshow('frame4', show_line(rel, pos))
     cv2.line(rel, (0, pos), (rel.shape[1], pos), 255, 1)
-    # cv2.imshow('frame3', thresh)
     cv2.imshow('frame2', rel)
     cv2.imshow('frame1', img)
-    # cv2.imshow('frame2', curves)
 
     key = cv2.waitKey(1) & 255
     if key == ord('q'):
