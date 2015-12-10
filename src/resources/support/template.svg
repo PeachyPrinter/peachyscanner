@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.30032681"
-     inkscape:cx="87.595442"
-     inkscape:cy="829.60875"
+     inkscape:zoom="0.60065361"
+     inkscape:cx="364.64705"
+     inkscape:cy="1034.3695"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -209,15 +209,16 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:100%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="744.31372"
-       y="410.07788"
+       x="201.34988"
+       y="-716.55817"
        id="text4810"
-       sodipodi:linespacing="100%"><tspan
+       sodipodi:linespacing="100%"
+       transform="matrix(0,1,-1,0,0,0)"><tspan
          sodipodi:role="line"
-         id="tspan4812"
-         x="744.31372"
-         y="410.07788"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15px;line-height:100%;font-family:'Abyssinica SIL';-inkscape-font-specification:'Abyssinica SIL, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start">Camera Focal Point</tspan></text>
+         x="201.34988"
+         y="-716.55817"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15px;line-height:100%;font-family:'Abyssinica SIL';-inkscape-font-specification:'Abyssinica SIL, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start"
+         id="tspan5050">Camera Centre</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:100%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -231,28 +232,28 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15px;line-height:100%;font-family:'Abyssinica SIL';-inkscape-font-specification:'Abyssinica SIL, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start"
          id="tspan4832">Laser Piviot Point</tspan></text>
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.35433071;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
-       d="M 88.582677,-1.90044 356,-1.90044"
+       style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.29272321;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 173.49018,-1.90044 182.50982,0"
        id="path4848"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.35433071;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
-       d="m 88.582677,-88.02444 267.417323,0"
+       style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.29272321;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 173.49018,-88.02444 182.50982,0"
        id="path4850"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.35433071;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
-       d="m 88.582677,-187.79534 267.417323,0"
+       style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.29272321;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 173.49018,-187.79534 182.50982,0"
        id="path4852"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.35433071;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
-       d="m 88.582677,-306.69764 267.417323,0"
+       style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.29272321;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 173.49018,-306.69764 182.50982,0"
        id="path4854"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.35433071;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
-       d="m 88.582677,-453.28084 267.417323,0"
+       style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.29272321;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 173.49018,-453.28084 182.50982,0"
        id="path4856"
        inkscape:connector-curvature="0" />
     <text
@@ -380,5 +381,69 @@
          y="-439.09518"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15px;line-height:100%;font-family:'Abyssinica SIL';-inkscape-font-specification:'Abyssinica SIL, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start"
          id="tspan4898-6-8">35º 249.9 mm</tspan></text>
+    <path
+       style="fill:#ff0000;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.35433071;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 708.66142,91.74194 c 0,298.0087 0,298.0087 0,298.0087"
+       id="path5028"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:100%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="375.49393"
+       y="420.68564"
+       id="text4810-6"
+       sodipodi:linespacing="100%"><tspan
+         sodipodi:role="line"
+         x="375.49393"
+         y="420.68564"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15px;line-height:100%;font-family:'Abyssinica SIL';-inkscape-font-specification:'Abyssinica SIL, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start"
+         id="tspan5118">Focal Plane</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:100%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="142.94241"
+       y="145.60304"
+       id="text4810-6-0"
+       sodipodi:linespacing="100%"
+       transform="matrix(0,-1,1,0,0,0)"><tspan
+         sodipodi:role="line"
+         x="142.94241"
+         y="145.60304"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15px;line-height:100%;font-family:'Abyssinica SIL';-inkscape-font-specification:'Abyssinica SIL, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start"
+         id="tspan5074">Laser Center Intersections</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:100%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="130.69301"
+       y="179.75014"
+       id="text4810-8-4"
+       sodipodi:linespacing="100%"><tspan
+         sodipodi:role="line"
+         x="130.69301"
+         y="179.75014"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15px;line-height:100%;font-family:'Abyssinica SIL';-inkscape-font-specification:'Abyssinica SIL, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start"
+         id="tspan4832-9">Laser intersection</tspan><tspan
+         sodipodi:role="line"
+         x="130.69301"
+         y="194.75014"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15px;line-height:100%;font-family:'Abyssinica SIL';-inkscape-font-specification:'Abyssinica SIL, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start"
+         id="tspan5096">angles</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.35433071;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 139.20352,432.28342 c 518.76257,0 517.6902,0 517.6902,0"
+       id="path5098"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:100%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="711.78888"
+       y="410.29153"
+       id="text4810-6-2"
+       sodipodi:linespacing="100%"><tspan
+         sodipodi:role="line"
+         id="tspan4812-9-7"
+         x="711.78888"
+         y="410.29153"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15px;line-height:100%;font-family:'Abyssinica SIL';-inkscape-font-specification:'Abyssinica SIL, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start">Camera Focal Point</tspan></text>
   </g>
 </svg>
