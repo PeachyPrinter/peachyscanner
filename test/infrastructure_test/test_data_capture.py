@@ -154,10 +154,11 @@ class PointCaptureXYZTest(unittest.TestCase):
         self.img2point = Mock()
         self.img2point.get_points.return_value = np.array([1.0, 1.0, 1.0])
         self.roi = ROI(0, 0, 1, 1)
+        self.laser_theta = 77
 
     def test_should_handle_all_sections_if_starting_at_not_0_index(self):
         sections = 200
-        point_capture = PointCaptureXYZ(sections, self.img2point)
+        point_capture = PointCaptureXYZ(sections, self.img2point, self.laser_theta)
         for idx in range(sections):
             index = (idx + 50) % 200
             result = point_capture.handle(laser_detection="BLA", section=idx, roi=self.roi)
@@ -166,7 +167,7 @@ class PointCaptureXYZTest(unittest.TestCase):
 
     def test_complete_should_be_false_if_all_sections_unhandled(self):
         sections = 200
-        point_capture = PointCaptureXYZ(sections, self.img2point)
+        point_capture = PointCaptureXYZ(sections, self.img2point, self.laser_theta)
         for idx in range(sections - 2):
             point_capture.handle(laser_detection="BLA", section=idx, roi=self.roi)
 
@@ -175,7 +176,7 @@ class PointCaptureXYZTest(unittest.TestCase):
     def test_complete_should_be_true_if_all_sections_handled(self):
         sections = 200
 
-        point_capture = PointCaptureXYZ(sections, self.img2point)
+        point_capture = PointCaptureXYZ(sections, self.img2point, self.laser_theta)
         for idx in range(sections):
             point_capture.handle(laser_detection="BLA", section=idx, roi=self.roi)
 
@@ -184,24 +185,24 @@ class PointCaptureXYZTest(unittest.TestCase):
     def test_status_should_return_amount_complete(self):
         sections = 10
 
-        point_capture = PointCaptureXYZ(sections, self.img2point)
+        point_capture = PointCaptureXYZ(sections, self.img2point, self.laser_theta)
         for idx in range(sections):
             self.assertEquals(idx / float(sections), point_capture.status)
             point_capture.handle(laser_detection="BLA", section=idx, roi=self.roi)
         self.assertEquals(1.0, point_capture.status)
 
     def test_handle_ignores_extra_keywords(self):
-        point_capture = PointCaptureXYZ(10, self.img2point)
+        point_capture = PointCaptureXYZ(10, self.img2point, self.laser_theta)
         point_capture.handle(frame='pizza', laser_detection="BLA", section=0, roi=self.roi)
 
     def test_handle_calls_img2points(self):
         sections = 200
         frame = np.ones((200,200), dtype='uint8')
-        point_capture = PointCaptureXYZ(sections, self.img2point)
+        point_capture = PointCaptureXYZ(sections, self.img2point, self.laser_theta)
 
         point_capture.handle(laser_detection=frame, section=0, roi=self.roi)
 
-        self.img2point.get_points.assert_called_with(frame, 0, self.roi)
+        self.img2point.get_points.assert_called_with(frame, 0, self.roi, self.laser_theta)
 
 
     def test_handle_calls_img2points_with_correct_rad(self):
@@ -209,17 +210,17 @@ class PointCaptureXYZTest(unittest.TestCase):
         current_section = 50
         expected_rad = np.pi / 2.0
         frame = np.ones((200, 200), dtype='uint8')
-        point_capture = PointCaptureXYZ(sections, self.img2point)
+        point_capture = PointCaptureXYZ(sections, self.img2point, self.laser_theta)
 
         point_capture.handle(laser_detection=frame, section=current_section, roi=self.roi)
 
-        self.img2point.get_points.assert_called_with(frame, expected_rad, self.roi)
+        self.img2point.get_points.assert_called_with(frame, expected_rad, self.roi, self.laser_theta)
 
 
     def test_handle_stores_points(self):
         sections = 200
         frame = np.ones((200, 200), dtype='uint8')
-        point_capture = PointCaptureXYZ(sections, self.img2point)
+        point_capture = PointCaptureXYZ(sections, self.img2point, self.laser_theta)
         expected = np.array([[1.0, 1.0, 1.0]])
 
         point_capture.handle(laser_detection=frame, section=0, roi=self.roi)
@@ -237,7 +238,7 @@ class PointCaptureXYZTest(unittest.TestCase):
 
         self.img2point.get_points.side_effect = points
 
-        point_capture = PointCaptureXYZ(sections, self.img2point)
+        point_capture = PointCaptureXYZ(sections, self.img2point, self.laser_theta)
         expected = np.array([[1.0, 1.0, 1.0], [2.0, 2.0, 2.0]])
 
         point_capture.handle(laser_detection=frame, section=0, roi=self.roi)
@@ -256,7 +257,7 @@ class PointCaptureXYZTest(unittest.TestCase):
 
         self.img2point.get_points.side_effect = points
 
-        point_capture = PointCaptureXYZ(sections, self.img2point, points_xyz=np.array([[-1.0, -1.0, -1.0], [-2.0, -2.0, -2.0]]))
+        point_capture = PointCaptureXYZ(sections, self.img2point, self.laser_theta, points_xyz=np.array([[-1.0, -1.0, -1.0], [-2.0, -2.0, -2.0]]))
         expected = np.array([[-1.0, -1.0, -1.0], [-2.0, -2.0, -2.0], [1.0, 1.0, 1.0], [2.0, 2.0, 2.0]])
 
         point_capture.handle(laser_detection=frame, section=0, roi=self.roi)

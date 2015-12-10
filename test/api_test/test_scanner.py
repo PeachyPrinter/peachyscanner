@@ -203,7 +203,7 @@ class ScannerAPITest(TestHelpers):
         cam.shape = [300, 100]
         api = ScannerAPI()
         api.img2points = True
-        api.capture_points_xyz()
+        api.capture_points_xyz(.45)
         self.assertTrue(len(api.video_processor.handlers) > 0)
         self.assertEquals(PointCaptureXYZ, type(api.video_processor.handlers[0][0]))
         self.assertTrue(hasattr(api.video_processor.handlers[0][0], 'handle'))
@@ -215,7 +215,7 @@ class ScannerAPITest(TestHelpers):
         api = ScannerAPI()
         api.img2points = True
         callback = Mock()
-        api.capture_points_xyz(callback)
+        api.capture_points_xyz(.45, callback)
         self.assertTrue(len(api.video_processor.handlers) > 0)
         self.assertEquals(PointCaptureXYZ, type(api.video_processor.handlers[0][0]))
         self.assertEqual(api.video_processor.handlers[0][1], callback)

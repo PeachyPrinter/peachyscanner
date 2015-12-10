@@ -44,11 +44,11 @@ class ScannerAPI(object):
         else:
             self.video_processor.subscribe(ImageCapture(self.encoder.sections, section_offset))
 
-    def capture_points_xyz(self, call_back=None):
+    def capture_points_xyz(self, laser_theta, points=None call_back=None):
         if call_back:
-            self.video_processor.subscribe(PointCaptureXYZ(self.encoder.sections, self.img2points), call_back)
+            self.video_processor.subscribe(PointCaptureXYZ(self.encoder.sections, self.img2points, laser_theta, points), call_back)
         else:
-            self.video_processor.subscribe(PointCaptureXYZ(self.encoder.sections, self.img2points))
+            self.video_processor.subscribe(PointCaptureXYZ(self.encoder.sections, self.img2points, laser_theta, points))
 
     def get_feed_image(self, size):
         return self.video_processor.get_bounded_image(*size)

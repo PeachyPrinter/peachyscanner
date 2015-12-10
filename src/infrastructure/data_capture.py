@@ -41,16 +41,17 @@ class ImageCapture(Handler):
 
 
 class PointCaptureXYZ(Handler):
-    def __init__(self, sections, img2points, points_xyz=None):
+    def __init__(self, sections, img2points, laser_theta, points_xyz=None, ):
         super(PointCaptureXYZ, self).__init__(sections)
         self.img2points = img2points
+        self.laser_theta = laser_theta
         self.sections = sections
         self._section_count = 0
         self.points_xyz = points_xyz
 
     def handle(self, laser_detection=None, section=0, roi=None, **kwargs):
         rad = (section / float(self.sections)) * 2.0 * np.pi
-        points = self.img2points.get_points(laser_detection, rad, roi)
+        points = self.img2points.get_points(laser_detection, rad, roi, self.laser_theta)
         if self.points_xyz is None:
             self.points_xyz = points
         else:
