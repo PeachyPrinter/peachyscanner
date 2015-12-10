@@ -21,7 +21,7 @@ class PointConverterTest(unittest.TestCase):
             focal_length_mm=9,
             sensor_size_xy_mm=camera_sensor_size_mm,
             focal_point_to_center_mm=9,
-            laser_center_intersection_rad=np.pi / 4,
+            intersections_rad_mm=[(np.pi / 4, 9)],
             )
         return Image2Points(
             hardware,
@@ -49,7 +49,7 @@ class PointConverterTest(unittest.TestCase):
             [ 9.0,  9.0, -9.0],  #  1,  1 
             ], dtype='float16')
 
-        result = i2p.get_points(image, 0, ROI(0, 0, 1, 1))
+        result = i2p.get_points(image, 0, ROI(0, 0, 1, 1), np.pi / 4)
 
         self.assert_array(expected, result)
 
@@ -66,7 +66,7 @@ class PointConverterTest(unittest.TestCase):
             [-3.0,  3.0,  3.0],  # -1,  1 
             ], dtype='float16')
 
-        result = i2p.get_points(image, 0, ROI(0, 0, 1, 1))
+        result = i2p.get_points(image, 0, ROI(0, 0, 1, 1), np.pi / 4)
 
         self.assert_array(expected, result)
 
@@ -87,7 +87,7 @@ class PointConverterTest(unittest.TestCase):
             [-9.0,  9.0, -9.0],  #  1,  1 
             ], dtype='float16')
 
-        result = i2p.get_points(image, rotation, ROI(0, 0, 1, 1))
+        result = i2p.get_points(image, rotation, ROI(0, 0, 1, 1), np.pi / 4)
 
         self.assert_array(expected, result, rtol=1e-03)
 
@@ -104,7 +104,7 @@ class PointConverterTest(unittest.TestCase):
 
         roi = ROI(.25, .25, 0.5, 0.5)
 
-        result = i2p.get_points(image, 0, roi)
+        result = i2p.get_points(image, 0, roi, np.pi / 4)
 
         self.assert_array(expected, result)
 
@@ -113,7 +113,7 @@ class PointConverterTest(unittest.TestCase):
         i2p = self.setup_i2p(camera_pixels_shape_yx=camera_pixels_shape_yx, camera_sensor_size_mm=(20, 20))
         image = np.ones((4, 4)).astype('bool')
 
-        result = i2p.get_points(image, 0, ROI(0, 0, 1, 1))
+        result = i2p.get_points(image, 0, ROI(0, 0, 1, 1), np.pi / 4)
 
         self.assertTrue(3, len(result))
 
@@ -124,7 +124,7 @@ class PointConverterTest(unittest.TestCase):
         image = np.zeros(camera_pixels_shape_yx).astype('uint8')
         image[:, 40] = 255
 
-        result = i2p.get_points(image, rotation, ROI(0, 0, 1, 1))
+        result = i2p.get_points(image, rotation, ROI(0, 0, 1, 1), np.pi / 4)
 
         self.assertEquals(480, result.shape[0])
 

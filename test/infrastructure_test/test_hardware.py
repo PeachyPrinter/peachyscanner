@@ -30,16 +30,23 @@ class HardwareConfigurationTest(unittest.TestCase):
         hardware_config = HardwareConfiguration(10, (10, 7.5), focal_point_to_center_mm, 0.68)
         self.assertEquals(focal_point_to_center_mm, hardware_config.focal_point_to_center_mm)
 
-    def test_hardware_config_has_laser_center_intersection_rad(self):
-        laser_center_intersection_rad = 0.66
-        hardware_config = HardwareConfiguration(10, (10, 7.5), 100, laser_center_intersection_rad)
-        self.assertEquals(laser_center_intersection_rad, hardware_config.laser_center_intersection_rad)
+    def test_hardware_config_has_intersections_rad_mm(self):
+        intersections_rad_mm = [(0.66, 10)]
+        hardware_config = HardwareConfiguration(10, (10, 7.5), 100, intersections_rad_mm)
+        self.assertEquals(intersections_rad_mm, hardware_config.intersections_rad_mm)
 
     def test_hardware_config_has_center_intersection_xyz(self):
         focal_point_to_center_mm = 100
         expected = np.array([0, 0, -100])
         hardware_config = HardwareConfiguration(10, (10, 7.5), focal_point_to_center_mm, 0.68)
         self.assertTrue((expected == hardware_config.center_intersection_xyz).all())
+
+    def test_hardware_config_has_laser_intersections_rad_xyz(self):
+        laser_point_to_center_mm = 100
+        expected = [(0.68, np.array([0, 0, -100]))]
+        hardware_config = HardwareConfiguration(10, (10, 7.5), 100, [(0.68, laser_point_to_center_mm)])
+        self.assertTrue(expected[0][0], hardware_config.laser_intersections_rad_xyz[0][0])
+        self.assertTrue((expected[0][1] == hardware_config.laser_intersections_rad_xyz[0][1]).all())
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level='INFO')

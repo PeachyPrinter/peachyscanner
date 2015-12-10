@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from scipy import signal
 
 a_val = int(30)
 b_val = int(255)
@@ -44,7 +43,6 @@ def show_line(a, line_number=100):
         val = line[pos]
         color = (int(val), int(0), int(255 - val))
         out = cv2.line(out, (pos, 255), (pos, 255 - val), color)
-    print np.r_[True, line[1:] < line[:-1]] & np.r_[line[:-1] < line[1:], True]
     return out
 
 

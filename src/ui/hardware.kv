@@ -124,39 +124,161 @@
                         height: app.label_height
                         text: "mm"
 
-            BoxLayout:
-                orientation: 'vertical'
-                padding: [3, 3, 3, 3]
-                canvas:
-                    Color:
-                        rgba: [1, 1, 1, 0.2]
-                    Rectangle:
-                        pos: self.pos
-                        size: self.size
+            GridLayout:
+                cols: 4
                 Label:
-                    halign: 'left'
-                    size_hint_y: None
-                    size_hint_x: None
-                    width: self.texture_size[0]
+                    text: 'Angle'
+                    size_hint: (None, None)
                     height: app.label_height
-                    text: "Laser Intersection Degrees"
-                BoxLayout:
-                    orientation: 'horizontal'
-                    TextInput:
-                        on_text: root.laser_intersection_degree = float(self.text)
-                        input_filter: 'float'
-                        size_hint_x: None
-                        width: "70dp"
-                        size_hint_y: None
-                        height: app.label_height
-                        multiline: False
-                        text: str(root.laser_intersection_degree)
-                    Label:
-                        size_hint_x: None
-                        width: "55dp"
-                        size_hint_y: None
-                        height: app.label_height
-                        text: "mm"
+                    width: '70dp'
+                Label:
+                    size_hint: (None, None)
+                    height: app.label_height
+                    width: '15dp'
+                Label:
+                    text: 'Distance'
+                    size_hint: (None, None)
+                    height: app.label_height
+                    width: '70dp'
+                Label:
+                    size_hint: (None, None)
+                    height: app.label_height
+                    width: '15dp'
+
+                TextInput:
+                    size_hint: (None, None)
+                    width: '70dp'
+                    height: app.label_height
+                    multiline: False
+                    text: str(root.laser_intersection_degree_1)
+                    on_text: root.laser_intersection_degree_1 = float(self.text)
+                    input_filter: 'float'
+                Label:
+                    text: 'Deg'
+                    size_hint: (None, None)
+                    height: app.label_height
+                    width: '15dp'
+                TextInput:
+                    size_hint: (None, None)
+                    height: app.label_height
+                    width: '70dp'
+                    multiline: False
+                    text: str(root.laser_intersection_distance_1)
+                    on_text: root.laser_intersection_distance_1 = float(self.text)
+                Label:
+                    text: 'mm'
+                    size_hint: (None, None)
+                    width: '10dp'
+                    height: app.label_height
+
+
+                TextInput:
+                    size_hint: (None, None)
+                    width: '70dp'
+                    height: app.label_height
+                    multiline: False
+                    text: str(root.laser_intersection_degree_2)
+                    on_text: root.laser_intersection_degree_2 = float(self.text)
+                    input_filter: 'float'
+                Label:
+                    text: 'Deg'
+                    size_hint: (None, None)
+                    height: app.label_height
+                    width: '15dp'
+                TextInput:
+                    size_hint: (None, None)
+                    height: app.label_height
+                    width: '70dp'
+                    multiline: False
+                    text: str(root.laser_intersection_distance_2)
+                    on_text: root.laser_intersection_distance_2 = float(self.text)
+                Label:
+                    text: 'mm'
+                    size_hint: (None, None)
+                    width: '10dp'
+                    height: app.label_height
+
+
+                TextInput:
+                    size_hint: (None, None)
+                    width: '70dp'
+                    height: app.label_height
+                    multiline: False
+                    text: str(root.laser_intersection_degree_3)
+                    on_text: root.laser_intersection_degree_3 = float(self.text)
+                    input_filter: 'float'
+                Label:
+                    text: 'Deg'
+                    size_hint: (None, None)
+                    height: app.label_height
+                    width: '15dp'
+                TextInput:
+                    size_hint: (None, None)
+                    height: app.label_height
+                    width: '70dp'
+                    multiline: False
+                    text: str(root.laser_intersection_distance_3)
+                    on_text: root.laser_intersection_distance_3 = float(self.text)
+                Label:
+                    text: 'mm'
+                    size_hint: (None, None)
+                    width: '10dp'
+                    height: app.label_height
+
+
+                TextInput:
+                    size_hint: (None, None)
+                    width: '70dp'
+                    height: app.label_height
+                    multiline: False
+                    text: str(root.laser_intersection_degree_4)
+                    on_text: root.laser_intersection_degree_4 = float(self.text)
+                    input_filter: 'float'
+                Label:
+                    text: 'Deg'
+                    size_hint: (None, None)
+                    height: app.label_height
+                    width: '15dp'
+                TextInput:
+                    size_hint: (None, None)
+                    height: app.label_height
+                    width: '70dp'
+                    multiline: False
+                    text: str(root.laser_intersection_distance_4)
+                    on_text: root.laser_intersection_distance_4 = float(self.text)
+                Label:
+                    text: 'mm'
+                    size_hint: (None, None)
+                    width: '10dp'
+                    height: app.label_height
+
+
+                TextInput:
+                    size_hint: (None, None)
+                    width: '70dp'
+                    height: app.label_height
+                    multiline: False
+                    text: str(root.laser_intersection_degree_5)
+                    on_text: root.laser_intersection_degree_5 = float(self.text)
+                    input_filter: 'float'
+                Label:
+                    text: 'Deg'
+                    size_hint: (None, None)
+                    height: app.label_height
+                    width: '15dp'
+                TextInput:
+                    size_hint: (None, None)
+                    height: app.label_height
+                    width: '70dp'
+                    multiline: False
+                    text: str(root.laser_intersection_distance_5)
+                    on_text: root.laser_intersection_distance_5 = float(self.text)
+                Label:
+                    text: 'mm'
+                    size_hint: (None, None)
+                    width: '10dp'
+                    height: app.label_height
+
             Label:
             Button:
                 size_hint_y: None
