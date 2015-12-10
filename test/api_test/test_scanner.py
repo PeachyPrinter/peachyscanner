@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 from mock import patch, Mock
 from api.scanner import ScannerAPI
 from infrastructure.roi import ROI
-from infrastructure.data_capture import ImageCapture, PointCapture, PointCaptureXYZ
+from infrastructure.data_capture import ImageCapture, PointCaptureXYZ
 from helpers import TestHelpers
 
 
@@ -187,28 +187,6 @@ class ScannerAPITest(TestHelpers):
         self.assertEquals(ImageCapture, type(api.video_processor.handlers[0][0]))
         self.assertEqual(api.video_processor.handlers[0][1], callback)
         self.assertEqual(api.video_processor.handlers[0][0].section_offset, expected_offset)
-
-
-    @patch('api.scanner.Camera')
-    def test_capture_points_should_create_an_image_handler_and_subscribe_it_to_video_processor(self, mock_camera):
-        cam = mock_camera.return_value
-        cam.shape = [300, 100]
-        api = ScannerAPI()
-        api.capture_points()
-        self.assertTrue(len(api.video_processor.handlers) > 0)
-        self.assertEquals(PointCapture, type(api.video_processor.handlers[0][0]))
-        self.assertTrue(hasattr(api.video_processor.handlers[0][0], 'handle'))
-
-    @patch('api.scanner.Camera')
-    def test_capture_points_should_subscribe_with_expected_callback(self, mock_camera):
-        cam = mock_camera.return_value
-        cam.shape = [300, 100]
-        api = ScannerAPI()
-        callback = Mock()
-        api.capture_points(callback)
-        self.assertTrue(len(api.video_processor.handlers) > 0)
-        self.assertEquals(PointCapture, type(api.video_processor.handlers[0][0]))
-        self.assertEqual(api.video_processor.handlers[0][1], callback)
 
 
     @patch('api.scanner.Camera')
