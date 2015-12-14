@@ -8,15 +8,18 @@ class Image2Points(object):
     ):
         self._mm_per_pixel_yx = self._calculate_mm_per_pixel_yx(camera_pixels_shape_yx, hardware.sensor_size_xy_mm)
         self._posisition_mask_yx = {}
+        self.laser_plane_normals = {}
         for (theta, pos) in hardware.laser_intersections_rad_xyz:
-            laser_plane_normal_xyz = self._get_laser_plane_normal_xyz(pos, theta)
+            
+            self.laser_plane_normals[theta] = self._get_laser_plane_normal_xyz(pos, theta)
+
             self._posisition_mask_yx[theta] = self._get_laser_intersections_mask_yx(
                 camera_pixels_shape_yx,
                 hardware.focal_length_mm,
                 self._mm_per_pixel_yx,
                 hardware.center_intersection_xyz,
                 pos,
-                laser_plane_normal_xyz)
+                self.laser_plane_normals[theta])
 
     def _get_laser_intersections_mask_yx(
         self,
@@ -53,7 +56,9 @@ class Image2Points(object):
         p_3 = np.array([-(np.tan(laser_center_intersection_rad) * (i_z / -2.0)), 0, i_z / 2.0])
         v_21 = p_2 - p_1
         v_31 = p_3 - p_1
-        return np.cross(v_21, v_31)
+        vec = np.cross(v_21, v_31)
+        unit_vec = vec / np.linalg.norm(vec)
+        return unit_vec
 
     def _rotation_matrix(self, theta):
         rotation_axis = np.asarray([0, 1, 0], dtype='float16')

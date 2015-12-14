@@ -3,16 +3,18 @@ from kivy.uix.screenmanager import Screen
 from kivy.logger import Logger
 from kivy.lang import Builder
 from kivy.uix.popup import Popup
+from kivy.uix.button import Button
 from kivy.resources import resource_find
 from kivy.graphics.opengl import GL_DEPTH_TEST, glEnable, glDisable
 from kivy.graphics.transformation import Matrix
 from kivy.graphics import BindTexture, Scale, Fbo, Rectangle, Canvas, Callback, ClearColor, RenderContext, Callback, ClearBuffers, PushMatrix, PopMatrix, Color, Translate, Rotate, UpdateNormalMatrix, Mesh, Line
 from kivy.clock import Clock
-from kivy.properties import ObjectProperty, BooleanProperty
+from kivy.properties import ObjectProperty, BooleanProperty, StringProperty
 from kivy.graphics.texture import Texture
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from threading import Lock
+import os
 
 import numpy as np
 import time
@@ -62,6 +64,15 @@ class SaveDialog(FloatLayout):
     save = ObjectProperty(None)
     text_input = ObjectProperty(None)
     cancel = ObjectProperty(None)
+    path = StringProperty(os.path.expanduser("~"))
+
+
+class GoButton(Button):
+
+    def __init__(self, rad_value, go_method, **kwargs):
+        super(GoButton, self).__init__(**kwargs)
+        self.rad_value = rad_value
+        self.go_method = go_method
 
 
 class PointsCapture(Screen):
@@ -70,13 +81,26 @@ class PointsCapture(Screen):
         self.scanner = scanner
         self._converter = GLConverter()
         self.raw_points_xyz = np.array([])
+        
+    def on_pre_enter(self):
+        laser_pos = [(int(np.rad2deg(rad)), rad) for rad in self.scanner.get_scanner_posisitions()]
+        for (human, rad) in laser_pos:
+            button = GoButton(rad, self.start_points_capture, text=str(human))
+            self.go_buttons.add_widget(button)
 
-    def start_points_capture(self):
-        self._disable_all()
+    def on_leave(self):
+        self.go_buttons.clear_widgets()
+        self.clear()
+
+    def clear(self,):
         self.image_box.clear()
         self.render.clear()
-        self.scanner.capture_points_xyz(self._capture_points_callback)
-        # TODO make this number a better one.
+        self.raw_points_xyz = np.array([])
+
+    def start_points_capture(self, theta):
+        self._disable_all()
+        points = self.raw_points_xyz if self.raw_points_xyz.size != 0 else None
+        self.scanner.capture_points_xyz(theta, points=points, call_back=self._capture_points_callback)
         self.scanner.capture_image(self._capture_image_callback, 200 - 25)
 
     def _capture_image_callback(self, handler):
@@ -108,10 +132,12 @@ class PointsCapture(Screen):
         self.dismiss_popup()
 
     def _enable_all(self):
-        self.go_button.disabled = False
+        self.go_buttons.disabled = False
+        self.clear_button.disabled = False
 
     def _disable_all(self):
-        self.go_button.disabled = True
+        self.go_buttons.disabled = True
+        self.clear_button.disabled = True
 
     def _update_image(self, *args):
         if hasattr(self, '_image'):
@@ -177,7 +203,7 @@ class ObjectRenderer(BoxLayout):
 
     def update_glsl(self, *largs):
         # self.fbo.shader.source = resource_find('simple.glsl')
-        asp = max(10,self.size[0]) / max(10, float(self.size[1]))
+        asp = max(10, self.size[0]) / max(10, float(self.size[1]))
         proj = Matrix().view_clip(-asp, asp, -1, 1, 1, 100, 1)
         model = Matrix().look_at(   0.0, 0.0, 0.0,   0.0, 0.0, -3.0,   0.0, 1.0, 0.0)
         proj = Matrix().view_clip(-asp, asp, -1, 1, 1, 100, 1)
@@ -191,7 +217,7 @@ class ObjectRenderer(BoxLayout):
 
     def update_mesh(self, points):
         self.points = points
-        points = np.array(points)[::2]
+        points = np.array(points)[::8]
         points = points.flatten()
 
         # with a = 1:

@@ -61,7 +61,7 @@ class MasterGUI(BoxLayout):
         self.load_hardware()
 
     def load_hardware(self):
-        hardware = HardwareConfiguration(12, (10, 7.5), 180, np.pi / 4)
+        hardware = HardwareConfiguration(12, (10, 7.5), 180, [])
         threading.Thread(target=self.scanner.configure, args=(hardware, self.call_back)).start()
 
     def call_back(self,):

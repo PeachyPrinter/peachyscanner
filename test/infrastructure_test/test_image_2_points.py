@@ -16,12 +16,12 @@ from infrastructure.roi import ROI
 
 class PointConverterTest(unittest.TestCase):
 
-    def setup_i2p(self, camera_pixels_shape_yx=(3, 3), camera_sensor_size_mm=(13.5, 13.5),):
+    def setup_i2p(self, camera_pixels_shape_yx=(3, 3), camera_sensor_size_mm=(13.5, 13.5), intersections_rad_mm=[(np.pi / 4, 9)],):
         hardware = HardwareConfiguration(
             focal_length_mm=9,
             sensor_size_xy_mm=camera_sensor_size_mm,
             focal_point_to_center_mm=9,
-            intersections_rad_mm=[(np.pi / 4, 9)],
+            intersections_rad_mm=intersections_rad_mm,
             )
         return Image2Points(
             hardware,
@@ -32,6 +32,30 @@ class PointConverterTest(unittest.TestCase):
         self.assertTrue(array1.shape == array2.shape)
         for idx in range(array1.shape[0]):
             self.assertTrue(np.allclose(array1[idx], array2[idx], rtol=rtol), "TEST:{}:  {} == {}".format(idx, array1[idx], array2[idx]))
+
+    def test_init_creates_expected_laser_plane_normals(self):
+        a_rad = 0.785398163397
+        b_rad = 0.844153986113
+        c_rad = 0.909753157943
+
+        expected_a_normal = np.array([9, 0, 9])
+        expected_a_normal = expected_a_normal / np.linalg.norm(expected_a_normal)
+        expected_b_normal = np.array([7.11111111118, 0, 8])
+        expected_b_normal = expected_b_normal / np.linalg.norm(expected_b_normal)
+        expected_c_normal = np.array([5.44444444452, 0, 7])
+        expected_c_normal = expected_c_normal / np.linalg.norm(expected_c_normal)
+
+        intersections_rad_mm = [(a_rad, 9), (b_rad, 8), (c_rad, 7)]
+        i2p = self.setup_i2p(intersections_rad_mm=intersections_rad_mm)
+
+        a_result = i2p.laser_plane_normals[a_rad]
+        b_result = i2p.laser_plane_normals[b_rad]
+        c_result = i2p.laser_plane_normals[c_rad]
+
+        self.assert_array(expected_a_normal, a_result)
+        self.assert_array(expected_b_normal, b_result)
+        self.assert_array(expected_c_normal, c_result)
+
 
     def test_get_points_returns_expected_points_give_simple_camera_and_image(self):
         camera_pixels_shape_yx = (3, 3)

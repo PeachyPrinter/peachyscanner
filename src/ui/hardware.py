@@ -71,16 +71,13 @@ class HardwareConfig(Popup):
         Config.set(self.section, 'laser_intersection_distance_5', str(self.laser_intersection_distance_5))
         Config.write()
 
-    def deg_to_rad(self, degree):
-        float(self.laser_intersection_degree) / 360 * 2 * np.pi
-
     def hardware(self):
         intersections_rad_mm = [
-            (self.deg_to_rad(self.laser_intersection_degree_1), self.laser_intersection_distance_1),
-            (self.deg_to_rad(self.laser_intersection_degree_2), self.laser_intersection_distance_2),
-            (self.deg_to_rad(self.laser_intersection_degree_3), self.laser_intersection_distance_3),
-            (self.deg_to_rad(self.laser_intersection_degree_4), self.laser_intersection_distance_4),
-            (self.deg_to_rad(self.laser_intersection_degree_5), self.laser_intersection_distance_5),
+            (np.deg2rad(self.laser_intersection_degree_1), self.laser_intersection_distance_1),
+            (np.deg2rad(self.laser_intersection_degree_2), self.laser_intersection_distance_2),
+            (np.deg2rad(self.laser_intersection_degree_3), self.laser_intersection_distance_3),
+            (np.deg2rad(self.laser_intersection_degree_4), self.laser_intersection_distance_4),
+            (np.deg2rad(self.laser_intersection_degree_5), self.laser_intersection_distance_5),
         ]
         camera_focal_length_mm = float(self.camera_focal_length_mm)
         sensor_size = (float(self.sensor_size_x_mm), float(self.sensor_size_y_mm))

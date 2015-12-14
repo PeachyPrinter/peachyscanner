@@ -44,7 +44,7 @@ class ScannerAPI(object):
         else:
             self.video_processor.subscribe(ImageCapture(self.encoder.sections, section_offset))
 
-    def capture_points_xyz(self, laser_theta, points=None call_back=None):
+    def capture_points_xyz(self, laser_theta, points=None, call_back=None):
         if call_back:
             self.video_processor.subscribe(PointCaptureXYZ(self.encoder.sections, self.img2points, laser_theta, points), call_back)
         else:
@@ -66,8 +66,14 @@ class ScannerAPI(object):
         self.video_processor.laser_detector = self.laser_detector
 
     def configure(self, hardware, callback):
-        self.img2points = Image2Points(hardware, self.camera.shape)
+        self._hardware = hardware
+        self.img2points = Image2Points(self._hardware, self.camera.shape)
         callback()
+
+    def get_scanner_posisitions(self):
+        if not hasattr(self, '_hardware'):
+            raise Exception()
+        return [rad for (rad, pos) in self._hardware.intersections_rad_mm]
 
     def start(self):
         self.video_processor.start()

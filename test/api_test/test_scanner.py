@@ -215,11 +215,10 @@ class ScannerAPITest(TestHelpers):
         api = ScannerAPI()
         api.img2points = True
         callback = Mock()
-        api.capture_points_xyz(.45, callback)
+        api.capture_points_xyz(.45, call_back=callback)
         self.assertTrue(len(api.video_processor.handlers) > 0)
         self.assertEquals(PointCaptureXYZ, type(api.video_processor.handlers[0][0]))
         self.assertEqual(api.video_processor.handlers[0][1], callback)
-
 
 
     @patch('api.scanner.Camera')
@@ -322,6 +321,36 @@ class ScannerAPITest(TestHelpers):
 
         mock_Image2Points.assert_called_once_with("bla", cam.shape)
         callback.assert_called_with()
+
+    @patch('api.scanner.Camera')
+    @patch('api.scanner.Image2Points')
+    def test_get_scanner_posisitions_get_list_of_configured_laser_posisitions(self, mock_Image2Points, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+
+        callback = Mock()
+        api = ScannerAPI()
+        mock_hardware = Mock()
+        mock_hardware.intersections_rad_mm = [(1, "bla"), (2, "bla")]
+        expected = [1, 2]
+
+        api.configure(mock_hardware, callback)
+        results = api.get_scanner_posisitions()
+
+        self.assertEquals(expected, results)
+
+    @patch('api.scanner.Camera')
+    @patch('api.scanner.Image2Points')
+    def test_get_scanner_posisitions_raises_exception_if_not_configured(self, mock_Image2Points, mock_camera):
+        cam = mock_camera.return_value
+        cam.shape = [300, 100]
+
+        api = ScannerAPI()
+
+        with self.assertRaises(Exception):
+            api.get_scanner_posisitions()
+
+
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level='INFO')

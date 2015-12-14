@@ -15,7 +15,7 @@
         FileChooserListView:
             id: filechooser
             on_selection: text_input.text = self.selection and self.selection[0] or ''
-            path: '~'
+            path: root.path
 
         TextInput:
             id: text_input
@@ -35,22 +35,27 @@
                 text: "Save"
                 on_release: root.save(filechooser.path, text_input.text)
 
+<GoButton>:
+    on_release: self.go_method(self.rad_value)
 
 <PointsCapture>:
     image_box: image_box
     name: 'points_capture_ui'
     render: render
-    go_button: go_button
+    go_buttons: go_buttons
     save_button: save_button
+    clear_button: clear_button
     progress: progress
     GridLayout:
         cols: 1
-        Button:
-            id: go_button
+        Label: 
             size_hint_y: None
             height: app.button_height
-            text: "Start Points Capture"
-            on_release: root.start_points_capture()
+            text: "Capture"
+        BoxLayout:
+            id: go_buttons
+            size_hint_y: None
+            height: app.button_height
         ProgressBar:
             id: progress
             size_hint_y: None
@@ -63,13 +68,19 @@
         NumpyImage:
             id:image_box
             size_hint_y: 0.5
-        Button:
-            id: save_button
+        BoxLayout:
             size_hint_y: None
             height: app.button_height
-            text: "Save Points"
-            disabled: True
-            on_release: root.show_save()
+            Button:
+                id: save_button
+                text: "Save"
+                disabled: True
+                on_release: root.show_save()
+            Button:
+                id: clear_button
+                text: "Clear"
+                disabled: True
+                on_release: root.clear()
 
 
 <ObjectRenderer>:

@@ -9,6 +9,8 @@
             spacing: "3dp"
             BoxLayout:
                 orientation: 'vertical'
+                size_hint_y: None
+                height: app.label_height
                 padding: [3, 3, 3, 3]
                 canvas:
                     Color:
@@ -16,15 +18,17 @@
                     Rectangle:
                         pos: self.pos
                         size: self.size
-                Label:
-                    halign: 'left'
-                    size_hint_y: None
-                    size_hint_x: None
-                    width: self.texture_size[0]
-                    height: app.label_height
-                    text: "Camera Focal Length"
                 BoxLayout:
                     orientation: 'horizontal'
+                    size_hint_y: None
+                    height: app.label_height
+                    Label:
+                        halign: 'left'
+                        size_hint_y: None
+                        size_hint_x: None
+                        width: self.texture_size[0]
+                        height: app.label_height
+                        text: "Camera Focal Length"
                     TextInput:
                         on_text: root.camera_focal_length_mm = float(self.text)
                         input_filter: 'float'
@@ -42,6 +46,8 @@
                         text: "mm"
 
             BoxLayout:
+                size_hint_y: None
+                height: app.label_height
                 orientation: 'vertical'
                 padding: [3, 3, 3, 3]
                 canvas:
@@ -50,15 +56,15 @@
                     Rectangle:
                         pos: self.pos
                         size: self.size
-                Label:
-                    halign: 'left'
-                    size_hint_y: None
-                    size_hint_x: None
-                    width: self.texture_size[0]
-                    height: app.label_height
-                    text: "Sensor Size X, Y"
                 BoxLayout:
                     orientation: 'horizontal'
+                    Label:
+                        halign: 'left'
+                        size_hint_y: None
+                        size_hint_x: None
+                        width: self.texture_size[0]
+                        height: app.label_height
+                        text: "Sensor Size X, Y"
                     TextInput:
                         on_text: root.sensor_size_x_mm = float(self.text)
                         input_filter: 'float'
@@ -92,6 +98,8 @@
 
             BoxLayout:
                 orientation: 'vertical'
+                size_hint_y: None
+                height: app.label_height
                 padding: [3, 3, 3, 3]
                 canvas:
                     Color:
@@ -99,15 +107,17 @@
                     Rectangle:
                         pos: self.pos
                         size: self.size
-                Label:
-                    halign: 'left'
-                    size_hint_y: None
-                    size_hint_x: None
-                    width: self.texture_size[0]
-                    height: app.label_height
-                    text: "Focal Point to Center"
                 BoxLayout:
                     orientation: 'horizontal'
+                    size_hint_y: None
+                    height: app.label_height
+                    Label:
+                        halign: 'left'
+                        size_hint_y: None
+                        size_hint_x: None
+                        width: self.texture_size[0]
+                        height: app.label_height
+                        text: "Focal Point to Center"
                     TextInput:
                         on_text: root.focal_point_to_center = float(self.text)
                         input_filter: 'float'
@@ -134,7 +144,7 @@
                 Label:
                     size_hint: (None, None)
                     height: app.label_height
-                    width: '15dp'
+                    width: '25dp'
                 Label:
                     text: 'Distance'
                     size_hint: (None, None)
@@ -143,7 +153,7 @@
                 Label:
                     size_hint: (None, None)
                     height: app.label_height
-                    width: '15dp'
+                    width: '25dp'
 
                 TextInput:
                     size_hint: (None, None)
@@ -157,7 +167,7 @@
                     text: 'Deg'
                     size_hint: (None, None)
                     height: app.label_height
-                    width: '15dp'
+                    width: '25dp'
                 TextInput:
                     size_hint: (None, None)
                     height: app.label_height
@@ -168,7 +178,7 @@
                 Label:
                     text: 'mm'
                     size_hint: (None, None)
-                    width: '10dp'
+                    width: '20dp'
                     height: app.label_height
 
 
@@ -184,7 +194,7 @@
                     text: 'Deg'
                     size_hint: (None, None)
                     height: app.label_height
-                    width: '15dp'
+                    width: '25dp'
                 TextInput:
                     size_hint: (None, None)
                     height: app.label_height
@@ -195,7 +205,7 @@
                 Label:
                     text: 'mm'
                     size_hint: (None, None)
-                    width: '10dp'
+                    width: '20dp'
                     height: app.label_height
 
 
@@ -211,7 +221,7 @@
                     text: 'Deg'
                     size_hint: (None, None)
                     height: app.label_height
-                    width: '15dp'
+                    width: '25dp'
                 TextInput:
                     size_hint: (None, None)
                     height: app.label_height
@@ -222,7 +232,7 @@
                 Label:
                     text: 'mm'
                     size_hint: (None, None)
-                    width: '10dp'
+                    width: '20dp'
                     height: app.label_height
 
 
@@ -238,7 +248,7 @@
                     text: 'Deg'
                     size_hint: (None, None)
                     height: app.label_height
-                    width: '15dp'
+                    width: '25dp'
                 TextInput:
                     size_hint: (None, None)
                     height: app.label_height
@@ -249,7 +259,7 @@
                 Label:
                     text: 'mm'
                     size_hint: (None, None)
-                    width: '10dp'
+                    width: '20dp'
                     height: app.label_height
 
 
@@ -265,7 +275,7 @@
                     text: 'Deg'
                     size_hint: (None, None)
                     height: app.label_height
-                    width: '15dp'
+                    width: '25dp'
                 TextInput:
                     size_hint: (None, None)
                     height: app.label_height
@@ -276,7 +286,7 @@
                 Label:
                     text: 'mm'
                     size_hint: (None, None)
-                    width: '10dp'
+                    width: '20dp'
                     height: app.label_height
 
             Label:
