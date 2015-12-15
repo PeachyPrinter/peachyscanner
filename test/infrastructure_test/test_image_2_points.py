@@ -16,24 +16,25 @@ from infrastructure.roi import ROI
 
 class PointConverterTest(unittest.TestCase):
 
-    def setup_i2p(self, camera_pixels_shape_yx=(3, 3), camera_sensor_size_mm=(13.5, 13.5), intersections_rad_mm=[(np.pi / 4, 9)],):
-        hardware = HardwareConfiguration(
+    def setup_i2p(
+            self,
             focal_length_mm=9,
+            camera_pixels_shape_yx=(3, 3),
+            camera_sensor_size_mm=(13.5, 13.5),
+            intersections_rad_mm=[(np.pi / 4, 9)]):
+        hardware = HardwareConfiguration(
+            focal_length_mm=focal_length_mm,
             sensor_size_xy_mm=camera_sensor_size_mm,
             focal_point_to_center_mm=9,
-            intersections_rad_mm=intersections_rad_mm,
-            )
-        return Image2Points(
-            hardware,
-            camera_pixels_shape_yx,
-            )
+            intersections_rad_mm=intersections_rad_mm)
+        return Image2Points(hardware, camera_pixels_shape_yx)
 
-    def assert_array(self, array1, array2, rtol=1e-05):
+    def assert_array(self, array1, array2, rtol=1e-02):
         self.assertTrue(array1.shape == array2.shape)
         for idx in range(array1.shape[0]):
             self.assertTrue(np.allclose(array1[idx], array2[idx], rtol=rtol), "TEST:{}:  {} == {}".format(idx, array1[idx], array2[idx]))
 
-    def test_init_creates_expected_laser_plane_normals(self):
+    def test_init_creates_expected_laser_plane_normals_1(self):
         a_rad = 0.785398163397
         b_rad = 0.844153986113
         c_rad = 0.909753157943
@@ -56,27 +57,175 @@ class PointConverterTest(unittest.TestCase):
         self.assert_array(expected_b_normal, b_result)
         self.assert_array(expected_c_normal, c_result)
 
+    def test_init_creates_expected_laser_plane_normals_2(self):
+        a_rad = np.pi / 4
 
-    def test_get_points_returns_expected_points_give_simple_camera_and_image(self):
+        expected_a_normal = np.array([9, 0, 9])
+        expected_a_normal = expected_a_normal / np.linalg.norm(expected_a_normal)
+
+        i2p = self.setup_i2p(
+            camera_pixels_shape_yx=(3, 3),
+            camera_sensor_size_mm=(3.0, 3.0),
+            focal_length_mm=3.0,
+            intersections_rad_mm=[(np.pi / 4, 9)])
+
+        a_result = i2p.laser_plane_normals[a_rad]
+        self.assert_array(expected_a_normal, a_result)
+
+    def test_get_points_returns_expected_points_give_simple_camera_and_image_at_0cm(self):
         camera_pixels_shape_yx = (3, 3)
-        i2p = self.setup_i2p(camera_pixels_shape_yx=camera_pixels_shape_yx)
+        i2p = self.setup_i2p(
+            camera_pixels_shape_yx=camera_pixels_shape_yx,
+            camera_sensor_size_mm=(3.0, 3.0),
+            focal_length_mm=3.0,
+            intersections_rad_mm=[(np.pi / 4, 9)]
+        )
         image = np.ones(camera_pixels_shape_yx).astype('bool')
-        expected = np.array([
-            [-3.0, -3.0,  3.0],  # -1, -1
-            [ 0,   -4.5,  0.0],  #  0, -1
-            [ 9.0, -9.0, -9.0],  #  1, -1
-            [-3.0,  0.0,  3.0],  # -1,  0 
-            [ 0,    0.0,  0.0],  #  0,  0 
-            [ 9.0,  0.0, -9.0],  #  1,  0 
-            [-3.0,  3.0,  3.0],  # -1,  1 
-            [ 0,    4.5,  0.0],  #  0,  1 
-            [ 9.0,  9.0, -9.0],  #  1,  1 
-            ], dtype='float16')
+        expected = np.array([[  -2.250,    2.250,    2.250, ],
+                             [  -0.000,    3.000,    0.000, ],
+                             [   4.500,    4.500,   -4.500, ],
+                             [  -2.250,    0.000,    2.250, ],
+                             [  -0.000,    0.000,    0.000, ],
+                             [   4.500,    0.000,   -4.500, ],
+                             [  -2.250,   -2.250,    2.250, ],
+                             [  -0.000,   -3.000,    0.000, ],
+                             [   4.500,   -4.500,   -4.500, ],
+                             ], dtype='float16')
 
         result = i2p.get_points(image, 0, ROI(0, 0, 1, 1), np.pi / 4)
 
         self.assert_array(expected, result)
 
+    def test_get_points_returns_expected_points_give_simple_camera_and_image_at_1cm(self):
+        camera_pixels_shape_yx = (3, 3)
+        b_rad = 0.844153986113
+
+        intersections_rad_mm = [(b_rad, 8)]
+        i2p = self.setup_i2p(
+            camera_sensor_size_mm=(3, 3),
+            camera_pixels_shape_yx=camera_pixels_shape_yx,
+            intersections_rad_mm=intersections_rad_mm,
+            focal_length_mm=3.0,
+            )
+        image = np.ones(camera_pixels_shape_yx).astype('bool')
+        expected = np.array([[  -2.057,    2.057,    2.829, ],
+                             [  -0.000,    2.667,    1.000, ],
+                             [   3.789,    3.789,   -2.368, ],
+                             [  -2.057,    0.000,    2.829, ],
+                             [  -0.000,    0.000,    1.000, ],
+                             [   3.789,    0.000,   -2.368, ],
+                             [  -2.057,   -2.057,    2.829, ],
+                             [  -0.000,   -2.667,    1.000, ],
+                             [   3.789,   -3.789,   -2.368, ]], dtype='float16')
+
+        result = i2p.get_points(image, 0, ROI(0, 0, 1, 1), b_rad)
+
+        self.assert_array(expected, result)
+
+    def test_get_points_returns_expected_points_give_simple_camera_and_image_at_2_cm(self):
+        camera_pixels_shape_yx = (3, 3)
+        c_rad = 0.909753157943
+
+        intersections_rad_mm = [(c_rad, 7)]
+        i2p = self.setup_i2p(
+            camera_sensor_size_mm=(3, 3),
+            camera_pixels_shape_yx=camera_pixels_shape_yx,
+            intersections_rad_mm=intersections_rad_mm,
+            focal_length_mm=3.0,
+            )
+        image = np.ones(camera_pixels_shape_yx).astype('bool')
+        expected = np.array([[  -1.853,    1.853,    3.441, ],
+                             [  -0.000,    2.333,    2.000, ],
+                             [   3.150,    3.150,   -0.450, ],
+                             [  -1.853,    0.000,    3.441, ],
+                             [  -0.000,    0.000,    2.000, ],
+                             [   3.150,    0.000,   -0.450, ],
+                             [  -1.853,   -1.853,    3.441, ],
+                             [  -0.000,   -2.333,    2.000, ],
+                             [   3.150,   -3.150,   -0.450, ],
+                             ], dtype='float16')
+
+        result = i2p.get_points(image, 0, ROI(0, 0, 1, 1), c_rad)
+
+        self.assert_array(expected, result)
+
+    def test_get_points_returns_expected_points_give_simple_camera_and_image_at_neg_1cm(self):
+        camera_pixels_shape_yx = (3, 3)
+        rad = 0.732815101787
+
+        intersections_rad_mm = [(rad, 10)]
+        i2p = self.setup_i2p(
+            camera_sensor_size_mm=(3, 3),
+            camera_pixels_shape_yx=camera_pixels_shape_yx,
+            intersections_rad_mm=intersections_rad_mm,
+            focal_length_mm=3.0,
+            )
+        image = np.ones(camera_pixels_shape_yx).astype('bool')
+        expected = np.array([[  -2.432,    2.432,    1.703, ],
+                             [   0.000,    3.333,   -1.000, ],
+                             [   5.294,    5.294,   -6.882, ],
+                             [  -2.432,    0.000,    1.703, ],
+                             [   0.000,    0.000,   -1.000, ],
+                             [   5.294,    0.000,   -6.882, ],
+                             [  -2.432,   -2.432,    1.703, ],
+                             [   0.000,   -3.333,   -1.000, ],
+                             [   5.294,   -5.294,   -6.882, ],
+                             ], dtype='float16')
+
+        result = i2p.get_points(image, 0, ROI(0, 0, 1, 1), rad)
+
+        self.assert_array(expected, result)
+
+    def test_get_points_returns_expected_points_give_simple_camera_and_image_at_neg_2cm(self):
+        camera_pixels_shape_yx = (3, 3)
+        rad = 0.685729510906
+
+        intersections_rad_mm = [(rad, 11)]
+        i2p = self.setup_i2p(
+            camera_sensor_size_mm=(3, 3),
+            camera_pixels_shape_yx=camera_pixels_shape_yx,
+            intersections_rad_mm=intersections_rad_mm,
+            focal_length_mm=3.0,
+            )
+        image = np.ones(camera_pixels_shape_yx).astype('bool')
+        expected = np.array([[  -2.605,    2.605,    1.184, ],
+                             [  -0.000,    3.667,   -2.000, ],
+                             [   6.187,    6.187,   -9.562, ],
+                             [  -2.605,    0.000,    1.184, ],
+                             [  -0.000,    0.000,   -2.000, ],
+                             [   6.187,    0.000,   -9.562, ],
+                             [  -2.605,   -2.605,    1.184, ],
+                             [  -0.000,   -3.667,   -2.000, ],
+                             [   6.187,   -6.187,   -9.562, ],
+                             ], dtype='float16')
+
+        result = i2p.get_points(image, 0, ROI(0, 0, 1, 1), rad)
+
+        self.assert_array(expected, result)
+
+    def test_get_points_returns_expected_points_give_alternate_camera_and_image_at_0cm(self):
+        camera_pixels_shape_yx = (3, 3)
+        i2p = self.setup_i2p(
+            camera_pixels_shape_yx=camera_pixels_shape_yx,
+            camera_sensor_size_mm=(1.0, 1.0),
+            focal_length_mm=2.0,
+            intersections_rad_mm=[(np.pi / 4, 9)]
+        )
+        image = np.ones(camera_pixels_shape_yx).astype('bool')
+        expected = np.array([[  -1.286,    1.286,    1.286, ],
+                             [  -0.000,    1.500,    0.000, ],
+                             [   1.800,    1.800,   -1.800, ],
+                             [  -1.286,   -0.000,    1.286, ],
+                             [  -0.000,   -0.000,    0.000, ],
+                             [   1.800,   -0.000,   -1.800, ],
+                             [  -1.286,   -1.286,    1.286, ],
+                             [  -0.000,   -1.500,    0.000, ],
+                             [   1.800,   -1.800,   -1.800, ],
+                             ], dtype='float16')
+
+        result = i2p.get_points(image, 0, ROI(0, 0, 1, 1), np.pi / 4)
+
+        self.assert_array(expected, result)
 
     def test_get_points_returns_expected_points_give_simple_camera_and_1_column(self):
         camera_pixels_shape_yx = (3, 3)
@@ -85,9 +234,9 @@ class PointConverterTest(unittest.TestCase):
         image[:, 0] = True
 
         expected = np.array([
-            [-3.0, -3.0,  3.0],  # -1, -1
+            [-3.0,  3.0,  3.0],  # -1, -1
             [-3.0,  0.0,  3.0],  # -1,  0 
-            [-3.0,  3.0,  3.0],  # -1,  1 
+            [-3.0, -3.0,  3.0],  # -1,  1 
             ], dtype='float16')
 
         result = i2p.get_points(image, 0, ROI(0, 0, 1, 1), np.pi / 4)
@@ -97,33 +246,42 @@ class PointConverterTest(unittest.TestCase):
     def test_get_points_should_rotate(self):
         camera_pixels_shape_yx = (3, 3)
         rotation = np.pi / 2.0
-        i2p = self.setup_i2p(camera_pixels_shape_yx=camera_pixels_shape_yx)
+        i2p = self.setup_i2p(
+            camera_pixels_shape_yx=camera_pixels_shape_yx,
+            camera_sensor_size_mm=(3.0, 3.0),
+            focal_length_mm=3.0,
+            intersections_rad_mm=[(np.pi / 4, 9)]
+        )
         image = np.ones(camera_pixels_shape_yx).astype('bool')
-        expected = np.array([
-            [ 3.0, -3.0,  3.0],  # -1, -1
-            [ 0.0, -4.5,  0.0],  #  0, -1
-            [-9.0, -9.0, -9.0],  #  1, -1
-            [ 3.0,  0.0,  3.0],  # -1,  0 
-            [ 0.0,  0.0,  0.0],  #  0,  0 
-            [-9.0,  0.0, -9.0],  #  1,  0 
-            [ 3.0,  3.0,  3.0],  # -1,  1 
-            [ 0.0,  4.5,  0.0],  #  0,  1 
-            [-9.0,  9.0, -9.0],  #  1,  1 
-            ], dtype='float16')
+        expected = np.array([[  2.250,    2.250,   2.250],
+                             [  0.000,    3.000,   0.000],
+                             [ -4.500,    4.500,  -4.500],
+                             [  2.250,    0.000,   2.250],
+                             [  0.000,    0.000,   0.000],
+                             [ -4.500,    0.000,  -4.500],
+                             [  2.250,   -2.250,   2.250],
+                             [  0.000,   -3.000,   0.000],
+                             [ -4.500,   -4.500,  -4.500],
+                             ], dtype='float16')
 
         result = i2p.get_points(image, rotation, ROI(0, 0, 1, 1), np.pi / 4)
 
-        self.assert_array(expected, result, rtol=1e-03)
+        self.assert_array(expected, result)
 
     def test_get_points_should_roi(self):
         camera_pixels_shape_yx = (4, 4)
-        i2p = self.setup_i2p(camera_pixels_shape_yx=camera_pixels_shape_yx, camera_sensor_size_mm=(18, 18))
+        i2p = self.setup_i2p(
+            camera_pixels_shape_yx=camera_pixels_shape_yx, 
+            camera_sensor_size_mm=(4, 4),
+            focal_length_mm=3.0,
+            intersections_rad_mm=[(np.pi / 4, 9)]
+            )
         image = np.ones((4, 4)).astype('bool')
         expected = np.array([
-            [-3.0, -3.0,   3.0],  # -1, -1
-            [ 0,   -4.5,  0.0],  #  0, -1
-            [-3.0,  0.0,   3.0],  # -1,  0 
-            [ 0,    0.0,  0.0],  #  0,  0 
+            [-1.286, 1.286, 1.286],  # -1, -1
+            [ 1.800, 1.800,-1.800],  #  0, -1
+            [-1.286,-1.286, 1.286],  # -1,  0 
+            [ 1.800,-1.800,-1.800],  #  0,  0 
             ], dtype='float16')
 
         roi = ROI(.25, .25, 0.5, 0.5)

@@ -1,4 +1,7 @@
 import numpy as np
+import logging
+
+logger = logging.getLogger('peachy')
 
 class Image2Points(object):
     def __init__(
@@ -10,9 +13,7 @@ class Image2Points(object):
         self._posisition_mask_yx = {}
         self.laser_plane_normals = {}
         for (theta, pos) in hardware.laser_intersections_rad_xyz:
-            
             self.laser_plane_normals[theta] = self._get_laser_plane_normal_xyz(pos, theta)
-
             self._posisition_mask_yx[theta] = self._get_laser_intersections_mask_yx(
                 camera_pixels_shape_yx,
                 hardware.focal_length_mm,
@@ -21,27 +22,54 @@ class Image2Points(object):
                 pos,
                 self.laser_plane_normals[theta])
 
-    def _get_laser_intersections_mask_yx(
-        self,
+    def get_data(self, 
         camera_pixels_shape_yx,
         camera_focal_length_mm,
         mm_per_pixel_yx,
         center_intersection_xyz,
         laser_intersection_point,
-        laser_plane_normal):
+        laser_plane_normal,
+        half_camera_yx,
+        half_pixel_yx):
+
+        return ("camera_pixels_shape_yx:    {: 4.3f}, {: 4.3f}\n".format(*camera_pixels_shape_yx) +
+        "half_camera_yx:            {: 4.3f}, {: 4.3f}\n".format(*half_camera_yx) +
+        "half_pixel_yx:             {: 4.3f}, {: 4.3f}\n".format(*half_pixel_yx) +
+        "camera_focal_length_mm:    {: 4.3f}\n".format(camera_focal_length_mm) +
+        "mm_per_pixel_yx:           {: 4.3f}, {: 4.3f}\n".format(*mm_per_pixel_yx) +
+        "center_intersection_xyz:   {: 4.3f}, {: 4.3f}, {: 4.3f}\n".format(*center_intersection_xyz) +
+        "laser_intersection_point:  {: 4.3f}, {: 4.3f}, {: 4.3f}\n".format(*laser_intersection_point) +
+        "laser_plane_normal:        {: 4.3f}, {: 4.3f}, {: 4.3f}\n".format(*laser_plane_normal))
+
+
+    def _get_laser_intersections_mask_yx(
+                            self,
+                            camera_pixels_shape_yx,
+                            camera_focal_length_mm,
+                            mm_per_pixel_yx,
+                            center_intersection_xyz,
+                            laser_intersection_point,
+                            laser_plane_normal
+                        ):
+        half_camera_yx = (camera_pixels_shape_yx[0] / 2.0, camera_pixels_shape_yx[1] / 2.0)
+        half_pixel_yx = (mm_per_pixel_yx[0] / 2.0, mm_per_pixel_yx[1] / 2.0)
+
+        logger.debug(self.get_data( camera_pixels_shape_yx, camera_focal_length_mm, mm_per_pixel_yx, center_intersection_xyz, laser_intersection_point, laser_plane_normal, half_camera_yx, half_pixel_yx))
 
         final = np.zeros((camera_pixels_shape_yx[0], camera_pixels_shape_yx[1], 3), dtype='float16')
         laser_intersection_point = np.array(laser_intersection_point)
         with np.errstate(divide='ignore', invalid='ignore'):
             p_dot = np.dot(laser_plane_normal, laser_intersection_point)
-            for y_camera in range(camera_pixels_shape_yx[0]):
-                for x_camera in range(camera_pixels_shape_yx[1]):
-                    x_pos = (x_camera - (camera_pixels_shape_yx[1] / 2)) * mm_per_pixel_yx[1]
-                    y_pos = (y_camera - (camera_pixels_shape_yx[0] / 2)) * mm_per_pixel_yx[0]
+            for x_camera in range(camera_pixels_shape_yx[1]):
+                for y_camera in range(camera_pixels_shape_yx[0]):
+                    x_pos = ((x_camera - half_camera_yx[1]) * mm_per_pixel_yx[1]) + half_pixel_yx[1]
+                    y_pos = (((camera_pixels_shape_yx[0] - y_camera) - half_camera_yx[0]) * mm_per_pixel_yx[0]) - half_pixel_yx[0]
                     z_pos = -camera_focal_length_mm
 
                     L2 = np.array([x_pos, y_pos, z_pos])
                     final[y_camera, x_camera] = (p_dot / np.dot(laser_plane_normal, L2)) * L2
+                    x, y, z = final[y_camera, x_camera]
+                    logger.debug("({}, {}) => ({: .3f}, {: .3f}, {: .3f}) => {: .3f},{: .3f},{: .3f}".format(x_camera, y_camera, x_pos, y_pos, z_pos, x, y, z))
         return final - center_intersection_xyz
 
     def _calculate_mm_per_pixel_yx(self, camera_pixels_shape_yx, camera_sensor_size_mm):

@@ -1,8 +1,4 @@
-import numpy as np
-import cv2
-import threading
 import logging
-import time
 from infrastructure.roi import ROI
 from infrastructure.encoder import Encoder
 
