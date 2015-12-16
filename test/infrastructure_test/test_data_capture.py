@@ -154,7 +154,7 @@ class PointCaptureXYZTest(unittest.TestCase):
         self.img2point = Mock()
         self.img2point.get_points.return_value = np.array([1.0, 1.0, 1.0])
         self.roi = ROI(0, 0, 1, 1)
-        self.laser_theta = 77
+        self.laser_theta = .77
 
     def test_should_handle_all_sections_if_starting_at_not_0_index(self):
         sections = 200

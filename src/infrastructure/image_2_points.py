@@ -1,6 +1,8 @@
 import numpy as np
 import logging
 
+import math
+
 logger = logging.getLogger('peachy')
 
 class Image2Points(object):
@@ -54,7 +56,7 @@ class Image2Points(object):
         half_camera_yx = (camera_pixels_shape_yx[0] / 2.0, camera_pixels_shape_yx[1] / 2.0)
         half_pixel_yx = (mm_per_pixel_yx[0] / 2.0, mm_per_pixel_yx[1] / 2.0)
 
-        logger.debug(self.get_data( camera_pixels_shape_yx, camera_focal_length_mm, mm_per_pixel_yx, center_intersection_xyz, laser_intersection_point, laser_plane_normal, half_camera_yx, half_pixel_yx))
+        logger.info(self.get_data( camera_pixels_shape_yx, camera_focal_length_mm, mm_per_pixel_yx, center_intersection_xyz, laser_intersection_point, laser_plane_normal, half_camera_yx, half_pixel_yx))
 
         final = np.zeros((camera_pixels_shape_yx[0], camera_pixels_shape_yx[1], 3), dtype='float16')
         laser_intersection_point = np.array(laser_intersection_point)
@@ -68,13 +70,13 @@ class Image2Points(object):
 
                     L2 = np.array([x_pos, y_pos, z_pos])
                     final[y_camera, x_camera] = (p_dot / np.dot(laser_plane_normal, L2)) * L2
-                    x, y, z = final[y_camera, x_camera]
-                    logger.debug("({}, {}) => ({: .3f}, {: .3f}, {: .3f}) => {: .3f},{: .3f},{: .3f}".format(x_camera, y_camera, x_pos, y_pos, z_pos, x, y, z))
+                    # x, y, z = final[y_camera, x_camera]
+                    # logger.debug("({}, {}) => ({: .3f}, {: .3f}, {: .3f}) => {: .3f},{: .3f},{: .3f}".format(x_camera, y_camera, x_pos, y_pos, z_pos, x, y, z))
         return final - center_intersection_xyz
 
-    def _calculate_mm_per_pixel_yx(self, camera_pixels_shape_yx, camera_sensor_size_mm):
-        x_mm_per_pixel = camera_sensor_size_mm[0] / float(camera_pixels_shape_yx[1])
-        y_mm_per_pixel = camera_sensor_size_mm[1] / float(camera_pixels_shape_yx[0])
+    def _calculate_mm_per_pixel_yx(self, camera_pixels_shape_yx, camera_sensor_size_mm_xy):
+        x_mm_per_pixel = camera_sensor_size_mm_xy[0] / float(camera_pixels_shape_yx[1])
+        y_mm_per_pixel = camera_sensor_size_mm_xy[1] / float(camera_pixels_shape_yx[0])
         return (y_mm_per_pixel, x_mm_per_pixel)
 
     def _get_laser_plane_normal_xyz(self, laser_intersection_point, laser_center_intersection_rad):
@@ -105,6 +107,7 @@ class Image2Points(object):
         return np.dot(rotation_matrix, points_xyz.T).T
 
     def get_points(self, image_yx, rotation_rad, roi, laser_theta):
+        logger.debug("getting points for {: 8.3f} rad {: 8.3f} deg".format(laser_theta, np.rad2deg(laser_theta)))
         roi_pos = roi.get(self._posisition_mask_yx[laser_theta])
         roi_image_yx = roi.get(image_yx).astype('bool')
         masked_result = roi_pos[roi_image_yx]

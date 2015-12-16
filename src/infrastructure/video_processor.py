@@ -1,7 +1,6 @@
 import threading
 import cv2
 import numpy as np
-import time
 
 import logging
 
@@ -62,12 +61,14 @@ class VideoProcessor(threading.Thread):
         roi_frame = self.roi.overlay(scaled_image)
         encoder_overlay = self.encoder.overlay_encoder(scaled_image)
         encoder_history = self.encoder.overlay_history(scaled_image)
+        rotation = ((self.encoder.position % self.encoder.sections) / float(self.encoder.sections)) * 360.0
         return {
             'frame': scaled_image,
             'laser_detection': scaled_detected,
             'encoder': encoder_overlay,
             'history': encoder_history,
-            'roi_frame': roi_frame
+            'roi_frame': roi_frame,
+            'rotation': rotation
         }
 
     def stop(self):

@@ -48,6 +48,7 @@ class PointCaptureXYZ(Handler):
         self.sections = sections
         self._section_count = 0
         self.points_xyz = points_xyz
+        logger.info("Point Capture Created for {: 8.3f} rad {: 8.3f} deg".format(self.laser_theta, np.rad2deg(self.laser_theta)))
 
     def handle(self, laser_detection=None, section=0, roi=None, **kwargs):
         rad = (section / float(self.sections)) * 2.0 * np.pi

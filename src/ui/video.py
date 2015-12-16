@@ -80,6 +80,7 @@ class ImageDisplay(BoxLayout):
                 pass
         if self.show_encoder:
             overlays = cv2.add(overlays, image_data['encoder'])
+            cv2.putText(overlays,"{: 5.2f} deg".format(image_data['rotation']), (0, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0,255,0) )
         if self.show_encoder_history:
             overlays = cv2.add(overlays, image_data['history'])
         image = self._add_overlays_to_image(image, overlays)
