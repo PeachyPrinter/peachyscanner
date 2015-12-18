@@ -6,7 +6,7 @@ import threading
 import kivy
 from kivy.app import App
 from kivy.config import Config, ConfigParser
-from kivy.uix.screenmanager import ScreenManager
+from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.core.window import Window
 from kivy.metrics import dp
@@ -22,15 +22,15 @@ from ui.posisition import PositionControl
 from ui.laserdetection import LaserDetection
 from ui.capture_control import PointsCapture
 from ui.video import ImageDisplay
-from ui.hardware import HardwareConfig
+from ui.hardware import HardwareConfig, HardwareLoader
 
 kivy.require('1.9.0')
 
 
-class MyScreenManager(ScreenManager):
+class SideBarScreenManager(ScreenManager):
 
     def __init__(self, scanner, video_widget, **kwargs):
-        super(MyScreenManager, self).__init__(**kwargs)
+        super(SideBarScreenManager, self).__init__(**kwargs)
         self.camera_control_ui = CameraControls(scanner.camera)
         self.posisition_control_ui = PositionControl(scanner, video_widget)
         self.laser_detection_ui = LaserDetection(scanner)
@@ -42,35 +42,45 @@ class MyScreenManager(ScreenManager):
         self.current = 'camera_control_ui'
 
 
-class ScannerGUI(BoxLayout):
+class ScannerGUI(Screen):
     def __init__(self, scanner, **kwargs):
         self.scanner = scanner
         super(ScannerGUI, self).__init__(**kwargs)
-        self.manager = MyScreenManager(scanner, self.video)
-        self.ids.screen_manager.add_widget(self.manager)
+        self.sub_manager = SideBarScreenManager(scanner, self.video)
+        self.ids.screen_manager.add_widget(self.sub_manager)
 
     def start_config(self):
-        self.pop = HardwareConfig(self.scanner)
-        self.pop.open()
+        self.sub_manager.current = 'camera_control_ui'
+        self.manager.current = 'config'
 
 
-class MasterGUI(BoxLayout):
+class MasterGUI(ScreenManager):
     def __init__(self, scanner, **kwargs):
         self.scanner = scanner
         super(MasterGUI, self).__init__(**kwargs)
+        self.scannergui = ScannerGUI(self.scanner)
+        self.loading = LoadingBox(self.scanner)
+        self.config = HardwareConfig(self.scanner)
+        self.add_widget(self.scannergui)
+        self.add_widget(self.loading)
+        self.add_widget(self.config)
+        self.current = 'loading'
+
+
+class LoadingBox(Screen):
+    def __init__(self, scanner, **kwargs):
+        self.scanner = scanner
+        super(LoadingBox, self).__init__(**kwargs)
+
+    def on_enter(self):
         self.load_hardware()
 
     def load_hardware(self):
-        hardware = HardwareConfiguration(12, (10, 7.5), 180, [])
+        hardware = HardwareLoader.get_hardware()
         threading.Thread(target=self.scanner.configure, args=(hardware, self.call_back)).start()
 
     def call_back(self,):
-        Clock.schedule_once(self.startup)
-
-    def startup(self, *largs):
-        while self.children:
-            self.remove_widget(self.children[0])
-        self.add_widget(ScannerGUI(self.scanner))
+        self.parent.current = 'scanner_gui_screen'
 
 
 

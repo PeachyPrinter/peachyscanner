@@ -81,9 +81,11 @@ class PointsCapture(Screen):
         self.scanner = scanner
         self._converter = GLConverter()
         self.raw_points_xyz = np.array([])
-        
+
     def on_pre_enter(self):
-        laser_pos = [(int(np.rad2deg(rad)), rad) for rad in self.scanner.get_scanner_posisitions()]
+        self.go_buttons.clear_widgets()
+        self.clear()
+        laser_pos = [("{: 5.2f}".format(np.rad2deg(rad)), rad) for rad in self.scanner.get_scanner_posisitions()]
         for (human, rad) in laser_pos:
             button = GoButton(rad, self.start_points_capture, text=str(human))
             self.go_buttons.add_widget(button)

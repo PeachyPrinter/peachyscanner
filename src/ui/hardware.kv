@@ -1,7 +1,7 @@
 
 <HardwareConfig>:
-    size_hint: (0.9, 0.9)
     title: "Hardware Setup"
+    name: 'config'
     BoxLayout:
         orientation: 'horizontal'
         BoxLayout:
@@ -10,7 +10,7 @@
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None
-                height: app.label_height
+                height: app.button_height
                 padding: [3, 3, 3, 3]
                 canvas:
                     Color:
@@ -22,6 +22,7 @@
                     orientation: 'horizontal'
                     size_hint_y: None
                     height: app.label_height
+                    spacing: '5dp'
                     Label:
                         halign: 'left'
                         size_hint_y: None
@@ -47,7 +48,7 @@
 
             BoxLayout:
                 size_hint_y: None
-                height: app.label_height
+                height: app.button_height
                 orientation: 'vertical'
                 padding: [3, 3, 3, 3]
                 canvas:
@@ -58,6 +59,7 @@
                         size: self.size
                 BoxLayout:
                     orientation: 'horizontal'
+                    spacing: "5dp"
                     Label:
                         halign: 'left'
                         size_hint_y: None
@@ -99,7 +101,7 @@
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None
-                height: app.label_height
+                height: app.button_height
                 padding: [3, 3, 3, 3]
                 canvas:
                     Color:
@@ -111,6 +113,7 @@
                     orientation: 'horizontal'
                     size_hint_y: None
                     height: app.label_height
+                    spacing: "5dp"
                     Label:
                         halign: 'left'
                         size_hint_y: None
@@ -136,6 +139,7 @@
 
             GridLayout:
                 cols: 4
+                spacing: 5
                 Label:
                     text: 'Angle'
                     size_hint: (None, None)
@@ -294,7 +298,7 @@
                 size_hint_y: None
                 height: app.button_height
                 text: "Done"
-                on_release: root.dismiss()
+                on_release: root.parent.current='loading'
 
         Label:
             text: "Helpful Image Here"
@@ -306,22 +310,4 @@
                     size: self.size
 
 
-<LoadingBox>:
-    BoxLayout:
-        size_hint: (None,None)
-        pos: root.pos
-        size: root.size
-        canvas:
-            Color: 
-                rgba: [0,0,0,1]
-            Rectangle: 
-                pos: root.pos
-                size: root.size
-        BoxLayout:
-            orientation: 'vertical'
-            Label:
-            Image:
-                source: 'loading.gif'
-                anim_delay: 1 / 30.0
-            Label:
-                text: "Loading..."
+

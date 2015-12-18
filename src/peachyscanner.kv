@@ -1,87 +1,103 @@
-<MyScreenManager>:
+<SideBarScreenManager>:
 
 
 <ScannerGUI>:
+    name: 'scanner_gui_screen'
     screen_manager: screen_manager
     video: video
-    GridLayout:
-        size_hint_x: None
-        width: '350dp'
-        cols: 1
-        BoxLayout:
-            size_hint_y: None
-            height: app.button_height
-            Button:
+    BoxLayout:
+        GridLayout:
+            size_hint_x: None
+            width: '350dp'
+            cols: 1
+            BoxLayout:
                 size_hint_y: None
                 height: app.button_height
-                text: "Camera"
-                on_release: root.manager.current = 'camera_control_ui'
-            Button:
+                Button:
+                    size_hint_y: None
+                    height: app.button_height
+                    text: "Camera"
+                    on_release: root.sub_manager.current = 'camera_control_ui'
+                Button:
+                    size_hint_y: None
+                    height: app.button_height
+                    text: "Encoder"
+                    on_release: root.sub_manager.current = 'posisition_control_ui'
+                Button:
+                    size_hint_y: None
+                    height: app.button_height
+                    text: "Color"
+                    on_release: root.sub_manager.current = 'color_control_ui'
+                Button:
+                    size_hint_y: None
+                    height: app.button_height
+                    text: "Points"
+                    on_release: root.sub_manager.current = 'points_capture_ui'
+                Button:
+                    size_hint_y: None
+                    height: app.button_height
+                    text: "Config"
+                    on_release: root.start_config()
+            BoxLayout:
+                id: screen_manager
+            BoxLayout:
                 size_hint_y: None
                 height: app.button_height
-                text: "Encoder"
-                on_release: root.manager.current = 'posisition_control_ui'
-            Button:
-                size_hint_y: None
-                height: app.button_height
-                text: "Color"
-                on_release: root.manager.current = 'color_control_ui'
-            Button:
-                size_hint_y: None
-                height: app.button_height
-                text: "Points"
-                on_release: root.manager.current = 'points_capture_ui'
-            Button:
-                size_hint_y: None
-                height: app.button_height
-                text: "Config"
-                on_release: root.start_config()
-        BoxLayout:
-            id: screen_manager
-        BoxLayout:
-            size_hint_y: None
-            height: app.button_height
-            ToggleButton:
-                size_hint_y: None
-                height: app.button_height
-                text: "Encoder"
-                state: 'down'
-                on_release: video.show_encoder = True if self.state == 'down' else False
-            ToggleButton:
-                size_hint_y: None
-                height: app.button_height
-                text: "History"
-                state: 'down'
-                on_release: video.show_encoder_history = True if self.state == 'down' else False
-            ToggleButton:
-                size_hint_y: None
-                height: app.button_height
-                text: "ROI"
-                state: 'down'
-                on_release: video.show_roi = True if self.state == 'down' else False
-            ToggleButton:
-                size_hint_y: None
-                height: app.button_height
-                text: "Mask"
-                state: 'down'
-                on_release: video.show_laser_detector = True if self.state == 'down' else False
-            ToggleButton:
-                size_hint_y: None
-                height: app.button_height
-                text: "Centre"
-                state: 'down'
-                on_release: video.show_center = True if self.state == 'down' else False
-    ImageDisplay:
-        id: video
-        scanner: app.scanner
+                ToggleButton:
+                    size_hint_y: None
+                    height: app.button_height
+                    text: "Encoder"
+                    state: 'down'
+                    on_release: video.show_encoder = True if self.state == 'down' else False
+                ToggleButton:
+                    size_hint_y: None
+                    height: app.button_height
+                    text: "History"
+                    state: 'down'
+                    on_release: video.show_encoder_history = True if self.state == 'down' else False
+                ToggleButton:
+                    size_hint_y: None
+                    height: app.button_height
+                    text: "ROI"
+                    state: 'down'
+                    on_release: video.show_roi = True if self.state == 'down' else False
+                ToggleButton:
+                    size_hint_y: None
+                    height: app.button_height
+                    text: "Mask"
+                    state: 'down'
+                    on_release: video.show_laser_detector = True if self.state == 'down' else False
+                ToggleButton:
+                    size_hint_y: None
+                    height: app.button_height
+                    text: "Centre"
+                    state: 'down'
+                    on_release: video.show_center = True if self.state == 'down' else False
+        ImageDisplay:
+            id: video
+            scanner: app.scanner
 
         
 <MasterGUI>:
-    orientation: 'vertical'
-    Label:
-    Image:
-        source: 'loading.gif'
-        anim_delay: 1 / 30.0
-    Label:
-        text: "Loading..."
+
+<LoadingBox>:
+    name: 'loading'
+    BoxLayout:
+        size_hint: (None,None)
+        pos: root.pos
+        size: root.size
+        canvas:
+            Color: 
+                rgba: [0,0,0,1]
+            Rectangle: 
+                pos: root.pos
+                size: root.size
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+            Image:
+                source: 'loading.gif'
+                anim_delay: 1 / 30.0
+            Label:
+                text: "Loading..."
 
