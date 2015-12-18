@@ -71,12 +71,13 @@ class Encoder(object):
         return mask
 
     def overlay_history(self, image):
+        history = list(self._history[-self.history_length:])
         mask = np.zeros(image.shape, dtype='uint8')
-        for idx in range(len(self._history)):
-            height = int((self._history[idx] / (255.0 * 3.0)) * mask.shape[0])
-            if self._history[idx] > self.threshold + self.null_zone:
+        for idx in range(len(history)):
+            height = int((history[idx] / (255.0 * 3.0)) * mask.shape[0])
+            if history[idx] > self.threshold + self.null_zone:
                 color = self.ENCODER_COLOR_HIGH_BGR
-            elif self._history[idx] <= self.threshold - self.null_zone:
+            elif history[idx] <= self.threshold - self.null_zone:
                 color = self.ENCODER_COLOR_LOW_BGR
             else:
                 color = self.ENCODER_COLOR_NULL_BGR
