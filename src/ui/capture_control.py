@@ -95,7 +95,7 @@ class PointsCapture(Screen):
         self.clear()
 
     def clear(self,):
-        self.image_box.clear()
+        # self.image_box.clear()
         self.render.clear()
         self.raw_points_xyz = np.array([])
 
@@ -103,11 +103,11 @@ class PointsCapture(Screen):
         self._disable_all()
         points = self.raw_points_xyz if self.raw_points_xyz.size != 0 else None
         self.scanner.capture_points_xyz(theta, points=points, call_back=self._capture_points_callback)
-        self.scanner.capture_image(self._capture_image_callback, 200 - 25)
+        # self.scanner.capture_image(self._capture_image_callback, 200 - 25)
 
-    def _capture_image_callback(self, handler):
-        self._image = handler.image
-        Clock.schedule_once(self._update_image)
+    # def _capture_image_callback(self, handler):
+    #     self._image = handler.image
+    #     Clock.schedule_once(self._update_image)
 
     def _capture_points_callback(self, handler):
         self.raw_points_xyz = handler.points_xyz
@@ -141,10 +141,10 @@ class PointsCapture(Screen):
         self.go_buttons.disabled = True
         self.clear_button.disabled = True
 
-    def _update_image(self, *args):
-        if hasattr(self, '_image'):
-            self.image_box.set_image(self._image)
-            self.render.update_texture(self.image_box.texture)
+    # def _update_image(self, *args):
+    #     if hasattr(self, '_image'):
+    #         self.image_box.set_image(self._image)
+    #         self.render.update_texture(self.image_box.texture)
 
     def update_model(self, *largs):
         amax = np.amax(self.raw_points_xyz)
@@ -255,7 +255,7 @@ class ObjectRenderer(BoxLayout):
             if hasattr(self, 'model_texture'):
                 BindTexture(texture=self.model_texture, index=1)
             Translate(0, 1, self.gl_depth  + 1)
-            Rotate(180, 1, 0, 0)
+            # Rotate(180, 1, 0, 0)
             self.rot = Rotate(0, 0, 1, 0)
             UpdateNormalMatrix()
             Color(1, 1, 1, 1)

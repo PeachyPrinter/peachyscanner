@@ -1,6 +1,7 @@
 import logging
 import time
 import numpy as np
+from math import floor
 
 logger = logging.getLogger('peachy')
 
@@ -41,15 +42,16 @@ class ROI(object):
         return new_frame
 
     def replace(self, full_frame, new_part):
+        part = new_part.copy()
         x_abs, y_abs, w_abs, h_abs = self._get_absolute(full_frame.shape)
-        full_frame[y_abs:y_abs + new_part.shape[0], x_abs:x_abs + new_part.shape[1]] = new_part
+        full_frame[y_abs:y_abs + part.shape[0], x_abs:x_abs + part.shape[1]] = part
         return full_frame
 
     def _get_absolute(self, shape):
-        x_abs = shape[1] * self.x_rel
-        y_abs = shape[0] * self.y_rel
-        w_abs = shape[1] * self.w_rel
-        h_abs = shape[0] * self.h_rel
+        x_abs = int(floor(shape[1] * self.x_rel))
+        y_abs = int(floor(shape[0] * self.y_rel))
+        w_abs = int(floor(shape[1] * self.w_rel))
+        h_abs = int(floor(shape[0] * self.h_rel))
         return (x_abs, y_abs, w_abs, h_abs)
 
     def get(self, frame):

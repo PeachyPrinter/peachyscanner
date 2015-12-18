@@ -39,7 +39,6 @@
     on_release: self.go_method(self.rad_value)
 
 <PointsCapture>:
-    image_box: image_box
     name: 'points_capture_ui'
     render: render
     go_buttons: go_buttons
@@ -65,9 +64,6 @@
         ObjectRenderer:
             id:render
             mesh_mode: False
-        NumpyImage:
-            id:image_box
-            size_hint_y: 0.5
         BoxLayout:
             size_hint_y: None
             height: app.button_height

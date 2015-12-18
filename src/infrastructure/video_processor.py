@@ -56,6 +56,9 @@ class VideoProcessor(threading.Thread):
         image = self.image['frame']
         detected = self.image['laser_detection']
         ratio = self._get_new_size(requested_x, requested_y, image.shape[1], image.shape[0])
+        if ratio == (0, 0):
+            ratio = (1, 1)
+
         scaled_image = cv2.resize(image, ratio)
         scaled_detected = cv2.resize(detected, ratio)
         roi_frame = self.roi.overlay(scaled_image)
