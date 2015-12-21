@@ -54,9 +54,17 @@ class LaserDetector2(object):
         g = self.sub(g, ag)
         r = self.sub(r, ar)
         rel = self.sub(r, g)
-        img = (rel == rel.max(axis=1)[:, None]).astype('uint8') * rel
-        ranged_image = cv2.inRange(img, self._threshold, 255)
-        return ranged_image
+        rel = (rel * (255.0 / np.max(rel))).astype('uint8')
+
+        thresh = np.zeros(rel.shape, dtype='uint8')
+        thresh[rel > self.threshold] = rel[rel > self.threshold]
+        rel = thresh.copy()
+
+        erosion = cv2.erode(rel, np.ones((2, 2), dtype=np.uint8), iterations=1)
+        dilation = cv2.dilate(erosion, np.ones((3, 10), dtype=np.uint8), iterations=1)
+        dial = (rel == dilation).astype(np.uint8) * 255
+        dial = cv2.bitwise_and(dial, rel)
+        return dial
 
     def sub(self, a, b):
         sub1 = a - b

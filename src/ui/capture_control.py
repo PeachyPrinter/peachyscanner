@@ -17,8 +17,6 @@ from threading import Lock
 import os
 
 import numpy as np
-import time
-import os
 from math import floor
 
 from infrastructure.gl_point_converter import GLConverter
@@ -212,7 +210,6 @@ class ObjectRenderer(BoxLayout):
         with self.canvas:
             self.fbo['projection_mat'] = proj
             self.fbo['modelview_mat'] = model
-        # with a = 1:
         self.mesh.vertices = self.mesh_data.vertices
         self.mesh.indices = self.mesh_data.indices
         self.rot.angle += -3
@@ -222,7 +219,6 @@ class ObjectRenderer(BoxLayout):
         points = np.array(points)[::8]
         points = points.flatten()
 
-        # with a = 1:
         self.mesh_data.vertices = points
         indicies = np.arange(len(points) // 8)
         if self.mesh_mode:
@@ -248,14 +244,13 @@ class ObjectRenderer(BoxLayout):
             fbo.shader.source = resource_find('simple.glsl')
             fbo['diffuse_light'] = (1.0, 1.0, 0.8)
             fbo['ambient_light'] = (0.5, 0.5, 0.5)
-        
+
         with fbo:
             self.cb = Callback(self.setup_gl_context)
             PushMatrix()
             if hasattr(self, 'model_texture'):
                 BindTexture(texture=self.model_texture, index=1)
-            Translate(0, 1, self.gl_depth  + 1)
-            # Rotate(180, 1, 0, 0)
+            Translate(0, 1, self.gl_depth + 1)
             self.rot = Rotate(0, 0, 1, 0)
             UpdateNormalMatrix()
             Color(1, 1, 1, 1)
@@ -266,13 +261,6 @@ class ObjectRenderer(BoxLayout):
                     mode=self.mesh_data.mode,
                 )
             PopMatrix()
-            # PushMatrix()
-            # Translate(0, 0, self.gl_depth)
-            # Rotate(90, 1, 0, 0)
-            # self.rot
-            # UpdateNormalMatrix()
-            # self.show_axis()   #Help with GL alignments
-            # PopMatrix()
             self.cb = Callback(self.reset_gl_context)
         fbo['texture1'] = 1
 
@@ -328,6 +316,7 @@ class ObjectRenderer(BoxLayout):
 
     def on_mesh_mode(self, instance, value):
         self.update_mesh(self.points)
+
 
 class MeshData(object):
     def __init__(self, **kwargs):
