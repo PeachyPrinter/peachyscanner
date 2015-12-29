@@ -4,12 +4,44 @@
 		"selected_items":
 		[
 			[
-				"d",
-				"dtype"
+				"thresh",
+				"threshold_value	statement"
+			],
+			[
+				"mas",
+				"master_image	statement"
+			],
+			[
+				"start",
+				"start_fps	statement"
+			],
+			[
+				"ret",
+				"retVal	statement"
+			],
+			[
+				"dia",
+				"dia_y	statement"
 			],
 			[
 				"im",
-				"image_yx	statement"
+				"imshow	function"
+			],
+			[
+				"di",
+				"dilation	statement"
+			],
+			[
+				"camera",
+				"camera_control_ui"
+			],
+			[
+				"Ha",
+				"HardwareLoader	class"
+			],
+			[
+				"d",
+				"dtype"
 			],
 			[
 				"focal",
@@ -18,10 +50,6 @@
 			[
 				"half",
 				"half_pixel_yx	statement"
-			],
-			[
-				"camera",
-				"x_camera"
 			],
 			[
 				"cam",
@@ -160,26 +188,26 @@
 	"buffers":
 	[
 		{
-			"file": "src/infrastructure/data_capture.py",
+			"file": "spikes/spike_line.py",
 			"settings":
 			{
-				"buffer_size": 2056,
+				"buffer_size": 4715,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "src/infrastructure/image_2_points.py",
+			"contents": "import sublime, sublime_plugin\n\nclass ExampleCommand(sublime_plugin.TextCommand):\n	def run(self, edit):\n		self.view.insert(edit, 0, \"Hello, World!\")\n",
 			"settings":
 			{
-				"buffer_size": 5773,
+				"buffer_size": 149,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "src/infrastructure/video_processor.py",
+			"file": "src/infrastructure/laser_detector.py",
 			"settings":
 			{
-				"buffer_size": 3427,
+				"buffer_size": 2412,
 				"line_ending": "Unix"
 			}
 		},
@@ -192,28 +220,11 @@
 			}
 		},
 		{
-			"file": "test/infrastructure_test/test_data_capture.py",
+			"file": "src/infrastructure/camera.py",
 			"settings":
 			{
-				"buffer_size": 10593,
+				"buffer_size": 1660,
 				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "test/infrastructure_test/test_image_2_points.py",
-			"settings":
-			{
-				"buffer_size": 14596,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/home/jtownley/Desktop/RecordCenterScreen.sh",
-			"settings":
-			{
-				"buffer_size": 150,
-				"line_ending": "Unix",
-				"name": "recordmydesktop -x 1920 -y 0 --width=1920 --height"
 			}
 		}
 	],
@@ -288,49 +299,58 @@
 	[
 		"/opt/git/peachyscanner",
 		"/opt/git/peachyscanner/spikes",
+		"/opt/git/peachyscanner/spikes/resources",
+		"/opt/git/peachyscanner/spikes/resources/shaders",
 		"/opt/git/peachyscanner/src",
 		"/opt/git/peachyscanner/src/api",
 		"/opt/git/peachyscanner/src/infrastructure",
 		"/opt/git/peachyscanner/src/resources",
+		"/opt/git/peachyscanner/src/resources/images",
+		"/opt/git/peachyscanner/src/resources/shaders",
+		"/opt/git/peachyscanner/src/resources/support",
 		"/opt/git/peachyscanner/src/ui",
-		"/opt/git/peachyscanner/test",
-		"/opt/git/peachyscanner/test/api_test",
-		"/opt/git/peachyscanner/test/infrastructure_test"
+		"/opt/git/peachyscanner/test"
 	],
 	"file_history":
 	[
+		"/opt/git/peachyscanner/spikes/spike_laser_detector2.py",
+		"/opt/git/peachyscanner/src/ui/hardware.kv",
+		"/opt/git/peachyscanner/src/ui/capture_control.py",
+		"/opt/git/peachyscanner/src/ui/laserdetection.kv",
+		"/opt/git/peachyscanner/test/spikeVideo.py",
+		"/opt/git/peachyscanner/src/infrastructure/laser_detector.py",
+		"/opt/git/peachyscanner/src/ui/capture_control.kv",
+		"/opt/git/peachyscanner/src/peachyscanner.kv",
+		"/opt/git/peachyscanner/test/infrastructure_test/test_roi.py",
+		"/opt/git/peachyscanner/src/ui/hardware.py",
+		"/opt/git/peachyscanner/src/infrastructure/encoder.py",
+		"/opt/git/peachyscanner/src/gui.py",
+		"/opt/git/peachyscanner/src/infrastructure/roi.py",
+		"/opt/git/peachyscanner/src/infrastructure/video_processor.py",
 		"/opt/git/peachyscanner/test/infrastructure_test/test_image_2_points.py",
+		"/opt/git/peachyscanner/test/infrastructure_test/test_data_capture.py",
+		"/opt/git/peachyscanner/src/ui/video.py",
 		"/opt/git/peachyscanner/src/infrastructure/image_2_points.py",
+		"/opt/git/peachyscanner/src/infrastructure/data_capture.py",
+		"/home/jtownley/Desktop/RecordCenterScreen.sh",
 		"/opt/git/peachyscanner/test/infrastructure_test/test_image_2_points_cheat_sheet.py",
 		"/opt/git/peachyscanner/src/infrastructure/gl_point_converter.py",
 		"/opt/git/peachyscanner/src/api/scanner.py",
-		"/opt/git/peachyscanner/src/infrastructure/encoder.py",
-		"/opt/git/peachyscanner/src/ui/video.py",
-		"/opt/git/peachyscanner/test/infrastructure_test/test_data_capture.py",
 		"/opt/git/peachyscanner/tmp/opencv/opencv-3.0.0/release/lib/libopencv_core.so.3.0.0",
 		"/opt/git/peachyscanner/tmp/opencv/opencv-3.0.0/release/lib/libopencv_core.so.3.0",
 		"/opt/git/peachyscanner/tmp/opencv/opencv-3.0.0/modules/core/src/ocl.cpp",
 		"/opt/git/peachyscanner/tmp/opencv/opencv-3.0.0/3rdparty/include/opencl/1.2/CL/cl_platform.h",
-		"/opt/git/peachyscanner/src/infrastructure/roi.py",
 		"/opt/git/peachyscanner/spikes/spike_ray_plane_intersection.py",
-		"/opt/git/peachyscanner/src/infrastructure/video_processor.py",
-		"/opt/git/peachyscanner/src/infrastructure/data_capture.py",
 		"/opt/git/peachyscanner/spikes/spike_rotopoint.py",
 		"/opt/git/peachyscanner/spikes/spike_translate_speed.py",
 		"/opt/git/peachyscanner/test/api_test/test_scanner.py",
-		"/opt/git/peachyscanner/src/ui/hardware.kv",
-		"/opt/git/peachyscanner/src/ui/hardware.py",
-		"/opt/git/peachyscanner/src/ui/capture_control.kv",
-		"/opt/git/peachyscanner/src/ui/capture_control.py",
 		"/opt/git/peachyscanner/src/main.py",
-		"/opt/git/peachyscanner/src/gui.py",
 		"/opt/git/peachyscanner/src/infrastructure/hardware.py",
 		"/home/jtownley/.config/sublime-text-3/Packages/Anaconda/Anaconda.sublime-settings",
 		"/opt/git/peachyscanner/test/run_all_tests.py",
 		"/opt/git/peachyscanner/test/infrastructure_test/test_hardware.py",
 		"/opt/git/peachyscanner/spikes/spike_line.py",
 		"/home/jtownley/Desktop/Parsedlog_for_bug_109486318.log",
-		"/opt/git/peachyscanner/src/infrastructure/laser_detector.py",
 		"/opt/git/peachyscanner/peachyscanner.sublime-project",
 		"/home/jtownley/.config/sublime-text-3/Packages/User/Preferences.sublime-settings",
 		"/opt/git/peachyscanner/src/infrastructure/writer.py",
@@ -344,7 +364,7 @@
 	],
 	"find":
 	{
-		"height": 35.0
+		"height": 22.0
 	},
 	"find_in_files":
 	{
@@ -361,6 +381,23 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"Threshold_value",
+			"a_val",
+			"sigma",
+			"Master",
+			"'frame1'",
+			", :",
+			"fps",
+			"l",
+			"30",
+			"print",
+			"math",
+			"{}",
+			"self._history",
+			"rgba: [1, 1, 1, 0.2]",
+			"manager",
+			"self.",
+			"MyScreenManager",
 			"float64",
 			"float16",
 			": .5f",
@@ -432,24 +469,24 @@
 	"groups":
 	[
 		{
-			"selected": 6,
+			"selected": 0,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "src/infrastructure/data_capture.py",
+					"file": "spikes/spike_line.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2056,
+						"buffer_size": 4715,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1728,
-								1728
+								1928,
+								1928
 							]
 						],
 						"settings":
@@ -459,57 +496,61 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 561.0,
+						"translation.y": 871.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 0,
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "src/infrastructure/image_2_points.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 5773,
+						"buffer_size": 149,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4892,
-								4892
+								106,
+								106
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Python/Python.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
+							"default_dir": "/home/jtownley/.config/sublime-text-3/Packages/User",
+							"syntax": "Packages/Python/Python.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 1434.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 1,
 					"type": "text"
-				},
+				}
+			]
+		},
+		{
+			"selected": 1,
+			"sheets":
+			[
 				{
 					"buffer": 2,
-					"file": "src/infrastructure/video_processor.py",
+					"file": "src/infrastructure/laser_detector.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3427,
+						"buffer_size": 2412,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1604,
-								1604
+								908,
+								908
 							]
 						],
 						"settings":
@@ -518,11 +559,11 @@
 							"tab_size": 4,
 							"translate_tabs_to_spaces": true
 						},
-						"translation.x": 0.0,
-						"translation.y": 510.0,
+						"translation.x": -0.0,
+						"translation.y": 78.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
@@ -538,8 +579,8 @@
 						"selection":
 						[
 							[
-								3586,
-								3586
+								2635,
+								2635
 							]
 						],
 						"settings":
@@ -548,58 +589,28 @@
 							"tab_size": 4,
 							"translate_tabs_to_spaces": true
 						},
-						"translation.x": -0.0,
-						"translation.y": 1122.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "test/infrastructure_test/test_data_capture.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 10593,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								364,
-								364
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Python/Python.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": -0.0,
-						"translation.y": 153.0,
+						"translation.x": 0.0,
+						"translation.y": 585.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 2,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
-					"file": "test/infrastructure_test/test_image_2_points.py",
+					"buffer": 4,
+					"file": "src/infrastructure/camera.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 14596,
+						"buffer_size": 1660,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								14596,
-								14596
+								970,
+								970
 							]
 						],
 						"settings":
@@ -609,52 +620,18 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 5304.0,
+						"translation.y": 20.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "/home/jtownley/Desktop/RecordCenterScreen.sh",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 150,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"auto_name": "recordmydesktop -x 1920 -y 0 --width=1920 --height",
-							"syntax": "Packages/ShellScript/Shell-Unix-Generic.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
+					"stack_index": 4,
 					"type": "text"
 				}
-			]
-		},
-		{
-			"sheets":
-			[
 			]
 		}
 	],
 	"incremental_find":
 	{
-		"height": 25.0
+		"height": 21.0
 	},
 	"input":
 	{
@@ -680,7 +657,7 @@
 		"cols":
 		[
 			0.0,
-			0.88621124413,
+			0.429187049368,
 			1.0
 		],
 		"rows":
@@ -702,7 +679,7 @@
 	"project": "peachyscanner.sublime-project",
 	"replace":
 	{
-		"height": 64.0
+		"height": 40.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -712,16 +689,52 @@
 		"selected_items":
 		[
 			[
+				"video",
+				"src/ui/video.py"
+			],
+			[
+				"camera",
+				"src/infrastructure/camera.py"
+			],
+			[
+				"laser",
+				"src/infrastructure/laser_detector.py"
+			],
+			[
+				"spike",
+				"spikes/spike_laser_detector2.py"
+			],
+			[
+				"las",
+				"src/infrastructure/laser_detector.py"
+			],
+			[
+				"cap",
+				"src/ui/capture_control.py"
+			],
+			[
+				"vi",
+				"src/infrastructure/video_processor.py"
+			],
+			[
+				"roi",
+				"test/infrastructure_test/test_roi.py"
+			],
+			[
+				"enco",
+				"src/infrastructure/encoder.py"
+			],
+			[
+				"peachy",
+				"src/peachyscanner.kv"
+			],
+			[
 				"test_image",
 				"test/infrastructure_test/test_image_2_points.py"
 			],
 			[
 				"test",
 				"test/infrastructure_test/test_data_capture.py"
-			],
-			[
-				"video",
-				"src/ui/video.py"
 			],
 			[
 				"image",
@@ -760,14 +773,6 @@
 				"src/api/scanner.py"
 			],
 			[
-				"enco",
-				"src/infrastructure/encoder.py"
-			],
-			[
-				"roi",
-				"src/infrastructure/roi.py"
-			],
-			[
 				"hark",
 				"src/ui/hardware.kv"
 			],
@@ -788,10 +793,6 @@
 				"src/infrastructure/hardware.py"
 			],
 			[
-				"cap",
-				"src/ui/capture_control.kv"
-			],
-			[
 				"scanner",
 				"src/api/scanner.py"
 			],
@@ -806,10 +807,6 @@
 			[
 				"test_iamg",
 				"test/infrastructure_test/test_image_2_points.py"
-			],
-			[
-				"spike",
-				"spike_line.py"
 			],
 			[
 				"gl",
@@ -843,7 +840,7 @@
 	"show_minimap": false,
 	"show_open_files": false,
 	"show_tabs": true,
-	"side_bar_visible": false,
+	"side_bar_visible": true,
 	"side_bar_width": 259.0,
 	"status_bar_visible": true,
 	"template_settings":
