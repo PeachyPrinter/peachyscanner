@@ -1,14 +1,19 @@
+# Sharpness causes HALO around the object 
+
+
 import cv2
 import numpy as np
 import time
 
-threshold_value = int(200)
+threshold_value = int(100)
 b_val = int(255)
 c_val = int(0)
 d_val = int(0)
 sigma = int(33)
 apertureSize = int(3)
 image_pic = 0
+contrast = float(2.0)
+brightness = 0
 
 c_mode = [cv2.CHAIN_APPROX_NONE, cv2.CHAIN_APPROX_SIMPLE, cv2. CHAIN_APPROX_TC89_L1, cv2.CHAIN_APPROX_TC89_KCOS]
 r_mode = [cv2.RETR_EXTERNAL, cv2.RETR_LIST, cv2.RETR_CCOMP, cv2.RETR_TREE, cv2.RETR_FLOODFILL]
@@ -36,15 +41,21 @@ def new_sigma(value):
     global sigma
     sigma = value / 100.0
 
-
 def new_apertureSize(value):
     global apertureSize
     apertureSize = value
 
-
 def new_image(value):
     global image_pic
     image_pic = value
+
+def new_brightness(value):
+    global brightness
+    brightness = value
+
+def new_contrast(value):
+    global contrast
+    contrast = value / 100.0
 
 def sub(a, b):
         sub1 = a - b
@@ -64,10 +75,12 @@ def show_line(a, line_number=100):
 spf = [1]
 source = np.ones((1, 400, 3), dtype='uint8')
 cv2.imshow('controls', source)
-cv2.createTrackbar('threshold', 'controls', 30, 255, new_threshold_value)
-cv2.createTrackbar('sigma', 'controls', 0, 100, new_sigma)
-cv2.createTrackbar('apertureSize', 'controls', 0, 32767, new_apertureSize)
+cv2.createTrackbar('threshold', 'controls', threshold_value, 255, new_threshold_value)
+cv2.createTrackbar('sigma', 'controls', sigma, 100, new_sigma)
+cv2.createTrackbar('apertureSize', 'controls', apertureSize, 100, new_apertureSize)
 cv2.createTrackbar('image', 'controls', 0, 5, new_image)
+cv2.createTrackbar('brigntness', 'controls', brightness, 255, new_brightness)
+cv2.createTrackbar('contrast', 'controls', int(contrast * 100), 10000, new_contrast)
 # cv2.createTrackbar('cmode', 'Master', 0, 3, new_var_b)
 # cv2.createTrackbar('rmode', 'Master', 0, 4, new_var_b)
 itera = 350
@@ -88,8 +101,14 @@ while True:
         b = sub(b_source, ab)
         g = sub(g_source, ag)
         r = sub(r_source, ar)
-        rel = sub(r, b)
-        rel = (r * (255.0 / np.max(r))).astype('uint8')
+        rel = sub(r, g).astype('int32')
+        rel = rel + brightness
+        fact = (259 * (contrast + 255))/(255 * (259 - contrast))
+        print(fact)
+        rel = (fact * (rel - 128)) + 128
+        rel[np.where(rel < 0)] = 0
+        rel[np.where(rel > 255)] = 255
+        rel.astype('uint8')
         thresh = np.zeros(rel.shape, dtype='uint8')
         thresh[rel > threshold_value] = rel[rel > threshold_value]
 
@@ -117,9 +136,9 @@ while True:
 
         master_image = np.zeros((960, 1920, 3), dtype='uint8')
         master_image[:480, 0:640, :] = img
-        cv2.putText(master_image, "Original".format(total), (0, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 255, 0))
-        cv2.putText(master_image, "{: 5.2f} ms".format(total), (0, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 255, 0))
-        cv2.putText(master_image, "{: 5.2f} fps".format(float(len(spf)) / sum(spf)), (0, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 255, 0))
+        cv2.putText(master_image, "Original".format(total), (0, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 128, 0))
+        cv2.putText(master_image, "{: 5.2f} ms".format(total), (0, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 128, 0))
+        cv2.putText(master_image, "{: 5.2f} fps".format(float(len(spf)) / sum(spf)), (0, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 128, 0))
 
         master_image[480:, 0:640, 0] = edges
         cv2.putText(master_image, "Edges", (0, 500), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 255, 0))
