@@ -20,6 +20,7 @@ import numpy as np
 from math import floor
 
 from infrastructure.gl_point_converter import GLConverter
+from infrastructure.point_thinning import PointThinner
 from infrastructure.writer import PLYWriter
 
 Builder.load_file('ui/capture_control.kv')
@@ -128,7 +129,9 @@ class PointsCapture(Screen):
 
     def save_points(self, path, filename):
         with open(os.path.join(path, filename), 'w') as afile:
-            PLYWriter().write_cartisien_points(afile, self.raw_points_xyz)
+            thinner = PointThinner()
+            converter = GLConverter()
+            PLYWriter(converter, thinner).write_cartisien_points(afile, self.raw_points_xyz)
         self.dismiss_popup()
 
     def _enable_all(self):

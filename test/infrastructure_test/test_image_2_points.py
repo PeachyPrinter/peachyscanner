@@ -314,7 +314,7 @@ class PointConverterTest(unittest.TestCase):
 
         self.assertEquals(480, result.shape[0])
 
-    def test_get_points_returns_expected_points_give_real_camera_and_image_at_5cm(self):
+    def test_get_points_returns_expected_points_given_real_camera_and_image_at_5cm(self):
         camera_pixels_shape_yx = (480, 640)
         intersections_rad = atan(175.0/125.0)
         i2p = self.setup_i2p(
@@ -333,10 +333,10 @@ class PointConverterTest(unittest.TestCase):
         image[240, 480] = True
         expected = np.array([[-20.612,   15.429,   64.723],
                              [  0.073,   17.497,   49.948],
-                             [ 27.160,   20.204,   30.600],
+                             [ 27.160,   20.204,   30.625],
                              [-20.612,   -0.065,   64.723],
                              [  0.073,   -0.073,   49.948],
-                             [ 27.160,   -0.085,   30.600]], dtype='float16')
+                             [ 27.160,   -0.085,   30.625]], dtype='float16')
 
         result = i2p.get_points(image, 0, ROI(0, 0, 1, 1), intersections_rad)
 

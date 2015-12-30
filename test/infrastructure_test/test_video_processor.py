@@ -40,6 +40,8 @@ class VideoProcessorTest(unittest.TestCase):
     def create_video_processor(self, roi=None):
         self.camera = FakeCamera()
         self.encoder = Mock()
+        self.encoder.position = 0
+        self.encoder.sections = 200
         self.encoder.should_capture_frame_for_section.return_value = (True, 0)
         self.mock_laser_detector = Mock()
         self.detected_image = np.ones((self.camera.image.shape[0], self.camera.image.shape[1]), dtype='uint8') * 255

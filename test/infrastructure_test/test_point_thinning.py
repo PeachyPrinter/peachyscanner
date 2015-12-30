@@ -16,8 +16,8 @@ class PointThinnerTest(unittest.TestCase):
         expected = np.array([[1.0, 0.0, 0.0], [2.0, 0.0, 0.0], [3.0, 0.0, 0.0]])
         percision = 0
 
-        PT = PointThinner()
-        result = PT.thin(points, percision)
+        PT = PointThinner(percision)
+        result = PT.thin(points)
 
         result.sort(axis=0)
         self.assertTrue(np.array_equal(result, expected))
@@ -27,32 +27,49 @@ class PointThinnerTest(unittest.TestCase):
         expected = np.array([[1.0, 0.0, 0.0], [2.0, 0.0, 0.0], [2.01, 0.0, 0.0]])
         percision = 2
 
-        PT = PointThinner()
-        result = PT.thin(points, percision)
+        PT = PointThinner(percision)
+        result = PT.thin(points, )
 
         result.sort(axis=0)
         self.assertTrue(np.array_equal(result, expected))
 
     def test_thin_thins_large_arrays(self):
+        percision = 0
         points = np.random.random([10000, 3]).astype('float16')
-        PT = PointThinner()
-        result = PT.thin(points, 0)
+        PT = PointThinner(percision)
+        result = PT.thin(points)
         self.assertEqual(len(result), 8)
         
-        PT = PointThinner()
-        result = PT.thin(points, 1)
+        percision = 1
+        PT = PointThinner(percision)
+        result = PT.thin(points)
         self.assertTrue(len(result) < 10000)
 
     def test_thin_thins_large_arrays_fast(self):
+        percision = 2
         points = np.random.random([1000000, 3]).astype('float16')
-        PT = PointThinner()
+        PT = PointThinner(percision)
         start = time.time()
-        result = PT.thin(points, 2)
+        result = PT.thin(points)
         end = time.time() - start
 
         self.assertLess(end, 1)
-        
 
+    def test_thin_should_determine_percision_if_none_specified(self):
+        PT = PointThinner()
+        points = np.array([[1.0, 0.0, 0.0], [1.0001, 0.0, 0.0], [2.0, 0.0, 0.0], [2.001, 0.0, 0.0], ])
+        expected = np.array([[1.0, 0.0, 0.0], [2.0, 0.0, 0.0], [2.001, 0.0, 0.0]])
+        result = PT.thin(points)
+        result.sort(axis=0)
+        self.assertTrue(np.array_equal(result, expected))
+
+    def test_thin_should_determine_percision_if_none_specified_for_diferent_scale(self):
+        PT = PointThinner()
+        points = np.array([[1000.0, 0.0, 0.0], [1000.1, 0.0, 0.0], [2000.0, 0.0, 0.0], [2001.0, 0.0, 0.0], ])
+        expected = np.array([[1000.0, 0.0, 0.0], [2000.0, 0.0, 0.0], [2001.0, 0.0, 0.0]])
+        result = PT.thin(points)
+        result.sort(axis=0)
+        self.assertTrue(np.array_equal(result, expected))
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level='INFO')

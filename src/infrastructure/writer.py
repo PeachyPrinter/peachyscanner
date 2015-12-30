@@ -13,12 +13,13 @@ class Writer(object):
 
 class PLYWriter(Writer):
 
-    def __init__(self):
-        self.converter = GLConverter()
+    def __init__(self, point_converter, point_thinner):
+        self._point_thinning = point_thinner
+        self.point_converter = point_converter
 
     def write_polar_points(self, outfile, polar_array):
         start = time.time()
-        points = self.converter.convert(polar_array)
+        points = self.point_converter.convert(polar_array)
         verticies = points.shape[0]
         header = "ply\nformat ascii 1.0\ncomment made by Peachy Scanner\ncomment Date Should Go Here\nelement vertex {}\nproperty float x\nproperty float y\nproperty float z\nend_header\n".format(str(verticies))
 
@@ -33,7 +34,8 @@ class PLYWriter(Writer):
 
     def write_cartisien_points(self, outfile, points_xyz):
         start = time.time()
-        points = self.converter.convert_xyz(points_xyz)
+        thinned_points = self._point_thinning.thin(points_xyz)
+        points = self.point_converter.convert_xyz(thinned_points)
         verticies = points.shape[0]
 
         header = "ply\nformat ascii 1.0\ncomment made by Peachy Scanner\ncomment Date Should Go Here\nelement vertex {}\nproperty float x\nproperty float y\nproperty float z\nend_header\n".format(str(verticies))
