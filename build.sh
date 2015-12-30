@@ -25,8 +25,8 @@ function debian_dependancies() {
   echo "Installing opencv 3 dependancies"
   sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
   sudo apt-get install python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev libdc1394-22
-  sudo apt-get install libopencv-dev libpng12-dev libtiff4-dev libxine-dev libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev libv4l-dev libqt4-dev 
-  sudo apt-get install libfaac-dev libmp3lame-dev libopencore-amrnb-dev libopencore-amrwb-dev libtheora-dev libvorbis-dev libxvidcore-dev x264 v4l-utils unzip  
+  sudo apt-get install libopencv-dev libpng12-dev libtiff4-dev libxine-dev libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev libv4l-dev libqt4-dev
+  sudo apt-get install libfaac-dev libmp3lame-dev libopencore-amrnb-dev libopencore-amrwb-dev libtheora-dev libvorbis-dev libxvidcore-dev x264 v4l-utils unzip
 }
 
 function install_opencv3() {
@@ -42,7 +42,7 @@ function install_opencv3() {
       cd opencv-3.0.0
       mkdir release
       cd release
-      cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_TBB=ON -D WITH_V4L=ON -D WITH_OPENGL=ON ..
+      cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_TBB=ON -D WITH_LIBV4L=ON -D WITH_OPENGL=ON ..
       make -j $(nproc)
       sudo make install
       popd
