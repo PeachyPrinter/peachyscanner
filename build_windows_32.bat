@@ -49,6 +49,18 @@ ECHO Git Revision Number is %GIT_REV_COUNT%
 copy version.properties src\VERSION.py
 copy version.properties VERSION.py
 
+
+echo ------------------------------------
+echo Running Tests
+echo ------------------------------------
+set PYTHONPATH=%PYTHONPATH%;src
+python test\run_all_tests.py
+
+IF NOT "%ERRORLEVEL%" == "0" (
+    echo "FAILED TESTS ABORTING"
+    EXIT /B 2
+)
+
 ECHO ------------------------------------
 ECHO Creating Package
 ECHO ------------------------------------
